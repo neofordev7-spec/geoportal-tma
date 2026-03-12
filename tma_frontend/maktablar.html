@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Maktablar — GEOPORTAL</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { primary: "#9d2bee" }, fontFamily: { display: ["Inter","sans-serif"] } } }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #dcfce7 0%, #e0f2fe 50%, #f3e8ff 100%);
+      min-height: 100vh; color: #0f172a;
+    }
+    .glass { background: rgba(255,255,255,0.55); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.7); }
+    .glass-sm { background: rgba(255,255,255,0.4); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.6); }
+    ::-webkit-scrollbar { display: none; }
+    .scroll-x { overflow-x: auto; scrollbar-width: none; }
+    .tab-filter { transition: all 0.2s; }
+    .tab-filter.active { background: #9d2bee; color: white; }
+    .tab-filter:not(.active) { background: rgba(255,255,255,0.6); color: #374151; }
+    .maktab-card { transition: transform 0.15s, box-shadow 0.15s; }
+    .maktab-card:active { transform: scale(0.97); }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    .fade-up { animation: fadeUp 0.3s ease-out; }
+    .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.4) 25%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.4) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .badge-yaxshi { background: rgba(34,197,94,0.12); color: #16a34a; }
+    .badge-muhtoj { background: rgba(245,158,11,0.12); color: #d97706; }
+    .badge-nosoz { background: rgba(239,68,68,0.12); color: #dc2626; }
+    .badge-yangi { background: rgba(148,163,184,0.15); color: #64748b; }
+  </style>
+</head>
+<body class="pb-6">
+
+  <!-- Header -->
+  <div class="sticky top-0 z-50 px-3 pt-3 pb-2" style="background:linear-gradient(to bottom,rgba(220,252,231,0.95) 70%,transparent)">
+    <div class="glass rounded-2xl px-4 py-3 flex items-center gap-3">
+      <button onclick="history.back()" class="w-9 h-9 glass-sm rounded-full flex items-center justify-center flex-shrink-0 active:scale-90 transition-transform">
+        <span class="material-symbols-outlined text-slate-600" style="font-size:18px">arrow_back</span>
+      </button>
+      <div class="flex-1 min-w-0">
+        <h1 class="font-black text-base text-slate-900 leading-tight">Maktablar</h1>
+        <p class="text-xs text-slate-500" id="headerSubtitle">Yuklanmoqda...</p>
+      </div>
+      <button onclick="qidiruvToggle()" class="w-9 h-9 glass-sm rounded-full flex items-center justify-center flex-shrink-0 active:scale-90 transition-transform">
+        <span class="material-symbols-outlined text-slate-600" style="font-size:18px">search</span>
+      </button>
+    </div>
+    <!-- Qidiruv -->
+    <div id="qidiruvBox" class="hidden mt-2">
+      <div class="glass rounded-full flex items-center px-4 gap-2 h-10">
+        <span class="material-symbols-outlined text-slate-400" style="font-size:16px">search</span>
+        <input id="qidiruvInput" type="text" placeholder="Maktab nomi bo'yicha qidiring..."
+          oninput="filterMaktablar()"
+          class="flex-1 bg-transparent border-none text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-0"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistika mini kartalar -->
+  <div class="px-3 mt-1 grid grid-cols-3 gap-2">
+    <div class="glass rounded-2xl p-3 text-center">
+      <p class="text-lg font-black text-slate-900" id="miniJami">—</p>
+      <p class="text-xs text-slate-500 mt-0.5">Jami maktab</p>
+    </div>
+    <div class="glass rounded-2xl p-3 text-center">
+      <p class="text-lg font-black" style="color:#22c55e" id="miniTekshirilgan">—</p>
+      <p class="text-xs text-slate-500 mt-0.5">Tekshirilgan</p>
+    </div>
+    <div class="glass rounded-2xl p-3 text-center">
+      <p class="text-lg font-black" style="color:#9d2bee" id="miniMamnuniyat">—</p>
+      <p class="text-xs text-slate-500 mt-0.5">Mamnuniyat</p>
+    </div>
+  </div>
+
+  <!-- Filter tablar -->
+  <div class="scroll-x px-3 mt-3 flex gap-2">
+    <button onclick="setFilter('hammasi')" id="f-hammasi" class="tab-filter active flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm">Hammasi</button>
+    <button onclick="setFilter('yaxshi')" id="f-yaxshi" class="tab-filter flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm">
+      <span class="inline-block w-1.5 h-1.5 rounded-full bg-green-500 mr-1"></span>Yaxshi
+    </button>
+    <button onclick="setFilter('muhtoj')" id="f-muhtoj" class="tab-filter flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm">
+      <span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 mr-1"></span>E'tiborga muhtoj
+    </button>
+    <button onclick="setFilter('nosoz')" id="f-nosoz" class="tab-filter flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm">
+      <span class="inline-block w-1.5 h-1.5 rounded-full bg-red-400 mr-1"></span>Nosoz
+    </button>
+    <button onclick="setFilter('yangi')" id="f-yangi" class="tab-filter flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm">
+      <span class="inline-block w-1.5 h-1.5 rounded-full bg-slate-400 mr-1"></span>Tekshirilmagan
+    </button>
+  </div>
+
+  <!-- Maktablar ro'yxati -->
+  <div id="maktablarList" class="px-3 mt-3 space-y-2 fade-up">
+    <!-- skeleton -->
+    <div class="glass rounded-2xl p-4"><div class="skeleton h-4 w-3/4 rounded-full mb-2"></div><div class="skeleton h-3 w-1/2 rounded-full"></div></div>
+    <div class="glass rounded-2xl p-4"><div class="skeleton h-4 w-2/3 rounded-full mb-2"></div><div class="skeleton h-3 w-2/5 rounded-full"></div></div>
+    <div class="glass rounded-2xl p-4"><div class="skeleton h-4 w-3/4 rounded-full mb-2"></div><div class="skeleton h-3 w-1/2 rounded-full"></div></div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready(); tg.expand();
+
+    let barcha = [];
+    let aktiv = 'hammasi';
+    let qidiruvMatn = '';
+
+    function qidiruvToggle() {
+      const box = document.getElementById('qidiruvBox');
+      box.classList.toggle('hidden');
+      if (!box.classList.contains('hidden')) document.getElementById('qidiruvInput').focus();
+    }
+
+    function setFilter(f) {
+      aktiv = f;
+      ['hammasi','yaxshi','muhtoj','nosoz','yangi'].forEach(x => {
+        document.getElementById('f-'+x).classList.remove('active');
+      });
+      document.getElementById('f-'+f).classList.add('active');
+      render();
+    }
+
+    function filterMaktablar() {
+      qidiruvMatn = document.getElementById('qidiruvInput').value.toLowerCase();
+      render();
+    }
+
+    function render() {
+      let list = [...barcha];
+      if (aktiv !== 'hammasi') {
+        list = list.filter(m => {
+          if (aktiv === 'yaxshi') return m.mamnuniyat_foizi !== null && m.mamnuniyat_foizi >= 70;
+          if (aktiv === 'muhtoj') return m.mamnuniyat_foizi !== null && m.mamnuniyat_foizi >= 40 && m.mamnuniyat_foizi < 70;
+          if (aktiv === 'nosoz') return m.mamnuniyat_foizi !== null && m.mamnuniyat_foizi < 40;
+          if (aktiv === 'yangi') return m.mamnuniyat_foizi === null;
+          return true;
+        });
+      }
+      if (qidiruvMatn) {
+        list = list.filter(m => m.nom.toLowerCase().includes(qidiruvMatn) || m.tuman.toLowerCase().includes(qidiruvMatn));
+      }
+
+      const container = document.getElementById('maktablarList');
+      if (!list.length) {
+        container.innerHTML = '<div class="glass rounded-2xl p-6 text-center text-slate-400 text-sm">Maktab topilmadi</div>';
+        return;
+      }
+      container.innerHTML = list.map(m => {
+        const foiz = m.mamnuniyat_foizi;
+        let badgeClass, badgeText, progressColor, rang;
+        if (foiz === null) {
+          badgeClass='badge-yangi'; badgeText='Tekshirilmagan'; progressColor='#94a3b8'; rang='#94a3b8';
+        } else if (foiz >= 70) {
+          badgeClass='badge-yaxshi'; badgeText='Yaxshi'; progressColor='#22c55e'; rang='#22c55e';
+        } else if (foiz >= 40) {
+          badgeClass='badge-muhtoj'; badgeText="E'tiborga muhtoj"; progressColor='#f59e0b'; rang='#f59e0b';
+        } else {
+          badgeClass='badge-nosoz'; badgeText='Nosoz'; progressColor='#ef4444'; rang='#ef4444';
+        }
+
+        const stars = foiz !== null ? Math.round(foiz / 20) : 0;
+
+        return `
+        <div class="maktab-card glass rounded-2xl overflow-hidden shadow-sm cursor-pointer"
+          onclick="window.location.href='/tma/maktablar/${m.id}/'">
+          <div class="flex gap-3 p-4">
+            <div class="w-14 h-14 rounded-xl flex-shrink-0 overflow-hidden bg-slate-100 flex items-center justify-center">
+              ${m.rasm_url
+                ? `<img src="${m.rasm_url}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\\'material-symbols-outlined text-slate-400\\' style=\\'font-size:22px\\'>school</span>'">`
+                : `<span class="material-symbols-outlined text-slate-400" style="font-size:22px">school</span>`}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-2 mb-1">
+                <p class="text-sm font-bold text-slate-900 leading-tight">${m.nom}</p>
+                <span class="text-xs px-2 py-0.5 rounded-full font-semibold flex-shrink-0 ${badgeClass}">${badgeText}</span>
+              </div>
+              <p class="text-xs text-slate-500 mb-2">
+                <span class="material-symbols-outlined align-middle" style="font-size:12px">location_on</span>
+                ${m.viloyat}, ${m.tuman}
+              </p>
+              ${foiz !== null ? `
+              <div class="flex items-center gap-2">
+                <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full transition-all" style="width:${foiz}%;background:${progressColor}"></div>
+                </div>
+                <span class="text-xs font-black" style="color:${progressColor}">${foiz}%</span>
+              </div>
+              ` : `<p class="text-xs text-slate-400">Hali tekshirilmagan</p>`}
+            </div>
+          </div>
+          <div class="border-t border-white/50 px-4 py-2 flex items-center justify-between bg-white/20">
+            <div class="flex items-center gap-3 text-xs text-slate-500">
+              <span>
+                <span class="material-symbols-outlined align-middle" style="font-size:13px;color:#22c55e">how_to_reg</span>
+                ${m.jami_tekshiruv} tekshiruv
+              </span>
+              <span>
+                <span class="material-symbols-outlined align-middle" style="font-size:13px;color:#9d2bee">task</span>
+                ${m.vaadalar_soni} va'da
+              </span>
+            </div>
+            <span class="material-symbols-outlined text-slate-400" style="font-size:16px">chevron_right</span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    async function yukla() {
+      try {
+        const res = await fetch('/api/maktablar/');
+        const d = await res.json();
+        barcha = d.maktablar || [];
+
+        // Statistika
+        document.getElementById('miniJami').textContent = barcha.length;
+        const tekshirilgan = barcha.filter(m => m.jami_tekshiruv > 0).length;
+        document.getElementById('miniTekshirilgan').textContent = tekshirilgan;
+        const foizlar = barcha.filter(m => m.mamnuniyat_foizi !== null).map(m => m.mamnuniyat_foizi);
+        const ort = foizlar.length ? Math.round(foizlar.reduce((a,b) => a+b, 0) / foizlar.length) : 0;
+        document.getElementById('miniMamnuniyat').textContent = ort + '%';
+        document.getElementById('headerSubtitle').textContent = `${barcha.length} ta maktab`;
+
+        render();
+      } catch {
+        document.getElementById('maktablarList').innerHTML =
+          '<div class="glass rounded-2xl p-6 text-center text-slate-400 text-sm">Ma\'lumot yuklashda xatolik</div>';
+      }
+    }
+
+    yukla();
+  </script>
+</body>
+</html>

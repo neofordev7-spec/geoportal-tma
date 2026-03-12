@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Maktab — GEOPORTAL</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:"#9d2bee"},fontFamily:{display:["Inter","sans-serif"]}}}}</script>
+  <style>
+    body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#dcfce7 0%,#e0f2fe 50%,#f3e8ff 100%);min-height:100vh;color:#0f172a;}
+    .glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.7);}
+    .glass-sm{background:rgba(255,255,255,0.4);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.6);}
+    ::-webkit-scrollbar{display:none;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp 0.3s ease-out;}
+    .vaada-card{transition:all 0.2s;}
+    .vaada-card:active{transform:scale(0.98);}
+    /* Modal */
+    .modal-overlay{background:rgba(0,0,0,0.5);backdrop-filter:blur(6px);}
+    @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    .slide-up{animation:slideUp 0.3s ease-out;}
+    .natija-btn{transition:all 0.2s;border:2px solid transparent;}
+    .natija-btn.sel-bajarildi{background:rgba(34,197,94,0.15);border-color:#22c55e;}
+    .natija-btn.sel-muammo{background:rgba(239,68,68,0.15);border-color:#ef4444;}
+  </style>
+</head>
+<body class="pb-28">
+
+  <!-- Header -->
+  <div class="sticky top-0 z-40 px-3 pt-3 pb-2" style="background:linear-gradient(to bottom,rgba(220,252,231,0.95) 70%,transparent)">
+    <div class="glass rounded-2xl px-4 py-3 flex items-center gap-3">
+      <button onclick="history.back()" class="w-9 h-9 glass-sm rounded-full flex items-center justify-center flex-shrink-0 active:scale-90 transition-transform">
+        <span class="material-symbols-outlined text-slate-600" style="font-size:18px">arrow_back</span>
+      </button>
+      <div class="flex-1 min-w-0">
+        <h1 id="maktabNom" class="font-black text-sm text-slate-900 truncate">Yuklanmoqda...</h1>
+        <p id="maktabJoylashuv" class="text-xs text-slate-500 truncate"></p>
+      </div>
+      <div id="foizBadge" class="hidden glass-sm rounded-full px-3 py-1 text-xs font-black"></div>
+    </div>
+  </div>
+
+  <!-- Hero rasm + statistika -->
+  <div class="px-3 mt-1 fade-up">
+    <div class="glass rounded-2xl overflow-hidden shadow-sm">
+      <div id="heroRasm" class="h-36 bg-slate-100 flex items-center justify-center relative">
+        <span class="material-symbols-outlined text-slate-300" style="font-size:48px">school</span>
+      </div>
+      <div class="p-4 grid grid-cols-3 gap-3 border-t border-white/50">
+        <div class="text-center">
+          <p class="text-xl font-black text-slate-900" id="statJami">—</p>
+          <p class="text-xs text-slate-500 mt-0.5">Tekshiruv</p>
+        </div>
+        <div class="text-center border-x border-white/50">
+          <p class="text-xl font-black" style="color:#22c55e" id="statBajarildi">—</p>
+          <p class="text-xs text-slate-500 mt-0.5">Bajarildi ✓</p>
+        </div>
+        <div class="text-center">
+          <p class="text-xl font-black" style="color:#ef4444" id="statMuammo">—</p>
+          <p class="text-xs text-slate-500 mt-0.5">Muammo ✗</p>
+        </div>
+      </div>
+      <!-- Progress bar -->
+      <div class="px-4 pb-4">
+        <div class="flex justify-between text-xs text-slate-500 mb-1">
+          <span>Mamnuniyat darajasi</span>
+          <span id="statFoiz" class="font-bold">—</span>
+        </div>
+        <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+          <div id="progressBar" class="h-full rounded-full transition-all" style="width:0%;background:#22c55e"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Va'dalar sarlavhasi -->
+  <div class="px-3 mt-4">
+    <div class="flex items-center justify-between mb-2">
+      <h2 class="text-xs font-black text-slate-500 uppercase tracking-widest">Davlat va'dalari</h2>
+      <span id="vaadalarSoni" class="text-xs text-slate-400"></span>
+    </div>
+    <div id="vaadalarList" class="space-y-2">
+      <div class="glass rounded-2xl p-4"><div class="h-3 w-2/3 bg-slate-200/60 rounded-full animate-pulse mb-2"></div><div class="h-2 w-1/2 bg-slate-200/60 rounded-full animate-pulse"></div></div>
+      <div class="glass rounded-2xl p-4"><div class="h-3 w-3/4 bg-slate-200/60 rounded-full animate-pulse mb-2"></div><div class="h-2 w-2/5 bg-slate-200/60 rounded-full animate-pulse"></div></div>
+    </div>
+  </div>
+
+  <!-- So'nggi tekshiruvlar -->
+  <div class="px-3 mt-4">
+    <h2 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">So'nggi tekshiruvlar</h2>
+    <div id="tekshiruvlarList" class="space-y-2">
+      <div class="glass rounded-xl p-3 text-center text-slate-400 text-xs">Yuklanmoqda...</div>
+    </div>
+  </div>
+
+  <!-- Fixed bottom: "Tekshirish" tugmasi -->
+  <div class="fixed bottom-0 left-0 right-0 px-3 pb-4 pt-2 z-50" style="background:linear-gradient(to top,rgba(220,252,231,0.98) 60%,transparent)">
+    <button id="tekshirBtn" onclick="modalOch(null)"
+      class="w-full py-4 rounded-full font-black text-base flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-lg"
+      style="background:#9d2bee;color:white;box-shadow:0 0 20px rgba(157,43,238,0.35)">
+      <span class="material-symbols-outlined" style="font-size:20px">fact_check</span>
+      Tekshirish
+    </button>
+  </div>
+
+  <!-- ═══ Tekshiruv Modal (Bottom Sheet) ═══ -->
+  <div id="modal" class="hidden fixed inset-0 z-50 flex items-end">
+    <div class="modal-overlay absolute inset-0" onclick="modalYop()"></div>
+    <div class="relative w-full glass slide-up rounded-t-3xl p-5 z-10 max-h-[85vh] overflow-y-auto" style="background:rgba(255,255,255,0.92)">
+      <div class="w-10 h-1 bg-slate-300 rounded-full mx-auto mb-4"></div>
+      <h3 class="text-base font-black text-slate-900 mb-1" id="modalTitle">Tekshirish</h3>
+      <p class="text-xs text-slate-500 mb-4" id="modalVaadaText"></p>
+
+      <!-- Natija tugmalari -->
+      <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Holat *</p>
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <button onclick="natijaTanla('bajarildi')" id="btn-bajarildi"
+          class="natija-btn glass-sm rounded-2xl p-4 flex flex-col items-center gap-2 active:scale-95 transition-all">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:rgba(34,197,94,0.12)">
+            <span class="material-symbols-outlined" style="font-size:22px;color:#22c55e">check_circle</span>
+          </div>
+          <span class="text-sm font-bold text-slate-700">Bajarildi ✓</span>
+          <span class="text-xs text-slate-400 text-center">Va'da bajarilgan</span>
+        </button>
+        <button onclick="natijaTanla('muammo')" id="btn-muammo"
+          class="natija-btn glass-sm rounded-2xl p-4 flex flex-col items-center gap-2 active:scale-95 transition-all">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:rgba(239,68,68,0.12)">
+            <span class="material-symbols-outlined" style="font-size:22px;color:#ef4444">cancel</span>
+          </div>
+          <span class="text-sm font-bold text-slate-700">Muammo ✗</span>
+          <span class="text-xs text-slate-400 text-center">Bajarilmagan / singan</span>
+        </button>
+      </div>
+
+      <!-- Rasm yuklash (ixtiyoriy) -->
+      <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Rasm (ixtiyoriy)</p>
+      <div class="glass-sm rounded-2xl relative mb-4" style="border:1.5px dashed rgba(0,0,0,0.12);">
+        <input type="file" id="modalRasm" accept="image/*" capture="environment"
+          class="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full"/>
+        <div id="modalRasmPlaceholder" class="flex items-center gap-3 p-3.5 pointer-events-none">
+          <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-primary" style="font-size:18px">add_a_photo</span>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-slate-700">Rasm olish yoki yuklash</p>
+            <p class="text-xs text-slate-400">JPEG, PNG (maks. 10MB)</p>
+          </div>
+        </div>
+        <img id="modalPreview" class="hidden w-full rounded-2xl object-cover" style="max-height:150px"/>
+      </div>
+
+      <!-- Izoh -->
+      <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Izoh (ixtiyoriy)</p>
+      <textarea id="modalIzoh" rows="2" placeholder="Qo'shimcha izoh..."
+        class="w-full px-4 py-3 rounded-2xl text-sm text-slate-700 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 mb-4"
+        style="background:rgba(0,0,0,0.04);border:1px solid rgba(0,0,0,0.08)"></textarea>
+
+      <!-- Submit -->
+      <button id="modalSubmit" onclick="tekshiruvYuborish()"
+        class="w-full py-3.5 rounded-full font-black text-sm text-white active:scale-95 transition-all"
+        style="background:#9d2bee;box-shadow:0 0 15px rgba(157,43,238,0.3)">
+        Yuborish
+      </button>
+    </div>
+  </div>
+
+  <!-- Muvaffaqiyat toast -->
+  <div id="toast" class="hidden fixed top-6 left-1/2 -translate-x-1/2 z-[60] px-4 py-2.5 rounded-full text-sm font-bold text-white shadow-lg"
+    style="background:#22c55e;box-shadow:0 0 20px rgba(34,197,94,0.4)">
+    ✓ Tekshiruv qabul qilindi!
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready(); tg.expand();
+
+    const maktabId = window.location.pathname.split('/').filter(Boolean).pop();
+    let aktiv_vaada_id = null;
+    let tanlangan_natija = null;
+    let maktabData = null;
+
+    // Rasm preview
+    document.getElementById('modalRasm').addEventListener('change', function() {
+      if (!this.files[0]) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.getElementById('modalPreview');
+        img.src = e.target.result;
+        img.classList.remove('hidden');
+        document.getElementById('modalRasmPlaceholder').classList.add('hidden');
+      };
+      reader.readAsDataURL(this.files[0]);
+    });
+
+    function natijaTanla(natija) {
+      tanlangan_natija = natija;
+      document.getElementById('btn-bajarildi').classList.remove('sel-bajarildi');
+      document.getElementById('btn-muammo').classList.remove('sel-muammo');
+      document.getElementById('btn-'+natija).classList.add('sel-'+natija);
+    }
+
+    function modalOch(vaadaId) {
+      aktiv_vaada_id = vaadaId;
+      tanlangan_natija = null;
+      document.getElementById('btn-bajarildi').classList.remove('sel-bajarildi');
+      document.getElementById('btn-muammo').classList.remove('sel-muammo');
+      document.getElementById('modalIzoh').value = '';
+      document.getElementById('modalRasm').value = '';
+      document.getElementById('modalPreview').classList.add('hidden');
+      document.getElementById('modalRasmPlaceholder').classList.remove('hidden');
+
+      if (vaadaId && maktabData) {
+        const vaada = maktabData.vaadalar.find(v => v.id === vaadaId);
+        document.getElementById('modalTitle').textContent = vaada ? vaada.nom : 'Tekshirish';
+        document.getElementById('modalVaadaText').textContent = vaada?.tavsif || '';
+      } else {
+        document.getElementById('modalTitle').textContent = "Umumiy tekshiruv";
+        document.getElementById('modalVaadaText').textContent = "Maktabning umumiy holati haqida fikr bildiring";
+      }
+      document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function modalYop() {
+      document.getElementById('modal').classList.add('hidden');
+    }
+
+    async function tekshiruvYuborish() {
+      if (!tanlangan_natija) {
+        tg.showAlert("Iltimos, natijani tanlang: Bajarildi yoki Muammo");
+        return;
+      }
+      const btn = document.getElementById('modalSubmit');
+      btn.disabled = true;
+      btn.textContent = 'Yuborilmoqda...';
+
+      const user = tg.initDataUnsafe?.user || {};
+      const formData = new FormData();
+      formData.append('maktab_id', maktabId);
+      formData.append('natija', tanlangan_natija);
+      formData.append('izoh', document.getElementById('modalIzoh').value);
+      formData.append('telegram_user_id', user.id || '0');
+      formData.append('telegram_username', user.username || '');
+      formData.append('telegram_full_name', `${user.first_name||''} ${user.last_name||''}`.trim());
+      if (aktiv_vaada_id) formData.append('vaada_id', aktiv_vaada_id);
+      const rasmFile = document.getElementById('modalRasm').files[0];
+      if (rasmFile) formData.append('rasm', rasmFile);
+
+      try {
+        const res = await fetch('/api/tekshiruv/', { method: 'POST', body: formData });
+        const d = await res.json();
+        if (res.ok && d.success) {
+          modalYop();
+          showToast(`✓ Rahmat! Mamnuniyat: ${d.mamnuniyat_foizi}%`);
+          setTimeout(() => yukla(), 800);
+        } else {
+          throw new Error(d.error || 'Xatolik');
+        }
+      } catch(e) {
+        tg.showAlert('Xatolik: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Yuborish';
+      }
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.remove('hidden');
+      setTimeout(() => t.classList.add('hidden'), 3000);
+    }
+
+    function renderVaadalar(vaadalar) {
+      const container = document.getElementById('vaadalarList');
+      document.getElementById('vaadalarSoni').textContent = `${vaadalar.length} ta va'da`;
+      if (!vaadalar.length) {
+        container.innerHTML = '<div class="glass rounded-2xl p-4 text-center text-slate-400 text-xs">Va\'dalar topilmadi</div>';
+        return;
+      }
+      container.innerHTML = vaadalar.map(v => {
+        const foiz = v.foiz;
+        let rang = '#94a3b8', bg = 'rgba(148,163,184,0.1)';
+        if (foiz !== null) {
+          rang = foiz >= 70 ? '#22c55e' : foiz >= 40 ? '#f59e0b' : '#ef4444';
+          bg = foiz >= 70 ? 'rgba(34,197,94,0.08)' : foiz >= 40 ? 'rgba(245,158,11,0.08)' : 'rgba(239,68,68,0.08)';
+        }
+        return `
+        <div class="vaada-card glass rounded-2xl p-4 cursor-pointer" onclick="modalOch(${v.id})" style="border-left:3px solid ${rang}">
+          <div class="flex items-start gap-3">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:${bg}">
+              <span class="material-symbols-outlined" style="font-size:18px;color:${rang}">${v.icon}</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-2 mb-1">
+                <p class="text-sm font-bold text-slate-800 leading-tight">${v.nom}</p>
+                ${foiz !== null
+                  ? `<span class="text-xs font-black flex-shrink-0" style="color:${rang}">${foiz}%</span>`
+                  : `<span class="text-xs text-slate-400 flex-shrink-0">yangi</span>`}
+              </div>
+              ${v.tavsif ? `<p class="text-xs text-slate-400 mb-2 leading-relaxed">${v.tavsif}</p>` : ''}
+              ${foiz !== null ? `
+              <div class="flex items-center gap-2">
+                <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full" style="width:${foiz}%;background:${rang}"></div>
+                </div>
+              </div>
+              <div class="flex gap-3 mt-1.5 text-xs text-slate-400">
+                <span style="color:#22c55e">✓ ${v.bajarildi}</span>
+                <span style="color:#ef4444">✗ ${v.muammo}</span>
+                <span>${v.jami} ta tekshiruv</span>
+              </div>` : `<p class="text-xs text-slate-400">Hali tekshirilmagan — siz birinchi bo'ling!</p>`}
+            </div>
+          </div>
+          <div class="mt-3 flex items-center justify-between">
+            <span class="text-xs font-semibold" style="color:#9d2bee">Tekshirish →</span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderTekshiruvlar(tekshiruvlar) {
+      const container = document.getElementById('tekshiruvlarList');
+      if (!tekshiruvlar.length) {
+        container.innerHTML = '<div class="glass rounded-xl p-4 text-center text-slate-400 text-xs">Hali tekshiruvlar yo\'q. Siz birinchi bo\'ling!</div>';
+        return;
+      }
+      container.innerHTML = tekshiruvlar.map(t => {
+        const isBajarildi = t.natija === 'bajarildi';
+        return `
+        <div class="glass rounded-xl p-3 flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center"
+            style="background:${isBajarildi ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)'}">
+            <span class="material-symbols-outlined" style="font-size:16px;color:${isBajarildi ? '#22c55e' : '#ef4444'}">
+              ${isBajarildi ? 'check_circle' : 'cancel'}
+            </span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-xs font-bold text-slate-700 truncate">${t.fuqaro}</p>
+              <span class="text-xs font-bold flex-shrink-0" style="color:${isBajarildi ? '#22c55e' : '#ef4444'}">${t.natija_label}</span>
+            </div>
+            ${t.vaada_nom !== '—' ? `<p class="text-xs text-slate-400 mt-0.5">${t.vaada_nom}</p>` : ''}
+            ${t.izoh ? `<p class="text-xs text-slate-500 mt-0.5 italic">"${t.izoh}"</p>` : ''}
+            ${t.rasm ? `<img src="${t.rasm}" class="mt-2 rounded-xl w-full object-cover" style="max-height:80px"/>` : ''}
+            <p class="text-xs text-slate-300 mt-1">${t.vaqt}</p>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    async function yukla() {
+      try {
+        const res = await fetch(`/api/maktablar/${maktabId}/`);
+        maktabData = await res.json();
+
+        document.getElementById('maktabNom').textContent = maktabData.nom;
+        document.getElementById('maktabJoylashuv').textContent = `${maktabData.viloyat}, ${maktabData.tuman}`;
+
+        if (maktabData.rasm_url) {
+          document.getElementById('heroRasm').innerHTML =
+            `<img src="${maktabData.rasm_url}" class="w-full h-full object-cover" onerror="this.remove()"/>`;
+        }
+
+        document.getElementById('statJami').textContent = maktabData.jami_tekshiruv;
+        document.getElementById('statBajarildi').textContent = maktabData.bajarildi;
+        document.getElementById('statMuammo').textContent = maktabData.muammo;
+
+        const foiz = maktabData.mamnuniyat_foizi;
+        if (foiz !== null) {
+          const rang = foiz >= 70 ? '#22c55e' : foiz >= 40 ? '#f59e0b' : '#ef4444';
+          document.getElementById('statFoiz').textContent = foiz + '%';
+          document.getElementById('statFoiz').style.color = rang;
+          document.getElementById('progressBar').style.width = foiz + '%';
+          document.getElementById('progressBar').style.background = rang;
+
+          const badge = document.getElementById('foizBadge');
+          badge.classList.remove('hidden');
+          badge.textContent = foiz + '%';
+          badge.style.color = rang;
+          badge.style.background = foiz >= 70 ? 'rgba(34,197,94,0.12)' : foiz >= 40 ? 'rgba(245,158,11,0.12)' : 'rgba(239,68,68,0.12)';
+        } else {
+          document.getElementById('statFoiz').textContent = 'Tekshirilmagan';
+        }
+
+        renderVaadalar(maktabData.vaadalar);
+        renderTekshiruvlar(maktabData.so_nggi_tekshiruvlar);
+      } catch {
+        document.getElementById('maktabNom').textContent = 'Xatolik yuz berdi';
+      }
+    }
+
+    yukla();
+  </script>
+</body>
+</html>

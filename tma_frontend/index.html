@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>GEOPORTAL</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#9d2bee",
+            green: { 500: "#22c55e" }
+          },
+          fontFamily: { display: ["Inter", "sans-serif"] },
+          borderRadius: { DEFAULT: "1rem", full: "9999px" }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #dcfce7 0%, #e0f2fe 50%, #f3e8ff 100%);
+      min-height: 100vh;
+      color: #0f172a;
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+    }
+    .glass-dark {
+      background: rgba(0, 0, 0, 0.06);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+    .tab-pill { transition: all 0.2s ease; }
+    .tab-pill.active { background: #22c55e; color: white; }
+    .tab-pill.active-purple { background: #9d2bee; color: white; }
+    .tab-pill:not(.active):not(.active-purple) {
+      background: rgba(255,255,255,0.6);
+      color: #374151;
+    }
+    .stat-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+    .stat-card:active { transform: scale(0.97); }
+    ::-webkit-scrollbar { display: none; }
+    .scroll-x { overflow-x: auto; scrollbar-width: none; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+    .fade-up { animation: fadeUp 0.3s ease-out forwards; }
+    .neon-green { box-shadow: 0 0 20px rgba(34, 197, 94, 0.35); }
+    .neon-purple { box-shadow: 0 0 20px rgba(157, 43, 238, 0.35); }
+  </style>
+</head>
+<body class="pb-28">
+
+  <!-- Top Navigation Bar -->
+  <div class="sticky top-0 z-50 px-3 pt-3 pb-1" style="background: linear-gradient(to bottom, rgba(220,252,231,0.95) 70%, transparent);">
+    <nav class="glass rounded-full px-4 py-2.5 flex items-center justify-between shadow-sm">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-full bg-blue-500 flex items-center justify-center">
+          <span class="material-symbols-outlined text-white" style="font-size:15px">public</span>
+        </div>
+        <span class="font-black text-base tracking-tight text-slate-900">GEOPORTAL</span>
+      </div>
+      <div id="userChip" class="hidden glass-dark rounded-full px-3 py-1 flex items-center gap-1.5">
+        <div class="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+          <span class="material-symbols-outlined text-white" style="font-size:12px">person</span>
+        </div>
+        <span id="userName" class="text-xs font-semibold text-slate-700"></span>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Main Tabs -->
+  <div class="scroll-x px-3 py-3 flex gap-2">
+    <button onclick="setTab('xarita')" id="tab-xarita" class="tab-pill active flex-shrink-0 px-4 py-2 rounded-full text-sm font-bold shadow-sm">Xarita</button>
+    <button onclick="setTab('malumotlar')" id="tab-malumotlar" class="tab-pill flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold shadow-sm">Ma'lumotlar</button>
+    <button onclick="setTab('grafik')" id="tab-grafik" class="tab-pill flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold shadow-sm">Grafik vositalar</button>
+    <button onclick="setTab('solishtirish')" id="tab-solishtirish" class="tab-pill flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold shadow-sm">Solishtirish</button>
+  </div>
+
+  <!-- ═══ TAB: XARITA ═══ -->
+  <div id="page-xarita" class="px-3 fade-up">
+
+    <!-- Sub-tabs -->
+    <div class="scroll-x flex gap-2 pb-3">
+      <button onclick="setSubTab('donorlar')" id="sub-donorlar" class="tab-pill flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">Top donorlar</button>
+      <button onclick="setSubTab('viloyatlar')" id="sub-viloyatlar" class="tab-pill active flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">Top viloyatlar</button>
+      <button onclick="setSubTab('yonalishlar')" id="sub-yonalishlar" class="tab-pill flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">Yo'nalishlar</button>
+      <button onclick="setSubTab('loyihalar')" id="sub-loyihalar" class="tab-pill flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">Eng yirik loyihalar</button>
+    </div>
+
+    <!-- Sub-tab: Top viloyatlar -->
+    <div id="sub-page-viloyatlar" class="space-y-2">
+      <div class="glass rounded-2xl overflow-hidden shadow-sm">
+        <div id="viloyatlarList" class="divide-y divide-white/40">
+          <!-- JS dan to'ldiriladi -->
+        </div>
+      </div>
+      <!-- Xarita placeholder -->
+      <div class="glass rounded-2xl p-5 flex flex-col items-center justify-center min-h-[160px] mt-2 shadow-sm">
+        <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-3">
+          <span class="material-symbols-outlined text-green-600" style="font-size:26px">map</span>
+        </div>
+        <p class="font-bold text-slate-700 text-sm">Interaktiv Xarita</p>
+        <p class="text-xs text-slate-400 mt-1 mb-3 text-center">Hududni tanlang va tafsilotlarni ko'ring</p>
+        <button class="neon-green bg-green-500 text-white px-5 py-2 rounded-full text-xs font-bold">Xaritani ochish</button>
+      </div>
+    </div>
+
+    <!-- Sub-tab: Top donorlar -->
+    <div id="sub-page-donorlar" class="hidden space-y-2">
+      <div class="glass rounded-2xl overflow-hidden shadow-sm">
+        <div class="divide-y divide-white/40">
+          <div class="flex items-center justify-between px-4 py-3">
+            <span class="text-sm font-semibold text-slate-700">O'zR Davlat byudjeti</span>
+            <span class="text-xs font-bold text-slate-500">225,006,327,253,921.22</span>
+          </div>
+          <div class="flex items-center justify-between px-4 py-3">
+            <span class="text-sm font-semibold text-slate-700">Jahon Banki</span>
+            <span class="text-xs font-bold text-slate-500">145,320,000,000.00</span>
+          </div>
+          <div class="flex items-center justify-between px-4 py-3">
+            <span class="text-sm font-semibold text-slate-700">ADB</span>
+            <span class="text-xs font-bold text-slate-500">102,480,000,000.00</span>
+          </div>
+          <div class="flex items-center justify-between px-4 py-3">
+            <span class="text-sm font-semibold text-slate-700">EBRD</span>
+            <span class="text-xs font-bold text-slate-500">78,900,000,000.00</span>
+          </div>
+          <div class="flex items-center justify-between px-4 py-3">
+            <span class="text-sm font-semibold text-slate-700">IsDB</span>
+            <span class="text-xs font-bold text-slate-500">35,600,000,000.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sub-tab: Yo'nalishlar -->
+    <div id="sub-page-yonalishlar" class="hidden space-y-2">
+      <div class="glass rounded-2xl overflow-hidden shadow-sm">
+        <div class="divide-y divide-white/40">
+          <div class="flex items-center justify-between px-4 py-3">
+            <span class="text-sm font-semibold text-slate-700">Yo'l</span>
+            <span class="text-xs font-bold text-slate-500">225,006,327,253,921.22</span>
+          </div>
+          <div class="flex items-center justify-between px-4 py-3">
+            <span class="text-sm font-semibold text-slate-700">Suv</span>
+            <span class="text-xs font-bold text-slate-500">225,006,327,253,921.22</span>
+          </div>
+          <div class="flex items-center justify-between px-4 py-3">
+            <span class="text-sm font-semibold text-slate-700">Sog'liq</span>
+            <span class="text-xs font-bold text-slate-500">225,006,327,253,921.22</span>
+          </div>
+          <div class="flex items-center justify-between px-4 py-3">
+            <span class="text-sm font-semibold text-slate-700">Ta'lim</span>
+            <span class="text-xs font-bold text-slate-500">225,006,327,253,921.22</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sub-tab: Eng yirik loyihalar -->
+    <div id="sub-page-loyihalar" class="hidden space-y-2">
+      <div class="glass rounded-2xl overflow-hidden shadow-sm">
+        <div class="px-4 py-2 bg-white/30">
+          <div class="grid grid-cols-3 text-xs font-semibold text-slate-400 py-1">
+            <span>Loyiha nomi</span>
+            <span class="text-center">Sektor</span>
+            <span class="text-right">Sarflangan</span>
+          </div>
+        </div>
+        <div class="divide-y divide-white/40">
+          <div class="grid grid-cols-3 px-4 py-3 items-center">
+            <span class="text-xs font-semibold text-slate-700">15778</span>
+            <span class="text-xs text-center text-slate-500">Yo'l</span>
+            <span class="text-xs text-right font-bold text-slate-700">35,998.89</span>
+          </div>
+          <div class="grid grid-cols-3 px-4 py-3 items-center">
+            <span class="text-xs font-semibold text-slate-700">15778</span>
+            <span class="text-xs text-center text-slate-500">Yo'l</span>
+            <span class="text-xs text-right font-bold text-slate-700">35,998.89</span>
+          </div>
+          <div class="grid grid-cols-3 px-4 py-3 items-center">
+            <span class="text-xs font-semibold text-slate-700">15778</span>
+            <span class="text-xs text-center text-slate-500">Yo'l</span>
+            <span class="text-xs text-right font-bold text-slate-700">35,998.89</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══ TAB: MA'LUMOTLAR ═══ -->
+  <div id="page-malumotlar" class="hidden px-3 fade-up">
+    <!-- Stats 4 cards -->
+    <div class="grid grid-cols-2 gap-2.5 mb-3">
+      <div class="glass stat-card rounded-2xl p-4 border-l-4 border-green-400 shadow-sm">
+        <div class="flex justify-between items-start mb-2">
+          <div class="p-2 bg-green-100 text-green-600 rounded-xl">
+            <span class="material-symbols-outlined" style="font-size:20px">menu_book</span>
+          </div>
+          <span class="material-symbols-outlined text-slate-300" style="font-size:16px">north_east</span>
+        </div>
+        <p class="text-xl font-black text-slate-900" id="stat-maktab">11 139</p>
+        <p class="text-xs text-slate-500 font-semibold mt-0.5">Maktablar</p>
+        <p class="text-xs text-green-500 mt-1 flex items-center gap-0.5">
+          <span class="material-symbols-outlined" style="font-size:11px">trending_up</span>+12 yangi
+        </p>
+      </div>
+      <div class="glass stat-card rounded-2xl p-4 border-l-4 border-purple-400 shadow-sm">
+        <div class="flex justify-between items-start mb-2">
+          <div class="p-2 bg-purple-100 text-purple-600 rounded-xl">
+            <span class="material-symbols-outlined" style="font-size:20px">school</span>
+          </div>
+          <span class="material-symbols-outlined text-slate-300" style="font-size:16px">north_east</span>
+        </div>
+        <p class="text-xl font-black text-slate-900" id="stat-bogcha">6 935</p>
+        <p class="text-xs text-slate-500 font-semibold mt-0.5">Bog'chalar</p>
+        <p class="text-xs text-purple-500 mt-1 flex items-center gap-0.5">
+          <span class="material-symbols-outlined" style="font-size:11px">trending_up</span>+8 yangi
+        </p>
+      </div>
+      <div class="glass stat-card rounded-2xl p-4 border-l-4 border-rose-400 shadow-sm">
+        <div class="flex justify-between items-start mb-2">
+          <div class="p-2 bg-rose-100 text-rose-600 rounded-xl">
+            <span class="material-symbols-outlined" style="font-size:20px">health_and_safety</span>
+          </div>
+          <span class="material-symbols-outlined text-slate-300" style="font-size:16px">north_east</span>
+        </div>
+        <p class="text-xl font-black text-slate-900" id="stat-tibbiyot">3 034</p>
+        <p class="text-xs text-slate-500 font-semibold mt-0.5">Tibbiyot</p>
+        <p class="text-xs text-rose-500 mt-1 flex items-center gap-0.5">
+          <span class="material-symbols-outlined" style="font-size:11px">trending_up</span>+4 yangi
+        </p>
+      </div>
+      <div class="glass stat-card rounded-2xl p-4 border-l-4 border-amber-400 shadow-sm">
+        <div class="flex justify-between items-start mb-2">
+          <div class="p-2 bg-amber-100 text-amber-600 rounded-xl">
+            <span class="material-symbols-outlined" style="font-size:20px">sports_basketball</span>
+          </div>
+          <span class="material-symbols-outlined text-slate-300" style="font-size:16px">north_east</span>
+        </div>
+        <p class="text-xl font-black text-slate-900" id="stat-sport">356</p>
+        <p class="text-xs text-slate-500 font-semibold mt-0.5">Sport</p>
+        <p class="text-xs text-amber-500 mt-1 flex items-center gap-0.5">
+          <span class="material-symbols-outlined" style="font-size:11px">trending_up</span>+2 yangi
+        </p>
+      </div>
+    </div>
+
+    <!-- Budget section -->
+    <div class="glass rounded-2xl p-4 shadow-sm" style="background: rgba(255,237,213,0.4);">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Sarflangan</p>
+          <p class="text-lg font-black text-slate-900 mt-0.5">169,899.82 <span class="text-xs font-normal text-slate-500">mlrd</span></p>
+        </div>
+        <div>
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ajratilgan</p>
+          <p class="text-lg font-black text-slate-900 mt-0.5">500,236.92 <span class="text-xs font-normal text-slate-500">mlrd</span></p>
+        </div>
+        <div>
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Loyihalar</p>
+          <p class="text-lg font-black text-slate-900 mt-0.5">30,749</p>
+        </div>
+        <div>
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">O'zlashtirish</p>
+          <div class="flex items-center gap-2 mt-0.5">
+            <p class="text-lg font-black text-slate-900">34%</p>
+            <div class="flex-1 h-2.5 bg-slate-200 rounded-full overflow-hidden">
+              <div class="h-full bg-primary rounded-full" style="width:34%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Murojaatlar counter -->
+    <div class="glass rounded-2xl p-4 mt-2.5 flex justify-between items-center shadow-sm">
+      <div>
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Fuqaro murojaatlari</p>
+        <p class="text-2xl font-black text-slate-900 mt-0.5" id="stat-murojaatlar">—</p>
+        <p class="text-xs text-slate-400">jami yuborilgan</p>
+      </div>
+      <div class="text-right">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Hal qilingan</p>
+        <p class="text-2xl font-black mt-0.5" style="color:#22c55e" id="stat-hal">—</p>
+        <p class="text-xs text-slate-400">murojaat</p>
+      </div>
+    </div>
+
+    <!-- Mening murojaatlarim -->
+    <div class="mt-3">
+      <div class="flex justify-between items-center mb-2">
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Mening murojaatlarim</p>
+        <button onclick="murojaatlarYukla()" class="text-xs font-bold" style="color:#9d2bee">Yangilash</button>
+      </div>
+      <div id="murojaatList" class="space-y-2">
+        <div class="glass rounded-xl p-3 text-center text-slate-400 text-xs">Yuklanmoqda...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: GRAFIK VOSITALAR ═══ -->
+  <div id="page-grafik" class="hidden px-3 fade-up">
+    <div class="glass rounded-2xl p-5 shadow-sm mb-2.5">
+      <p class="text-sm font-bold text-slate-700 mb-4">Yo'nalishlar bo'yicha taqsimot</p>
+      <!-- Donut chart (SVG) -->
+      <div class="flex items-center gap-5">
+        <svg width="110" height="110" viewBox="0 0 110 110">
+          <circle cx="55" cy="55" r="40" fill="none" stroke="#e2e8f0" stroke-width="18"/>
+          <circle cx="55" cy="55" r="40" fill="none" stroke="#22c55e" stroke-width="18" stroke-dasharray="101 151" stroke-dashoffset="0" stroke-linecap="round"/>
+          <circle cx="55" cy="55" r="40" fill="none" stroke="#38bdf8" stroke-width="18" stroke-dasharray="59 193" stroke-dashoffset="-101" stroke-linecap="round"/>
+          <circle cx="55" cy="55" r="40" fill="none" stroke="#a855f7" stroke-width="18" stroke-dasharray="50 202" stroke-dashoffset="-160" stroke-linecap="round"/>
+          <circle cx="55" cy="55" r="40" fill="none" stroke="#f472b6" stroke-width="18" stroke-dasharray="40 212" stroke-dashoffset="-210" stroke-linecap="round"/>
+        </svg>
+        <div class="space-y-1.5 text-xs">
+          <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"></span><span class="text-slate-600">Yo'l — 40.3%</span></div>
+          <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-sky-400 inline-block"></span><span class="text-slate-600">Suv — 23.6%</span></div>
+          <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span><span class="text-slate-600">Sog'liq — 20%</span></div>
+          <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-pink-400 inline-block"></span><span class="text-slate-600">Ta'lim — 16.1%</span></div>
+        </div>
+      </div>
+    </div>
+    <!-- Bar chart donorlar -->
+    <div class="glass rounded-2xl p-5 shadow-sm">
+      <p class="text-sm font-bold text-slate-700 mb-4">Donorlar bo'yicha (mlrd so'm)</p>
+      <div class="space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-500 w-20 text-right">O'zR Byudjet</span>
+          <div class="flex-1 h-5 rounded-full overflow-hidden bg-slate-100">
+            <div class="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500" style="width:100%"></div>
+          </div>
+          <span class="text-xs font-bold text-slate-600">200T</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-500 w-20 text-right">Jahon Banki</span>
+          <div class="flex-1 h-5 rounded-full overflow-hidden bg-slate-100">
+            <div class="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500" style="width:73%"></div>
+          </div>
+          <span class="text-xs font-bold text-slate-600">146T</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-500 w-20 text-right">ADB</span>
+          <div class="flex-1 h-5 rounded-full overflow-hidden bg-slate-100">
+            <div class="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500" style="width:51%"></div>
+          </div>
+          <span class="text-xs font-bold text-slate-600">102T</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-500 w-20 text-right">EBRD</span>
+          <div class="flex-1 h-5 rounded-full overflow-hidden bg-slate-100">
+            <div class="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500" style="width:40%"></div>
+          </div>
+          <span class="text-xs font-bold text-slate-600">80T</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-500 w-20 text-right">IsDB</span>
+          <div class="flex-1 h-5 rounded-full overflow-hidden bg-slate-100">
+            <div class="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500" style="width:18%"></div>
+          </div>
+          <span class="text-xs font-bold text-slate-600">36T</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: SOLISHTIRISH ═══ -->
+  <div id="page-solishtirish" class="hidden px-3 fade-up">
+    <div class="glass rounded-2xl p-4 mb-2.5 shadow-sm">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Solishtiruv turi</p>
+      <select class="w-full h-11 px-4 rounded-full text-sm font-semibold text-slate-700 border border-white/60 bg-white/70 focus:outline-none focus:ring-2 focus:ring-green-400">
+        <option>O'zR Davlat byudjeti</option>
+        <option>Xalqaro donorlar</option>
+      </select>
+    </div>
+    <div class="grid grid-cols-2 gap-2.5 mb-2.5">
+      <div>
+        <p class="text-xs font-bold text-slate-400 mb-1.5 px-1">Variant A</p>
+        <select class="w-full h-11 px-3 rounded-full text-xs font-semibold text-slate-700 border border-white/60 bg-white/70 focus:outline-none">
+          <option>O'zR Davlat byudjeti (konkurs)</option>
+        </select>
+      </div>
+      <div>
+        <p class="text-xs font-bold text-slate-400 mb-1.5 px-1">Variant B</p>
+        <select class="w-full h-11 px-3 rounded-full text-xs font-semibold text-slate-700 border border-white/60 bg-white/70 focus:outline-none">
+          <option>O'zR Davlat byudjeti (konkurs)</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 gap-2.5">
+      <!-- A panel -->
+      <div class="glass rounded-2xl p-3 shadow-sm">
+        <p class="text-xs font-bold text-slate-500 mb-2">Variant A</p>
+        <div class="space-y-1.5">
+          <div><p class="text-xs text-slate-400">Sarflangan</p><p class="text-sm font-black text-slate-900">169,899.32</p></div>
+          <div><p class="text-xs text-slate-400">Ajratilgan</p><p class="text-sm font-black text-slate-900">500,235.33</p></div>
+          <div><p class="text-xs text-slate-400">O'zlashtirish</p>
+            <div class="flex items-center gap-1 mt-0.5">
+              <p class="text-sm font-black text-slate-900">34%</p>
+              <div class="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                <div class="h-full bg-green-500 rounded-full" style="width:34%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- B panel -->
+      <div class="glass rounded-2xl p-3 shadow-sm">
+        <p class="text-xs font-bold text-slate-500 mb-2">Variant B</p>
+        <div class="space-y-1.5">
+          <div><p class="text-xs text-slate-400">Sarflangan</p><p class="text-sm font-black text-slate-900">169,899.32</p></div>
+          <div><p class="text-xs text-slate-400">Ajratilgan</p><p class="text-sm font-black text-slate-900">500,235.33</p></div>
+          <div><p class="text-xs text-slate-400">O'zlashtirish</p>
+            <div class="flex items-center gap-1 mt-0.5">
+              <p class="text-sm font-black text-slate-900">34%</p>
+              <div class="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                <div class="h-full bg-primary rounded-full" style="width:34%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Tezkor havolalar ═══ -->
+  <div class="px-3 mt-4 grid grid-cols-3 gap-2">
+    <button onclick="window.location.href='/tma/maktablar/'"
+      class="glass rounded-2xl p-3 flex flex-col items-center gap-1.5 active:scale-95 transition-transform shadow-sm">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(34,197,94,0.12)">
+        <span class="material-symbols-outlined" style="font-size:18px;color:#22c55e">school</span>
+      </div>
+      <p class="text-xs font-bold text-slate-700 text-center leading-tight">Maktablar</p>
+    </button>
+    <button onclick="window.location.href='/tma/murojaat/'"
+      class="glass rounded-2xl p-3 flex flex-col items-center gap-1.5 active:scale-95 transition-transform shadow-sm">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(157,43,238,0.12)">
+        <span class="material-symbols-outlined" style="font-size:18px;color:#9d2bee">add_a_photo</span>
+      </div>
+      <p class="text-xs font-bold text-slate-700 text-center leading-tight">Murojaat</p>
+    </button>
+    <button onclick="window.location.href='/tma/tahlil/'"
+      class="glass rounded-2xl p-3 flex flex-col items-center gap-1.5 active:scale-95 transition-transform shadow-sm">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(59,130,246,0.12)">
+        <span class="material-symbols-outlined" style="font-size:18px;color:#3b82f6">analytics</span>
+      </div>
+      <p class="text-xs font-bold text-slate-700 text-center leading-tight">Tahlil</p>
+    </button>
+  </div>
+
+  <!-- ═══ Maktablar holati (mini) ═══ -->
+  <div class="px-3 mt-4 mb-4">
+    <div class="flex items-center justify-between mb-2">
+      <h2 class="text-xs font-black text-slate-500 uppercase tracking-widest">Maktablar holati</h2>
+      <button onclick="window.location.href='/tma/maktablar/'" class="text-xs font-bold" style="color:#9d2bee">Barchasi →</button>
+    </div>
+    <div id="maktablarMini" class="space-y-2">
+      <div class="glass rounded-xl p-3 text-center text-slate-400 text-xs">Yuklanmoqda...</div>
+    </div>
+  </div>
+
+  <!-- ═══ BOTTOM ACTION BUTTON ═══ -->
+  <div class="fixed bottom-0 left-0 right-0 px-3 pb-4 pt-2 z-50" style="background: linear-gradient(to top, rgba(220,252,231,0.98) 60%, transparent);">
+    <button onclick="window.location.href='/tma/murojaat/'"
+      class="neon-green w-full py-4 rounded-full font-black text-base tracking-wide flex items-center justify-center gap-2 active:scale-95 transition-transform bg-green-500 text-white shadow-lg">
+      <span class="material-symbols-outlined" style="font-size:20px">add_circle</span>
+      Ma'lumot qoldirish
+    </button>
+  </div>
+
+  <script>
+    // ── Telegram SDK ──────────────────────────────────────────────────────
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    const user = tg.initDataUnsafe?.user;
+    if (user) {
+      const chip = document.getElementById('userChip');
+      document.getElementById('userName').textContent = user.first_name || user.username || 'Fuqaro';
+      chip.classList.remove('hidden');
+    }
+
+    // ── Tab navigation ────────────────────────────────────────────────────
+    const tabs = ['xarita','malumotlar','grafik','solishtirish'];
+    function setTab(name) {
+      tabs.forEach(t => {
+        document.getElementById('page-'+t).classList.add('hidden');
+        const btn = document.getElementById('tab-'+t);
+        btn.classList.remove('active');
+        btn.classList.remove('active-purple');
+      });
+      document.getElementById('page-'+name).classList.remove('hidden');
+      document.getElementById('page-'+name).classList.add('fade-up');
+      document.getElementById('tab-'+name).classList.add('active');
+      if (name === 'malumotlar') { statistikaYukla(); murojaatlarYukla(); }
+    }
+
+    // ── Sub-tab navigation ────────────────────────────────────────────────
+    const subTabs = ['donorlar','viloyatlar','yonalishlar','loyihalar'];
+    function setSubTab(name) {
+      subTabs.forEach(t => {
+        document.getElementById('sub-page-'+t).classList.add('hidden');
+        document.getElementById('sub-'+t).classList.remove('active');
+      });
+      document.getElementById('sub-page-'+name).classList.remove('hidden');
+      document.getElementById('sub-'+name).classList.add('active');
+    }
+
+    // ── API: statistika ───────────────────────────────────────────────────
+    const VILOYATLAR_DATA = [
+      { nomi: 'Toshkent shahri', loyiha: '1,245', miqdor: '225,006,327,253,921.22', rang: '#22c55e' },
+      { nomi: "Farg'ona viloyati", loyiha: '956', miqdor: '225,006,327,253,921.22', rang: '#9d2bee' },
+      { nomi: "Qoraqalpog'iston", loyiha: '872', miqdor: '225,006,327,253,921.22', rang: '#38bdf8' },
+      { nomi: 'Qashqadaryo', loyiha: '756', miqdor: '225,006,327,253,921.22', rang: '#f59e0b' },
+      { nomi: 'Samarqand', loyiha: '645', miqdor: '225,006,327,253,921.22', rang: '#f472b6' },
+      { nomi: 'Surxondaryo', loyiha: '534', miqdor: '225,006,327,253,921.22', rang: '#34d399' },
+    ];
+
+    function renderViloyatlar() {
+      const container = document.getElementById('viloyatlarList');
+      container.innerHTML = VILOYATLAR_DATA.map(v => `
+        <div class="flex items-center justify-between px-4 py-3">
+          <div class="flex items-center gap-3">
+            <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${v.rang}"></span>
+            <span class="text-sm font-semibold text-slate-700">${v.nomi}</span>
+          </div>
+          <span class="text-xs font-bold text-slate-400">${v.miqdor}</span>
+        </div>
+      `).join('');
+    }
+
+    async function statistikaYukla() {
+      try {
+        const res = await fetch('/api/statistika/');
+        const d = await res.json();
+        document.getElementById('stat-maktab').textContent = d.maktablar_soni?.toLocaleString('uz') || '11 139';
+        document.getElementById('stat-bogcha').textContent = d.bogchalar_soni?.toLocaleString('uz') || '6 935';
+        document.getElementById('stat-tibbiyot').textContent = d.tibbiyot_soni?.toLocaleString('uz') || '3 034';
+        document.getElementById('stat-sport').textContent = d.sport_soni?.toLocaleString('uz') || '356';
+        document.getElementById('stat-murojaatlar').textContent = d.murojaatlar_soni ?? '0';
+        document.getElementById('stat-hal').textContent = d.hal_qilingan ?? '0';
+      } catch {}
+    }
+
+    async function murojaatlarYukla() {
+      const list = document.getElementById('murojaatList');
+      if (!user) {
+        list.innerHTML = '<div class="glass rounded-xl p-3 text-center text-slate-400 text-xs">Telegram orqali kiring</div>';
+        return;
+      }
+      try {
+        const res = await fetch(`/api/murojaatlar/?user_id=${user.id}`);
+        const d = await res.json();
+        if (!d.murojaatlar?.length) {
+          list.innerHTML = '<div class="glass rounded-xl p-3 text-center text-slate-400 text-xs">Hali murojaatlar yo\'q</div>';
+          return;
+        }
+        const holatRang = { 'Kutilmoqda': '#f59e0b', "Ko'rib chiqilmoqda": '#9d2bee', 'Hal qilindi': '#22c55e' };
+        list.innerHTML = d.murojaatlar.map(m => `
+          <div class="glass rounded-xl p-3 flex items-start gap-3 shadow-sm">
+            ${m.rasm
+              ? `<img src="${m.rasm}" class="w-11 h-11 rounded-xl object-cover flex-shrink-0" />`
+              : `<div class="w-11 h-11 rounded-xl flex-shrink-0 bg-slate-100 flex items-center justify-center"><span class="material-symbols-outlined text-slate-300" style="font-size:18px">image_not_supported</span></div>`}
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-2">
+                <p class="text-sm font-bold text-slate-800 truncate">${m.infratuzilma}</p>
+                <span class="text-xs px-2 py-0.5 rounded-full flex-shrink-0 font-semibold" style="background:${holatRang[m.holat] || '#888'}20;color:${holatRang[m.holat] || '#888'}">${m.holat}</span>
+              </div>
+              <p class="text-xs text-slate-500 truncate mt-0.5">${m.viloyat}, ${m.tuman}</p>
+              <p class="text-xs text-slate-400 mt-0.5">${m.yuborilgan_vaqt}</p>
+            </div>
+          </div>
+        `).join('');
+      } catch {
+        list.innerHTML = '<div class="glass rounded-xl p-3 text-center text-slate-400 text-xs">Xatolik yuz berdi</div>';
+      }
+    }
+
+    renderViloyatlar();
+
+    async function maktablarMiniYukla() {
+      try {
+        const res = await fetch('/api/maktablar/');
+        const d = await res.json();
+        const list = (d.maktablar || []).slice(0, 4);
+        const container = document.getElementById('maktablarMini');
+        if (!list.length) {
+          container.innerHTML = '<div class="glass rounded-xl p-3 text-center text-slate-400 text-xs">Maktablar topilmadi</div>';
+          return;
+        }
+        container.innerHTML = list.map(m => {
+          const foiz = m.mamnuniyat_foizi;
+          const rang = foiz === null ? '#94a3b8' : foiz >= 70 ? '#22c55e' : foiz >= 40 ? '#f59e0b' : '#ef4444';
+          const holat = foiz === null ? 'Tekshirilmagan' : foiz >= 70 ? 'Yaxshi' : foiz >= 40 ? "E'tiborga muhtoj" : 'Nosoz';
+          return `
+          <div class="glass rounded-xl p-3 flex items-center gap-3 cursor-pointer active:scale-98 transition-transform"
+            onclick="window.location.href='/tma/maktablar/${m.id}/'">
+            <div class="w-9 h-9 rounded-xl flex-shrink-0 bg-slate-100 flex items-center justify-center">
+              <span class="material-symbols-outlined text-slate-400" style="font-size:16px">school</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-bold text-slate-800 truncate">${m.nom}</p>
+              <p class="text-xs text-slate-400 truncate">${m.tuman}</p>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <p class="text-xs font-black" style="color:${rang}">${foiz !== null ? foiz + '%' : '—'}</p>
+              <p class="text-xs font-semibold" style="color:${rang};font-size:10px">${holat}</p>
+            </div>
+          </div>`;
+        }).join('');
+      } catch {}
+    }
+    maktablarMiniYukla();
+  </script>
+</body>
+</html>

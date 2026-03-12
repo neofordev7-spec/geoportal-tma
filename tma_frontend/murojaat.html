@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Ma'lumot qoldirish — GEOPORTAL</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { primary: "#9d2bee" },
+          fontFamily: { display: ["Inter","sans-serif"] }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0a0a0c;
+      background-image:
+        radial-gradient(at 0% 0%, #064e3b 0px, transparent 50%),
+        radial-gradient(at 100% 0%, #0c4a6e 0px, transparent 50%),
+        radial-gradient(at 100% 100%, #4c1d95 0px, transparent 50%),
+        radial-gradient(at 0% 100%, #064e3b 0px, transparent 50%);
+      min-height: 100vh;
+      color: #f1f5f9;
+    }
+    .glass-panel {
+      background: rgba(26, 16, 34, 0.55);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .glass-input {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #f1f5f9;
+    }
+    .glass-input:focus { outline: none; border-color: rgba(157,43,238,0.6); box-shadow: 0 0 0 3px rgba(157,43,238,0.15); }
+    select.glass-input option { background: #1a1022; color: #f1f5f9; }
+    textarea.glass-input::placeholder,
+    input.glass-input::placeholder { color: rgba(148,163,184,0.6); }
+    #uploadArea { transition: border-color 0.2s, background 0.2s; }
+    #previewImg { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { animation: spin 0.8s linear infinite; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; width: 18px; height: 18px; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .fade-up { animation: fadeUp 0.3s ease-out; }
+    .neon-purple { box-shadow: 0 0 30px rgba(157,43,238,0.45); }
+    .pulse-dot { animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.7;transform:scale(1.3)} }
+  </style>
+</head>
+<body class="pb-28">
+
+  <!-- Header -->
+  <header class="px-4 pt-4 pb-2">
+    <div class="glass-panel rounded-2xl px-4 py-3 flex items-center gap-3">
+      <button onclick="history.back()" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center active:scale-90 transition-transform flex-shrink-0">
+        <span class="material-symbols-outlined text-white" style="font-size:20px">arrow_back</span>
+      </button>
+      <div class="flex-1 min-w-0">
+        <h1 class="text-base font-extrabold text-white tracking-tight">Ma'lumot qoldirish</h1>
+        <p class="text-xs text-slate-400 truncate">GEOPORTAL raqamli infratuzilma xaritasi</p>
+      </div>
+      <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/20 border border-primary/30 flex-shrink-0">
+        <span class="w-1.5 h-1.5 rounded-full bg-primary pulse-dot"></span>
+        <span class="text-xs font-bold text-primary">Jonli</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="px-4 pt-3 fade-up">
+    <div class="glass-panel rounded-3xl p-5 relative overflow-hidden shadow-2xl">
+      <!-- Ambient glow -->
+      <div class="absolute -top-16 -right-16 w-48 h-48 bg-primary/15 blur-3xl rounded-full pointer-events-none"></div>
+
+      <!-- Badge -->
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/20 border border-primary/30 mb-5">
+        <span class="w-1.5 h-1.5 rounded-full bg-primary pulse-dot"></span>
+        <span class="text-xs font-bold tracking-widest uppercase text-primary">Ma'lumot qoldirish</span>
+      </div>
+
+      <!-- ── Rasm yuklash ────────────────────────────────── -->
+      <div class="mb-5">
+        <label class="text-xs font-semibold text-slate-300 uppercase tracking-widest block mb-2">Infratuzilma fotosurati</label>
+        <div id="uploadArea"
+          class="relative flex flex-col items-center justify-center rounded-3xl overflow-hidden cursor-pointer transition-all"
+          style="min-height:180px; border: 2px dashed rgba(255,255,255,0.18); background: linear-gradient(135deg, rgba(157,43,238,0.08), rgba(255,255,255,0.03));">
+          <input type="file" id="rasmInput" name="rasm" accept="image/*" capture="environment"
+            class="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full" />
+          <div id="uploadPlaceholder" class="flex flex-col items-center text-center p-6 pointer-events-none">
+            <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center mb-3 shadow-xl">
+              <span class="material-symbols-outlined text-primary font-bold" style="font-size:28px">add</span>
+            </div>
+            <p class="text-sm font-bold text-white mb-1">Hududdagi infratuzilmani rasmga oling</p>
+            <p class="text-xs text-slate-400">JPEG, PNG yoki HEIC (Maks. 10MB)</p>
+          </div>
+          <img id="previewImg" class="w-full rounded-3xl object-cover" style="max-height:220px" />
+          <button type="button" id="removeImgBtn" onclick="rasmOchir(event)"
+            class="absolute top-2 right-2 z-20 w-7 h-7 rounded-full flex items-center justify-center hidden"
+            style="background:rgba(0,0,0,0.65)">
+            <span class="material-symbols-outlined text-white" style="font-size:15px">close</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Dropdowns 2x2 ───────────────────────────────── -->
+      <div class="grid grid-cols-2 gap-3 mb-5">
+        <!-- Viloyat -->
+        <div class="relative group col-span-2">
+          <select id="viloyat" required class="glass-input w-full h-12 pl-5 pr-10 rounded-full text-sm font-semibold appearance-none focus:ring-0 cursor-pointer">
+            <option disabled selected value="">Viloyatni tanlang</option>
+            <option value="toshkent_sh">Toshkent shahri</option>
+            <option value="toshkent_v">Toshkent viloyati</option>
+            <option value="samarqand">Samarqand viloyati</option>
+            <option value="fargona">Farg'ona viloyati</option>
+            <option value="andijon">Andijon viloyati</option>
+            <option value="namangan">Namangan viloyati</option>
+            <option value="buxoro">Buxoro viloyati</option>
+            <option value="xorazm">Xorazm viloyati</option>
+            <option value="qashqadaryo">Qashqadaryo viloyati</option>
+            <option value="surxondaryo">Surxondaryo viloyati</option>
+            <option value="jizzax">Jizzax viloyati</option>
+            <option value="sirdaryo">Sirdaryo viloyati</option>
+            <option value="navoiy">Navoiy viloyati</option>
+            <option value="qoraqalpogiston">Qoraqalpog'iston Resp.</option>
+          </select>
+          <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-primary transition-colors" style="font-size:18px">expand_more</span>
+        </div>
+
+        <!-- Tuman -->
+        <div class="relative group">
+          <select id="tuman" required class="glass-input w-full h-12 pl-5 pr-8 rounded-full text-sm font-semibold appearance-none focus:ring-0 cursor-pointer">
+            <option disabled selected value="">Tuman</option>
+            <option value="Mirobod tumani">Mirobod</option>
+            <option value="Yunusobod tumani">Yunusobod</option>
+            <option value="Chilonzor tumani">Chilonzor</option>
+            <option value="Bektemir tumani">Bektemir</option>
+            <option value="Yakkasaroy tumani">Yakkasaroy</option>
+            <option value="Shayxontohur tumani">Shayxontohur</option>
+            <option value="Uchtepa tumani">Uchtepa</option>
+            <option value="Olmazar tumani">Olmazar</option>
+          </select>
+          <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" style="font-size:16px">expand_more</span>
+        </div>
+
+        <!-- Infratuzilma -->
+        <div class="relative group">
+          <select id="infratuzilma" required class="glass-input w-full h-12 pl-5 pr-8 rounded-full text-sm font-semibold appearance-none focus:ring-0 cursor-pointer">
+            <option disabled selected value="">Infratuzilma</option>
+            <option value="maktab">Maktab</option>
+            <option value="shifoxona">Shifoxona</option>
+            <option value="bogcha">Bog'cha</option>
+            <option value="yol">Yo'l infratuzilmasi</option>
+            <option value="sport">Sport inshootlari</option>
+            <option value="boshqa">Boshqa</option>
+          </select>
+          <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" style="font-size:16px">expand_more</span>
+        </div>
+
+        <!-- Sektor -->
+        <div class="relative group col-span-2">
+          <select id="sektor" required class="glass-input w-full h-12 pl-5 pr-10 rounded-full text-sm font-semibold appearance-none focus:ring-0 cursor-pointer">
+            <option disabled selected value="">Sektorni tanlang</option>
+            <option value="1-Sektor">1-Sektor</option>
+            <option value="2-Sektor">2-Sektor</option>
+            <option value="3-Sektor">3-Sektor</option>
+            <option value="4-Sektor">4-Sektor</option>
+          </select>
+          <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-primary transition-colors" style="font-size:18px">expand_more</span>
+        </div>
+      </div>
+
+      <!-- ── Izoh ────────────────────────────────────────── -->
+      <div class="mb-5">
+        <label class="text-xs font-semibold text-slate-300 uppercase tracking-widest block mb-2">Qo'shimcha izoh</label>
+        <textarea id="izoh" rows="4"
+          placeholder="Infratuzilmadagi muammolar haqida qo'shimcha izoh qoldiring."
+          class="glass-input w-full p-5 rounded-3xl text-sm resize-none focus:ring-0 placeholder-slate-500"></textarea>
+      </div>
+
+      <!-- ── Info cards ───────────────────────────────────── -->
+      <div class="grid grid-cols-3 gap-2 mb-2">
+        <div class="glass-input rounded-2xl p-3 text-center">
+          <span class="material-symbols-outlined block mb-1 text-primary" style="font-size:18px">location_on</span>
+          <p class="text-xs text-slate-400 leading-tight">GPS avtomatik</p>
+        </div>
+        <div class="glass-input rounded-2xl p-3 text-center">
+          <span class="material-symbols-outlined block mb-1 text-primary" style="font-size:18px">security</span>
+          <p class="text-xs text-slate-400 leading-tight">Xavfsizlik kafolati</p>
+        </div>
+        <div class="glass-input rounded-2xl p-3 text-center">
+          <span class="material-symbols-outlined block mb-1 text-primary" style="font-size:18px">schedule</span>
+          <p class="text-xs text-slate-400 leading-tight">24 soat ichida</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ── Submit button ───────────────────────────────────── -->
+  <div class="fixed bottom-0 left-0 right-0 px-4 pb-4 pt-2 z-50" style="background: linear-gradient(to top, #0a0a0c 55%, transparent);">
+    <button id="submitBtn" onclick="formYuborish()"
+      class="neon-purple w-full py-4 rounded-full font-black text-base tracking-wide flex items-center justify-center gap-2.5 active:scale-95 transition-all bg-primary text-white">
+      <span>Yuborish</span>
+      <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform" style="font-size:20px">send</span>
+    </button>
+  </div>
+
+  <!-- ── Muvaffaqiyat modali ─────────────────────────────── -->
+  <div id="successModal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-5" style="background:rgba(0,0,0,0.75);backdrop-filter:blur(6px)">
+    <div class="glass-panel rounded-3xl p-8 text-center w-full max-w-sm fade-up">
+      <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
+        style="background:rgba(34,197,94,0.15);border:2px solid rgba(34,197,94,0.4)">
+        <span class="material-symbols-outlined text-green-400" style="font-size:32px">check_circle</span>
+      </div>
+      <h2 class="text-xl font-black text-white mb-2">Rahmat!</h2>
+      <p class="text-sm text-slate-400 mb-6">Murojaatingiz qabul qilindi.<br/>24 soat ichida ko'rib chiqiladi.</p>
+      <button onclick="window.Telegram.WebApp.close()"
+        class="w-full py-3.5 rounded-full font-black text-sm bg-primary text-white neon-purple">
+        Yopish
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    // Telegram MainButton
+    tg.MainButton.setText('Yuborish');
+    tg.MainButton.setParams({ color: '#9d2bee', text_color: '#ffffff' });
+    tg.MainButton.show();
+    tg.MainButton.onClick(formYuborish);
+
+    // Rasm preview
+    document.getElementById('rasmInput').addEventListener('change', function() {
+      const file = this.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.getElementById('previewImg');
+        img.src = e.target.result;
+        img.style.display = 'block';
+        document.getElementById('uploadPlaceholder').style.display = 'none';
+        document.getElementById('removeImgBtn').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function rasmOchir(e) {
+      e.preventDefault(); e.stopPropagation();
+      document.getElementById('rasmInput').value = '';
+      document.getElementById('previewImg').style.display = 'none';
+      document.getElementById('uploadPlaceholder').style.display = 'flex';
+      document.getElementById('removeImgBtn').classList.add('hidden');
+    }
+
+    async function formYuborish() {
+      const viloyat = document.getElementById('viloyat').value;
+      const tuman = document.getElementById('tuman').value;
+      const infratuzilma = document.getElementById('infratuzilma').value;
+      const sektor = document.getElementById('sektor').value;
+
+      if (!viloyat || !tuman || !infratuzilma || !sektor) {
+        tg.showAlert("Iltimos, barcha majburiy maydonlarni to'ldiring!");
+        return;
+      }
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div><span>Yuborilmoqda...</span>';
+      tg.MainButton.showProgress();
+
+      const user = tg.initDataUnsafe?.user || {};
+      const formData = new FormData();
+      formData.append('viloyat', viloyat);
+      formData.append('tuman', tuman);
+      formData.append('infratuzilma', infratuzilma);
+      formData.append('sektor', sektor);
+      formData.append('izoh', document.getElementById('izoh').value);
+      formData.append('telegram_user_id', user.id || '0');
+      formData.append('telegram_username', user.username || '');
+      formData.append('telegram_full_name', `${user.first_name || ''} ${user.last_name || ''}`.trim());
+
+      const rasmFile = document.getElementById('rasmInput').files[0];
+      if (rasmFile) formData.append('rasm', rasmFile);
+
+      try {
+        const res = await fetch('/api/murojaat/', { method: 'POST', body: formData });
+        const data = await res.json();
+        tg.MainButton.hideProgress();
+        if (res.ok && data.success) {
+          document.getElementById('successModal').classList.remove('hidden');
+        } else {
+          throw new Error(data.error || 'Server xatosi');
+        }
+      } catch(e) {
+        tg.MainButton.hideProgress();
+        tg.showAlert('Xatolik: ' + e.message);
+        btn.disabled = false;
+        btn.innerHTML = '<span>Yuborish</span><span class="material-symbols-outlined" style="font-size:20px">send</span>';
+      }
+    }
+  </script>
+</body>
+</html>
