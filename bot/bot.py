@@ -15,7 +15,7 @@ from aiogram.types import (
 load_dotenv()
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
-NGROK_URL = os.getenv('NGROK_URL', 'http://localhost:8000')
+APP_URL = os.getenv('APP_URL', 'http://localhost:8000')
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s — %(levelname)s — %(message)s')
 logger = logging.getLogger(__name__)
@@ -39,7 +39,7 @@ Quyidagi tugmani bosib, ilovani oching 👇
 
 @dp.message(CommandStart())
 async def start_handler(message: Message):
-    webapp_url = f"{NGROK_URL}/tma/"
+    webapp_url = f"{APP_URL}/tma/"
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
@@ -82,7 +82,7 @@ async def web_app_data_handler(message: Message):
                 'telegram_full_name': message.from_user.full_name or '',
             }
             async with session.post(
-                f"{NGROK_URL}/api/murojaat/",
+                f"{APP_URL}/api/murojaat/",
                 json=payload
             ) as resp:
                 result = await resp.json()
@@ -101,7 +101,7 @@ async def web_app_data_handler(message: Message):
 
 @dp.message()
 async def fallback_handler(message: Message):
-    webapp_url = f"{NGROK_URL}/tma/"
+    webapp_url = f"{APP_URL}/tma/"
     keyboard = InlineKeyboardMarkup(inline_keyboard=[[
         InlineKeyboardButton(
             text="🌍 GEOPORTAL ochish",
@@ -119,7 +119,7 @@ async def main():
         logger.error("BOT_TOKEN .env faylida topilmadi!")
         return
 
-    logger.info(f"Bot ishga tushmoqda... NGROK: {NGROK_URL}")
+    logger.info(f"Bot ishga tushmoqda... NGROK: {APP_URL}")
     await dp.start_polling(bot, skip_updates=True)
 
 

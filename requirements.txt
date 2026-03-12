@@ -5,3 +5,7 @@ Pillow
 aiogram>=3.7
 python-dotenv
 aiohttp
+gunicorn
+whitenoise
+dj-database-url
+psycopg2-binary
