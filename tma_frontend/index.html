@@ -7,6 +7,8 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
   <script>
     tailwind.config = {
@@ -103,14 +105,9 @@
           <!-- JS dan to'ldiriladi -->
         </div>
       </div>
-      <!-- Xarita placeholder -->
-      <div class="glass rounded-2xl p-5 flex flex-col items-center justify-center min-h-[160px] mt-2 shadow-sm">
-        <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-3">
-          <span class="material-symbols-outlined text-green-600" style="font-size:26px">map</span>
-        </div>
-        <p class="font-bold text-slate-700 text-sm">Interaktiv Xarita</p>
-        <p class="text-xs text-slate-400 mt-1 mb-3 text-center">Hududni tanlang va tafsilotlarni ko'ring</p>
-        <button class="neon-green bg-green-500 text-white px-5 py-2 rounded-full text-xs font-bold">Xaritani ochish</button>
+      <!-- Leaflet Xarita -->
+      <div class="glass rounded-2xl overflow-hidden mt-2 shadow-sm">
+        <div id="leafletMap" style="height:320px;width:100%;border-radius:1rem;z-index:1;"></div>
       </div>
     </div>
 
@@ -621,6 +618,46 @@
       } catch {}
     }
     maktablarMiniYukla();
+
+    // ── Leaflet Xarita ────────────────────────────────────────────────────
+    let leafletMap = null;
+    function initMap() {
+      if (leafletMap) return;
+      leafletMap = L.map('leafletMap', { zoomControl: true }).setView([41.2995, 69.2401], 6);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap',
+        maxZoom: 18,
+      }).addTo(leafletMap);
+
+      fetch('/api/maktablar/')
+        .then(r => r.json())
+        .then(data => {
+          data.forEach(m => {
+            if (!m.lat || !m.lng) return;
+            const rang = m.mamnuniyat_foizi === null ? '#94a3b8'
+              : m.mamnuniyat_foizi >= 70 ? '#22c55e'
+              : m.mamnuniyat_foizi >= 40 ? '#f59e0b' : '#ef4444';
+            const icon = L.divIcon({
+              className: '',
+              html: `<div style="width:14px;height:14px;border-radius:50%;background:${rang};border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>`,
+              iconSize: [14, 14],
+              iconAnchor: [7, 7],
+            });
+            L.marker([m.lat, m.lng], { icon })
+              .addTo(leafletMap)
+              .bindPopup(`<b>${m.nom}</b><br>${m.viloyat}<br>Mamnuniyat: ${m.mamnuniyat_foizi ?? '—'}%`);
+          });
+          setTimeout(() => leafletMap.invalidateSize(), 200);
+        }).catch(() => {});
+    }
+
+    // Xarita tab ochilganda init qil
+    const origSetTab = window.setTab;
+    window.setTab = function(name) {
+      origSetTab ? origSetTab(name) : setTab(name);
+    };
+    document.getElementById('tab-xarita').addEventListener('click', () => setTimeout(initMap, 100));
+    setTimeout(initMap, 300);
   </script>
 </body>
 </html>
