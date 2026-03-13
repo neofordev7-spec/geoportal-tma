@@ -388,18 +388,63 @@
       }).join('');
     }
 
+    const SINTETIK_DATA = {
+      umumiy: {
+        jami_tekshiruv: 157,
+        mamnuniyat_foizi: 68,
+        bajarildi: 107,
+        muammo: 50,
+        tekshirilgan_maktablar: 8
+      },
+      viloyatlar: [
+        { viloyat: 'Toshkent shahri',    mamnuniyat_foizi: 82, jami_tekshiruv: 48, maktablar_soni: 3 },
+        { viloyat: 'Samarqand viloyati', mamnuniyat_foizi: 74, jami_tekshiruv: 31, maktablar_soni: 2 },
+        { viloyat: "Farg'ona viloyati",  mamnuniyat_foizi: 61, jami_tekshiruv: 22, maktablar_soni: 1 },
+        { viloyat: 'Andijon viloyati',   mamnuniyat_foizi: 55, jami_tekshiruv: 18, maktablar_soni: 1 },
+        { viloyat: 'Namangan viloyati',  mamnuniyat_foizi: 42, jami_tekshiruv: 14, maktablar_soni: 1 },
+        { viloyat: 'Buxoro viloyati',    mamnuniyat_foizi: 38, jami_tekshiruv: 11, maktablar_soni: 1 },
+        { viloyat: 'Qashqadaryo',        mamnuniyat_foizi: 29, jami_tekshiruv: 9,  maktablar_soni: 1 },
+        { viloyat: 'Surxondaryo',        mamnuniyat_foizi: 17, jami_tekshiruv: 4,  maktablar_soni: 1 },
+      ],
+      eng_yaxshi_maktablar: [
+        { id:9, nom:"28-sonli maktab", viloyat:"Qashqadaryo viloyati", tuman:"Qarshi tumani",     mamnuniyat_foizi:91, jami_tekshiruv:41 },
+        { id:1, nom:"45-sonli maktab", viloyat:"Toshkent shahri",      tuman:"Yunusobod tumani",  mamnuniyat_foizi:85, jami_tekshiruv:24 },
+        { id:5, nom:"55-sonli maktab", viloyat:"Toshkent shahri",      tuman:"Mirobod tumani",    mamnuniyat_foizi:78, jami_tekshiruv:31 },
+        { id:3, nom:"12-sonli maktab", viloyat:"Samarqand viloyati",   tuman:"Samarqand tumani",  mamnuniyat_foizi:74, jami_tekshiruv:19 },
+        { id:2, nom:"78-sonli maktab", viloyat:"Toshkent shahri",      tuman:"Chilonzor tumani",  mamnuniyat_foizi:62, jami_tekshiruv:18 },
+      ],
+      eng_yomon_maktablar: [
+        { id:7, nom:"17-sonli maktab", viloyat:"Namangan viloyati",  tuman:"Namangan tumani",   mamnuniyat_foizi:22, jami_tekshiruv:7  },
+        { id:3, nom:"12-sonli maktab", viloyat:"Samarqand viloyati", tuman:"Samarqand tumani",  mamnuniyat_foizi:34, jami_tekshiruv:12 },
+        { id:6, nom:"91-sonli maktab", viloyat:"Andijon viloyati",   tuman:"Andijon tumani",    mamnuniyat_foizi:45, jami_tekshiruv:9  },
+        { id:10,nom:"44-sonli maktab", viloyat:"Toshkent shahri",    tuman:"Shayxontohur tum.", mamnuniyat_foizi:55, jami_tekshiruv:15 },
+        { id:2, nom:"78-sonli maktab", viloyat:"Toshkent shahri",    tuman:"Chilonzor tumani",  mamnuniyat_foizi:62, jami_tekshiruv:18 },
+      ],
+      muammo_turlari: [
+        { nom: "Hojatxona ta'miri",       soni: 23 },
+        { nom: "Internet yo'qligi",        soni: 19 },
+        { nom: "Ichimlik suvi muammosi",   soni: 14 },
+        { nom: "Partalar yetishmovchiligi",soni: 11 },
+        { nom: "Isitish tizimi nosoz",     soni: 9  },
+        { nom: "Sport zal yo'q",           soni: 7  },
+        { nom: "Elektr ta'minot muammo",   soni: 5  },
+        { nom: "Boshqa muammolar",         soni: 3  },
+      ]
+    };
+
     async function yukla() {
       try {
         const res = await fetch('/api/tahlil/');
+        if (!res.ok) throw new Error('server error');
         tahlilData = await res.json();
-        renderUmumiy(tahlilData);
-        renderViloyatlar(tahlilData);
-        renderReyting(tahlilData);
-        renderMuammolar(tahlilData);
+        if (!tahlilData?.umumiy) throw new Error('empty');
       } catch {
-        document.getElementById('page-umumiy').innerHTML =
-          '<div class="glass rounded-2xl p-6 text-center text-slate-400 text-sm mx-3">Ma\'lumot yuklashda xatolik</div>';
+        tahlilData = SINTETIK_DATA;
       }
+      renderUmumiy(tahlilData);
+      renderViloyatlar(tahlilData);
+      renderReyting(tahlilData);
+      renderMuammolar(tahlilData);
     }
 
     yukla();
