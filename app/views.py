@@ -88,12 +88,14 @@ def murojaat_yuborish(request):
     # Ko'p rasm saqlash
     rasmlar = request.FILES.getlist('rasmlar')
     if not rasmlar:
-        # Eski nom bilan ham qabul qil
         single = request.FILES.get('rasm')
         if single:
             rasmlar = [single]
     for f in rasmlar:
-        MurojaatRasm.objects.create(murojaat=murojaat, rasm=f)
+        try:
+            MurojaatRasm.objects.create(murojaat=murojaat, rasm=f)
+        except Exception:
+            pass  # Rasm saqlanmasa ham murojaat qabul qilinadi
 
     return Response({
         'success': True,

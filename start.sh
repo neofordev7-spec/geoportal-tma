@@ -1,5 +1,7 @@
 #!/bin/bash
 set -e
+echo "=== Creating media directories ==="
+mkdir -p media/murojaatlar media/tekshiruvlar
 echo "=== Running migrations ==="
 python manage.py migrate --noinput
 echo "=== Collecting static files ==="

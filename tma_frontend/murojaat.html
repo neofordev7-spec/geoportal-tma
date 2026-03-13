@@ -312,12 +312,16 @@
 
       try {
         const res = await fetch('/api/murojaat/', { method: 'POST', body: formData });
-        const data = await res.json();
+        let data;
+        const text = await res.text();
+        try { data = JSON.parse(text); } catch(_) {
+          throw new Error('Server javobi noto\'g\'ri (' + res.status + '). Qayta urinib ko\'ring.');
+        }
         tg.MainButton.hideProgress();
         if (res.ok && data.success) {
           document.getElementById('successModal').classList.remove('hidden');
         } else {
-          throw new Error(data.error || 'Server xatosi');
+          throw new Error(data.error || 'Server xatosi: ' + res.status);
         }
       } catch(e) {
         tg.MainButton.hideProgress();
