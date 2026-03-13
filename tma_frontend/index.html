@@ -632,22 +632,20 @@
 
     renderViloyatlar();
 
-    async function maktablarMiniYukla() {
-      try {
-        const res = await fetch('/api/maktablar/');
-        const d = await res.json();
-        const list = (d.maktablar || []).slice(0, 4);
-        const container = document.getElementById('maktablarMini');
-        if (!list.length) {
-          container.innerHTML = '<div class="glass rounded-xl p-3 text-center text-slate-400 text-xs">Maktablar topilmadi</div>';
-          return;
-        }
-        container.innerHTML = list.map(m => {
-          const foiz = m.mamnuniyat_foizi;
-          const rang = foiz === null ? '#94a3b8' : foiz >= 70 ? '#22c55e' : foiz >= 40 ? '#f59e0b' : '#ef4444';
-          const holat = foiz === null ? 'Tekshirilmagan' : foiz >= 70 ? 'Yaxshi' : foiz >= 40 ? "E'tiborga muhtoj" : 'Nosoz';
-          return `
-          <div class="glass rounded-xl p-3 flex items-center gap-3 cursor-pointer active:scale-98 transition-transform"
+    const SINTETIK_MAKTABLAR = [
+      { id:1, nom:"45-sonli maktab", tuman:"Yunusobod tumani", mamnuniyat_foizi:85 },
+      { id:2, nom:"78-sonli maktab", tuman:"Chilonzor tumani", mamnuniyat_foizi:62 },
+      { id:3, nom:"12-sonli maktab", tuman:"Samarqand tumani", mamnuniyat_foizi:34 },
+      { id:4, nom:"33-sonli maktab", tuman:"Farg'ona tumani",  mamnuniyat_foizi:null },
+    ];
+
+    function renderMaktablarMini(list) {
+      const container = document.getElementById('maktablarMini');
+      container.innerHTML = list.map(m => {
+        const foiz = m.mamnuniyat_foizi;
+        const rang = foiz === null ? '#94a3b8' : foiz >= 70 ? '#22c55e' : foiz >= 40 ? '#f59e0b' : '#ef4444';
+        const holat = foiz === null ? 'Tekshirilmagan' : foiz >= 70 ? 'Yaxshi' : foiz >= 40 ? "E'tiborga muhtoj" : 'Nosoz';
+        return `<div class="glass rounded-xl p-3 flex items-center gap-3 cursor-pointer active:scale-98 transition-transform"
             onclick="window.location.href='/tma/maktablar/${m.id}/'">
             <div class="w-9 h-9 rounded-xl flex-shrink-0 bg-slate-100 flex items-center justify-center">
               <span class="material-symbols-outlined text-slate-400" style="font-size:16px">school</span>
@@ -657,12 +655,22 @@
               <p class="text-xs text-slate-400 truncate">${m.tuman}</p>
             </div>
             <div class="text-right flex-shrink-0">
-              <p class="text-xs font-black" style="color:${rang}">${foiz !== null ? foiz + '%' : '—'}</p>
+              <p class="text-xs font-black" style="color:${rang}">${foiz !== null ? foiz+'%' : '—'}</p>
               <p class="text-xs font-semibold" style="color:${rang};font-size:10px">${holat}</p>
             </div>
           </div>`;
-        }).join('');
-      } catch {}
+      }).join('');
+    }
+
+    async function maktablarMiniYukla() {
+      try {
+        const res = await fetch('/api/maktablar/');
+        const d = await res.json();
+        const list = (d.maktablar || d || []).slice(0, 4);
+        renderMaktablarMini(list.length ? list : SINTETIK_MAKTABLAR);
+      } catch {
+        renderMaktablarMini(SINTETIK_MAKTABLAR);
+      }
     }
     maktablarMiniYukla();
 

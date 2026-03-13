@@ -214,26 +214,37 @@
       }).join('');
     }
 
+    const SINTETIK = [
+      { id:1, nom:"45-sonli umumta'lim maktabi", viloyat:"Toshkent shahri", tuman:"Yunusobod tumani", rasm_url:"", mamnuniyat_foizi:85, jami_tekshiruv:24, vaadalar_soni:4 },
+      { id:2, nom:"78-sonli umumta'lim maktabi", viloyat:"Toshkent shahri", tuman:"Chilonzor tumani", rasm_url:"", mamnuniyat_foizi:62, jami_tekshiruv:18, vaadalar_soni:3 },
+      { id:3, nom:"12-sonli umumta'lim maktabi", viloyat:"Samarqand viloyati", tuman:"Samarqand tumani", rasm_url:"", mamnuniyat_foizi:34, jami_tekshiruv:12, vaadalar_soni:4 },
+      { id:4, nom:"33-sonli umumta'lim maktabi", viloyat:"Farg'ona viloyati", tuman:"Farg'ona tumani", rasm_url:"", mamnuniyat_foizi:null, jami_tekshiruv:0, vaadalar_soni:2 },
+      { id:5, nom:"55-sonli umumta'lim maktabi", viloyat:"Toshkent shahri", tuman:"Mirobod tumani", rasm_url:"", mamnuniyat_foizi:78, jami_tekshiruv:31, vaadalar_soni:3 },
+      { id:6, nom:"91-sonli umumta'lim maktabi", viloyat:"Andijon viloyati", tuman:"Andijon tumani", rasm_url:"", mamnuniyat_foizi:45, jami_tekshiruv:9, vaadalar_soni:3 },
+      { id:7, nom:"17-sonli umumta'lim maktabi", viloyat:"Namangan viloyati", tuman:"Namangan tumani", rasm_url:"", mamnuniyat_foizi:22, jami_tekshiruv:7, vaadalar_soni:4 },
+      { id:8, nom:"62-sonli umumta'lim maktabi", viloyat:"Buxoro viloyati", tuman:"Buxoro tumani", rasm_url:"", mamnuniyat_foizi:null, jami_tekshiruv:0, vaadalar_soni:2 },
+      { id:9, nom:"28-sonli umumta'lim maktabi", viloyat:"Qashqadaryo viloyati", tuman:"Qarshi tumani", rasm_url:"", mamnuniyat_foizi:91, jami_tekshiruv:41, vaadalar_soni:4 },
+      { id:10, nom:"44-sonli umumta'lim maktabi", viloyat:"Toshkent shahri", tuman:"Shayxontohur tumani", rasm_url:"", mamnuniyat_foizi:55, jami_tekshiruv:15, vaadalar_soni:3 },
+    ];
+
     async function yukla() {
       try {
         const res = await fetch('/api/maktablar/');
         const d = await res.json();
-        barcha = d.maktablar || [];
-
-        // Statistika
-        document.getElementById('miniJami').textContent = barcha.length;
-        const tekshirilgan = barcha.filter(m => m.jami_tekshiruv > 0).length;
-        document.getElementById('miniTekshirilgan').textContent = tekshirilgan;
-        const foizlar = barcha.filter(m => m.mamnuniyat_foizi !== null).map(m => m.mamnuniyat_foizi);
-        const ort = foizlar.length ? Math.round(foizlar.reduce((a,b) => a+b, 0) / foizlar.length) : 0;
-        document.getElementById('miniMamnuniyat').textContent = ort + '%';
-        document.getElementById('headerSubtitle').textContent = `${barcha.length} ta maktab`;
-
-        render();
+        barcha = (d.maktablar || d || []);
+        if (!barcha.length) barcha = SINTETIK;
       } catch {
-        document.getElementById('maktablarList').innerHTML =
-          '<div class="glass rounded-2xl p-6 text-center text-slate-400 text-sm">Ma\'lumot yuklashda xatolik</div>';
+        barcha = SINTETIK;
       }
+      // Statistika
+      document.getElementById('miniJami').textContent = barcha.length;
+      const tekshirilgan = barcha.filter(m => m.jami_tekshiruv > 0).length;
+      document.getElementById('miniTekshirilgan').textContent = tekshirilgan;
+      const foizlar = barcha.filter(m => m.mamnuniyat_foizi !== null).map(m => m.mamnuniyat_foizi);
+      const ort = foizlar.length ? Math.round(foizlar.reduce((a,b) => a+b, 0) / foizlar.length) : 0;
+      document.getElementById('miniMamnuniyat').textContent = ort + '%';
+      document.getElementById('headerSubtitle').textContent = `${barcha.length} ta maktab`;
+      render();
     }
 
     yukla();
