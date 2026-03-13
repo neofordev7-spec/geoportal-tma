@@ -63,6 +63,15 @@ class Murojaat(models.Model):
         return f"{self.telegram_full_name or self.telegram_user_id} — {self.get_infratuzilma_display()} ({self.get_viloyat_display()})"
 
 
+class MurojaatRasm(models.Model):
+    murojaat = models.ForeignKey(Murojaat, on_delete=models.CASCADE, related_name='rasmlar')
+    rasm = models.ImageField(upload_to='murojaatlar/')
+
+    class Meta:
+        verbose_name = 'Murojaat rasmi'
+        verbose_name_plural = 'Murojaat rasmlari'
+
+
 class Statistika(models.Model):
     maktablar_soni = models.IntegerField(default=11139)
     bogchalar_soni = models.IntegerField(default=6935)

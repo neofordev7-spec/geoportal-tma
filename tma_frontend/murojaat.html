@@ -87,28 +87,24 @@
         <span class="text-xs font-bold tracking-widest uppercase text-primary">Ma'lumot qoldirish</span>
       </div>
 
-      <!-- ── Rasm yuklash ────────────────────────────────── -->
+      <!-- ── Ko'p rasm yuklash ─────────────────────────── -->
       <div class="mb-5">
-        <label class="text-xs font-semibold text-slate-300 uppercase tracking-widest block mb-2">Infratuzilma fotosurati</label>
-        <div id="uploadArea"
-          class="relative flex flex-col items-center justify-center rounded-3xl overflow-hidden cursor-pointer transition-all"
-          style="min-height:180px; border: 2px dashed rgba(255,255,255,0.18); background: linear-gradient(135deg, rgba(157,43,238,0.08), rgba(255,255,255,0.03));">
-          <input type="file" id="rasmInput" name="rasm" accept="image/*" capture="environment"
-            class="absolute inset-0 opacity-0 cursor-pointer z-10 w-full h-full" />
-          <div id="uploadPlaceholder" class="flex flex-col items-center text-center p-6 pointer-events-none">
-            <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center mb-3 shadow-xl">
-              <span class="material-symbols-outlined text-primary font-bold" style="font-size:28px">add</span>
-            </div>
-            <p class="text-sm font-bold text-white mb-1">Hududdagi infratuzilmani rasmga oling</p>
-            <p class="text-xs text-slate-400">JPEG, PNG yoki HEIC (Maks. 10MB)</p>
-          </div>
-          <img id="previewImg" class="w-full rounded-3xl object-cover" style="max-height:220px" />
-          <button type="button" id="removeImgBtn" onclick="rasmOchir(event)"
-            class="absolute top-2 right-2 z-20 w-7 h-7 rounded-full flex items-center justify-center hidden"
-            style="background:rgba(0,0,0,0.65)">
-            <span class="material-symbols-outlined text-white" style="font-size:15px">close</span>
+        <label class="text-xs font-semibold text-slate-300 uppercase tracking-widest block mb-2">
+          Infratuzilma fotosuratlari <span class="text-slate-500 normal-case">(max 5 ta)</span>
+        </label>
+        <input type="file" id="rasmInput" name="rasmlar" accept="image/*" multiple
+          class="hidden" />
+        <div id="rasmGrid" class="grid gap-2" style="grid-template-columns: repeat(3, 1fr);">
+          <!-- Preview kartalar JS dan -->
+          <button type="button" onclick="document.getElementById('rasmInput').click()"
+            id="addRasmBtn"
+            class="flex flex-col items-center justify-center rounded-2xl cursor-pointer transition-all active:scale-95"
+            style="min-height:100px; border: 2px dashed rgba(255,255,255,0.2); background: rgba(157,43,238,0.06);">
+            <span class="material-symbols-outlined text-primary" style="font-size:28px">add_photo_alternate</span>
+            <span class="text-xs text-slate-400 mt-1">Rasm qo'sh</span>
           </button>
         </div>
+        <p class="text-xs text-slate-500 mt-2">Bir vaqtda bir nechta rasm tanlash mumkin</p>
       </div>
 
       <!-- ── Dropdowns 2x2 ───────────────────────────────── -->
@@ -241,27 +237,48 @@
     tg.MainButton.show();
     tg.MainButton.onClick(formYuborish);
 
-    // Rasm preview
+    // Ko'p rasm preview
+    let tanlangan_rasmlar = [];
+
     document.getElementById('rasmInput').addEventListener('change', function() {
-      const file = this.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = e => {
-        const img = document.getElementById('previewImg');
-        img.src = e.target.result;
-        img.style.display = 'block';
-        document.getElementById('uploadPlaceholder').style.display = 'none';
-        document.getElementById('removeImgBtn').classList.remove('hidden');
-      };
-      reader.readAsDataURL(file);
+      const yangi = Array.from(this.files);
+      yangi.forEach(f => {
+        if (tanlangan_rasmlar.length >= 5) return;
+        if (tanlangan_rasmlar.find(r => r.name === f.name && r.size === f.size)) return;
+        tanlangan_rasmlar.push(f);
+      });
+      this.value = '';
+      rasmGridRender();
     });
 
-    function rasmOchir(e) {
-      e.preventDefault(); e.stopPropagation();
-      document.getElementById('rasmInput').value = '';
-      document.getElementById('previewImg').style.display = 'none';
-      document.getElementById('uploadPlaceholder').style.display = 'flex';
-      document.getElementById('removeImgBtn').classList.add('hidden');
+    function rasmGridRender() {
+      const grid = document.getElementById('rasmGrid');
+      const kartalar = tanlangan_rasmlar.map((f, i) => {
+        const url = URL.createObjectURL(f);
+        return `<div class="relative rounded-2xl overflow-hidden" style="min-height:100px;">
+          <img src="${url}" class="w-full h-full object-cover" style="min-height:100px;"/>
+          <button type="button" onclick="rasmOchir(${i})"
+            class="absolute top-1 right-1 w-6 h-6 rounded-full flex items-center justify-center"
+            style="background:rgba(0,0,0,0.7)">
+            <span class="material-symbols-outlined text-white" style="font-size:14px">close</span>
+          </button>
+        </div>`;
+      }).join('');
+
+      const addBtn = tanlangan_rasmlar.length < 5
+        ? `<button type="button" onclick="document.getElementById('rasmInput').click()"
+            class="flex flex-col items-center justify-center rounded-2xl cursor-pointer active:scale-95"
+            style="min-height:100px; border:2px dashed rgba(255,255,255,0.2); background:rgba(157,43,238,0.06);">
+            <span class="material-symbols-outlined text-primary" style="font-size:28px">add_photo_alternate</span>
+            <span class="text-xs text-slate-400 mt-1">Rasm qo'sh</span>
+          </button>` : '';
+
+      grid.innerHTML = kartalar + addBtn;
+    }
+
+    function rasmOchir(i) {
+      tanlangan_rasmlar.splice(i, 1);
+      rasmGridRender();
     }
 
     async function formYuborish() {
@@ -291,8 +308,7 @@
       formData.append('telegram_username', user.username || '');
       formData.append('telegram_full_name', `${user.first_name || ''} ${user.last_name || ''}`.trim());
 
-      const rasmFile = document.getElementById('rasmInput').files[0];
-      if (rasmFile) formData.append('rasm', rasmFile);
+      tanlangan_rasmlar.forEach(f => formData.append('rasmlar', f));
 
       try {
         const res = await fetch('/api/murojaat/', { method: 'POST', body: formData });

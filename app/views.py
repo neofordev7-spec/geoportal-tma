@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .models import (
-    Murojaat, Statistika, Maktab, Vaada, Tekshiruv,
+    Murojaat, MurojaatRasm, Statistika, Maktab, Vaada, Tekshiruv,
     VILOYATLAR, INFRATUZILMA_TURLARI,
 )
 
@@ -76,7 +76,6 @@ def murojaat_yuborish(request):
         return Response({'error': 'Viloyat, tuman, infratuzilma va sektor majburiy'}, status=status.HTTP_400_BAD_REQUEST)
 
     murojaat = Murojaat.objects.create(
-        rasm=data.get('rasm'),
         viloyat=viloyat,
         tuman=tuman,
         infratuzilma=infratuzilma,
@@ -86,6 +85,16 @@ def murojaat_yuborish(request):
         telegram_username=data.get('telegram_username', ''),
         telegram_full_name=data.get('telegram_full_name', ''),
     )
+    # Ko'p rasm saqlash
+    rasmlar = request.FILES.getlist('rasmlar')
+    if not rasmlar:
+        # Eski nom bilan ham qabul qil
+        single = request.FILES.get('rasm')
+        if single:
+            rasmlar = [single]
+    for f in rasmlar:
+        MurojaatRasm.objects.create(murojaat=murojaat, rasm=f)
+
     return Response({
         'success': True,
         'id': murojaat.id,
