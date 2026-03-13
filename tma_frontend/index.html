@@ -308,63 +308,110 @@
 
   <!-- ═══ TAB: GRAFIK VOSITALAR ═══ -->
   <div id="page-grafik" class="hidden px-3 fade-up">
-    <div class="glass rounded-2xl p-5 shadow-sm mb-2.5">
-      <p class="text-sm font-bold text-slate-700 mb-4">Yo'nalishlar bo'yicha taqsimot</p>
-      <!-- Donut chart (SVG) -->
-      <div class="flex items-center gap-5">
-        <svg width="110" height="110" viewBox="0 0 110 110">
-          <circle cx="55" cy="55" r="40" fill="none" stroke="#e2e8f0" stroke-width="18"/>
-          <circle cx="55" cy="55" r="40" fill="none" stroke="#22c55e" stroke-width="18" stroke-dasharray="101 151" stroke-dashoffset="0" stroke-linecap="round"/>
-          <circle cx="55" cy="55" r="40" fill="none" stroke="#38bdf8" stroke-width="18" stroke-dasharray="59 193" stroke-dashoffset="-101" stroke-linecap="round"/>
-          <circle cx="55" cy="55" r="40" fill="none" stroke="#a855f7" stroke-width="18" stroke-dasharray="50 202" stroke-dashoffset="-160" stroke-linecap="round"/>
-          <circle cx="55" cy="55" r="40" fill="none" stroke="#f472b6" stroke-width="18" stroke-dasharray="40 212" stroke-dashoffset="-210" stroke-linecap="round"/>
-        </svg>
-        <div class="space-y-1.5 text-xs">
-          <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"></span><span class="text-slate-600">Yo'l — 40.3%</span></div>
-          <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-sky-400 inline-block"></span><span class="text-slate-600">Suv — 23.6%</span></div>
-          <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span><span class="text-slate-600">Sog'liq — 20%</span></div>
-          <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-pink-400 inline-block"></span><span class="text-slate-600">Ta'lim — 16.1%</span></div>
+    <!-- Sub-tabs -->
+    <div class="scroll-x flex gap-2 pb-3">
+      <button onclick="setGrafikTab('internet')" id="gtab-internet" class="tab-pill active flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">Internet</button>
+      <button onclick="setGrafikTab('suv')" id="gtab-suv" class="tab-pill flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">Ichimlik suvi</button>
+      <button onclick="setGrafikTab('yonalish')" id="gtab-yonalish" class="tab-pill flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">Yo'nalishlar</button>
+      <button onclick="setGrafikTab('donor')" id="gtab-donor" class="tab-pill flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">Donorlar</button>
+    </div>
+
+    <!-- Internet tab -->
+    <div id="gtab-page-internet">
+      <div class="glass rounded-2xl p-4 shadow-sm mb-2.5">
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Internet turi bo'yicha</p>
+        <div class="flex gap-3 mb-4 flex-wrap">
+          <span class="flex items-center gap-1.5 text-xs font-bold text-slate-600"><span class="w-3 h-3 rounded-sm inline-block" style="background:#1d4ed8"></span>Optik <b>10,071</b></span>
+          <span class="flex items-center gap-1.5 text-xs font-bold text-slate-600"><span class="w-3 h-3 rounded-sm inline-block" style="background:#f59e0b"></span>Internet yo'q <b>478</b></span>
+          <span class="flex items-center gap-1.5 text-xs font-bold text-slate-600"><span class="w-3 h-3 rounded-sm inline-block" style="background:#22d3ee"></span>Mobil <b>590</b></span>
+        </div>
+        <div class="space-y-1.5" id="internetBars">
+          <!-- JS renders -->
         </div>
       </div>
     </div>
-    <!-- Bar chart donorlar -->
-    <div class="glass rounded-2xl p-5 shadow-sm">
-      <p class="text-sm font-bold text-slate-700 mb-4">Donorlar bo'yicha (mlrd so'm)</p>
-      <div class="space-y-2">
-        <div class="flex items-center gap-2">
-          <span class="text-xs text-slate-500 w-20 text-right">O'zR Byudjet</span>
-          <div class="flex-1 h-5 rounded-full overflow-hidden bg-slate-100">
-            <div class="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500" style="width:100%"></div>
+
+    <!-- Ichimlik suvi tab -->
+    <div id="gtab-page-suv" class="hidden">
+      <div class="glass rounded-2xl p-4 shadow-sm mb-2.5">
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Ichimlik suvi ta'minoti</p>
+        <div class="flex items-center gap-5">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="44" fill="none" stroke="#e2e8f0" stroke-width="20"/>
+            <circle cx="60" cy="60" r="44" fill="none" stroke="#7c3aed" stroke-width="20"
+              stroke-dasharray="144 133" stroke-dashoffset="0" stroke-linecap="butt"/>
+            <circle cx="60" cy="60" r="44" fill="none" stroke="#3b82f6" stroke-width="20"
+              stroke-dasharray="79 198" stroke-dashoffset="-144" stroke-linecap="butt"/>
+            <circle cx="60" cy="60" r="44" fill="none" stroke="#f97316" stroke-width="20"
+              stroke-dasharray="30 247" stroke-dashoffset="-223" stroke-linecap="butt"/>
+            <circle cx="60" cy="60" r="44" fill="none" stroke="#fbbf24" stroke-width="20"
+              stroke-dasharray="24 253" stroke-dashoffset="-253" stroke-linecap="butt"/>
+            <text x="60" y="55" text-anchor="middle" class="text-xs" style="font-size:10px;fill:#475569;font-weight:700">Jami</text>
+            <text x="60" y="70" text-anchor="middle" style="font-size:12px;fill:#0f172a;font-weight:900">11,139</text>
+          </svg>
+          <div class="space-y-2 text-xs flex-1">
+            <div class="flex justify-between items-center">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm inline-block" style="background:#7c3aed"></span>Markaziy</span>
+              <span class="font-black text-slate-700">5,816 <span class="text-slate-400 font-normal">52%</span></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm inline-block" style="background:#3b82f6"></span>Mahalliy</span>
+              <span class="font-black text-slate-700">3,165 <span class="text-slate-400 font-normal">28%</span></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm inline-block" style="background:#f97316"></span>Yetkazib</span>
+              <span class="font-black text-slate-700">1,188 <span class="text-slate-400 font-normal">11%</span></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm inline-block" style="background:#fbbf24"></span>Suv yo'q</span>
+              <span class="font-black text-slate-700">970 <span class="text-slate-400 font-normal">9%</span></span>
+            </div>
           </div>
-          <span class="text-xs font-bold text-slate-600">200T</span>
         </div>
-        <div class="flex items-center gap-2">
-          <span class="text-xs text-slate-500 w-20 text-right">Jahon Banki</span>
-          <div class="flex-1 h-5 rounded-full overflow-hidden bg-slate-100">
-            <div class="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500" style="width:73%"></div>
-          </div>
-          <span class="text-xs font-bold text-slate-600">146T</span>
+        <!-- Viloyat breakdown -->
+        <div class="mt-4 space-y-1.5">
+          <p class="text-xs font-bold text-slate-500 mb-2">Viloyatlar kesimida (suvsizlik %)</p>
+          <div class="flex items-center gap-2"><span class="text-xs text-slate-500 w-24">Sirdaryo</span><div class="flex-1 h-4 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full" style="background:#ef4444;width:18%"></div></div><span class="text-xs font-bold text-red-500">18%</span></div>
+          <div class="flex items-center gap-2"><span class="text-xs text-slate-500 w-24">Qashqadaryo</span><div class="flex-1 h-4 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full" style="background:#f59e0b;width:14%"></div></div><span class="text-xs font-bold text-amber-500">14%</span></div>
+          <div class="flex items-center gap-2"><span class="text-xs text-slate-500 w-24">Surxondaryo</span><div class="flex-1 h-4 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full" style="background:#f59e0b;width:12%"></div></div><span class="text-xs font-bold text-amber-500">12%</span></div>
+          <div class="flex items-center gap-2"><span class="text-xs text-slate-500 w-24">Navoiy</span><div class="flex-1 h-4 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full" style="background:#f59e0b;width:10%"></div></div><span class="text-xs font-bold text-amber-500">10%</span></div>
+          <div class="flex items-center gap-2"><span class="text-xs text-slate-500 w-24">Toshkent sh.</span><div class="flex-1 h-4 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full" style="background:#22c55e;width:2%"></div></div><span class="text-xs font-bold text-green-500">2%</span></div>
         </div>
-        <div class="flex items-center gap-2">
-          <span class="text-xs text-slate-500 w-20 text-right">ADB</span>
-          <div class="flex-1 h-5 rounded-full overflow-hidden bg-slate-100">
-            <div class="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500" style="width:51%"></div>
+      </div>
+    </div>
+
+    <!-- Yo'nalishlar tab -->
+    <div id="gtab-page-yonalish" class="hidden">
+      <div class="glass rounded-2xl p-5 shadow-sm mb-2.5">
+        <p class="text-sm font-bold text-slate-700 mb-4">Yo'nalishlar bo'yicha taqsimot</p>
+        <div class="flex items-center gap-5">
+          <svg width="110" height="110" viewBox="0 0 110 110">
+            <circle cx="55" cy="55" r="40" fill="none" stroke="#e2e8f0" stroke-width="18"/>
+            <circle cx="55" cy="55" r="40" fill="none" stroke="#22c55e" stroke-width="18" stroke-dasharray="101 151" stroke-dashoffset="0" stroke-linecap="round"/>
+            <circle cx="55" cy="55" r="40" fill="none" stroke="#38bdf8" stroke-width="18" stroke-dasharray="59 193" stroke-dashoffset="-101" stroke-linecap="round"/>
+            <circle cx="55" cy="55" r="40" fill="none" stroke="#a855f7" stroke-width="18" stroke-dasharray="50 202" stroke-dashoffset="-160" stroke-linecap="round"/>
+            <circle cx="55" cy="55" r="40" fill="none" stroke="#f472b6" stroke-width="18" stroke-dasharray="40 212" stroke-dashoffset="-210" stroke-linecap="round"/>
+          </svg>
+          <div class="space-y-1.5 text-xs">
+            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"></span><span class="text-slate-600">Yo'l — 40.3%</span></div>
+            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-sky-400 inline-block"></span><span class="text-slate-600">Suv — 23.6%</span></div>
+            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span><span class="text-slate-600">Sog'liq — 20%</span></div>
+            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-pink-400 inline-block"></span><span class="text-slate-600">Ta'lim — 16.1%</span></div>
           </div>
-          <span class="text-xs font-bold text-slate-600">102T</span>
         </div>
-        <div class="flex items-center gap-2">
-          <span class="text-xs text-slate-500 w-20 text-right">EBRD</span>
-          <div class="flex-1 h-5 rounded-full overflow-hidden bg-slate-100">
-            <div class="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500" style="width:40%"></div>
-          </div>
-          <span class="text-xs font-bold text-slate-600">80T</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="text-xs text-slate-500 w-20 text-right">IsDB</span>
-          <div class="flex-1 h-5 rounded-full overflow-hidden bg-slate-100">
-            <div class="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500" style="width:18%"></div>
-          </div>
-          <span class="text-xs font-bold text-slate-600">36T</span>
+      </div>
+    </div>
+
+    <!-- Donorlar tab -->
+    <div id="gtab-page-donor" class="hidden">
+      <div class="glass rounded-2xl p-5 shadow-sm">
+        <p class="text-sm font-bold text-slate-700 mb-4">Donorlar bo'yicha (mlrd so'm)</p>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2"><span class="text-xs text-slate-500 w-20 text-right">O'zR Byudjet</span><div class="flex-1 h-5 rounded-full overflow-hidden bg-slate-100"><div class="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500" style="width:100%"></div></div><span class="text-xs font-bold text-slate-600">200T</span></div>
+          <div class="flex items-center gap-2"><span class="text-xs text-slate-500 w-20 text-right">Jahon Banki</span><div class="flex-1 h-5 rounded-full overflow-hidden bg-slate-100"><div class="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500" style="width:73%"></div></div><span class="text-xs font-bold text-slate-600">146T</span></div>
+          <div class="flex items-center gap-2"><span class="text-xs text-slate-500 w-20 text-right">ADB</span><div class="flex-1 h-5 rounded-full overflow-hidden bg-slate-100"><div class="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500" style="width:51%"></div></div><span class="text-xs font-bold text-slate-600">102T</span></div>
+          <div class="flex items-center gap-2"><span class="text-xs text-slate-500 w-20 text-right">EBRD</span><div class="flex-1 h-5 rounded-full overflow-hidden bg-slate-100"><div class="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500" style="width:40%"></div></div><span class="text-xs font-bold text-slate-600">80T</span></div>
+          <div class="flex items-center gap-2"><span class="text-xs text-slate-500 w-20 text-right">IsDB</span><div class="flex-1 h-5 rounded-full overflow-hidden bg-slate-100"><div class="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500" style="width:18%"></div></div><span class="text-xs font-bold text-slate-600">36T</span></div>
         </div>
       </div>
     </div>
@@ -618,6 +665,56 @@
       } catch {}
     }
     maktablarMiniYukla();
+
+    // ── Grafik sub-tabs ───────────────────────────────────────────────────
+    const grafikTabs = ['internet','suv','yonalish','donor'];
+    function setGrafikTab(name) {
+      grafikTabs.forEach(t => {
+        document.getElementById('gtab-page-'+t).classList.add('hidden');
+        document.getElementById('gtab-'+t).classList.remove('active');
+      });
+      document.getElementById('gtab-page-'+name).classList.remove('hidden');
+      document.getElementById('gtab-'+name).classList.add('active');
+      if (name === 'internet') renderInternetBars();
+    }
+
+    // ── Internet bars data (geoasr.uz dan) ───────────────────────────────
+    const INTERNET_DATA = [
+      { nom: 'Samarqand',       optik: 1380, yoq: 40,  mobil: 30  },
+      { nom: 'Qashqadaryo',     optik: 1050, yoq: 180, mobil: 200 },
+      { nom: 'Surxondaryo',     optik: 985,  yoq: 40,  mobil: 25  },
+      { nom: "Farg'ona",        optik: 950,  yoq: 45,  mobil: 35  },
+      { nom: 'Toshkent v.',     optik: 960,  yoq: 50,  mobil: 40  },
+      { nom: 'Andijon',         optik: 790,  yoq: 30,  mobil: 30  },
+      { nom: 'Namangan',        optik: 650,  yoq: 30,  mobil: 20  },
+      { nom: "Qoraqalpog'iston",optik: 570,  yoq: 80,  mobil: 50  },
+      { nom: 'Jizzax',          optik: 545,  yoq: 35,  mobil: 20  },
+      { nom: 'Xorazm',          optik: 530,  yoq: 30,  mobil: 20  },
+      { nom: 'Buxoro',          optik: 510,  yoq: 25,  mobil: 15  },
+      { nom: 'Navoiy',          optik: 355,  yoq: 20,  mobil: 15  },
+      { nom: 'Sirdaryo',        optik: 275,  yoq: 15,  mobil: 10  },
+      { nom: 'Toshkent sh.',    optik: 280,  yoq: 5,   mobil: 5   },
+    ];
+
+    function renderInternetBars() {
+      const maxVal = Math.max(...INTERNET_DATA.map(d => d.optik + d.yoq + d.mobil));
+      document.getElementById('internetBars').innerHTML = INTERNET_DATA.map(d => {
+        const jami = d.optik + d.yoq + d.mobil;
+        const pOptik = (d.optik/maxVal*100).toFixed(1);
+        const pYoq  = (d.yoq/maxVal*100).toFixed(1);
+        const pMobil= (d.mobil/maxVal*100).toFixed(1);
+        return `<div class="flex items-center gap-2">
+          <span class="text-xs text-slate-500 flex-shrink-0" style="width:80px;font-size:10px">${d.nom}</span>
+          <div class="flex-1 h-4 rounded-full overflow-hidden bg-slate-100 flex">
+            <div style="width:${pOptik}%;background:#1d4ed8"></div>
+            <div style="width:${pYoq}%;background:#f59e0b"></div>
+            <div style="width:${pMobil}%;background:#22d3ee"></div>
+          </div>
+          <span class="text-xs font-bold text-slate-500 flex-shrink-0" style="min-width:32px;text-align:right">${jami}</span>
+        </div>`;
+      }).join('');
+    }
+    renderInternetBars();
 
     // ── Leaflet Xarita ────────────────────────────────────────────────────
     let leafletMap = null;
