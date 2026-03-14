@@ -41,14 +41,20 @@
 
     /* Maktab marker icon */
     .mk-num{
-      width:30px;height:30px;border-radius:50%;
+      width:34px;height:34px;border-radius:12px;
       display:flex;align-items:center;justify-content:center;
-      background:#fff;color:#3b82f6;
-      box-shadow:0 2px 10px rgba(0,0,0,0.35),0 0 0 2.5px rgba(59,130,246,0.35);
-      transition:transform 0.2s;cursor:pointer;
-      font-family:'Inter',sans-serif;font-weight:800;font-size:12px;
+      background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;
+      box-shadow:0 3px 12px rgba(59,130,246,0.4),0 0 0 2px rgba(255,255,255,0.25);
+      transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;
+      font-family:'Inter',sans-serif;font-weight:800;font-size:13px;
+      position:relative;
     }
-    .mk-num:hover{transform:scale(1.18);}
+    .mk-num::after{
+      content:'';position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);
+      width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;
+      border-top:5px solid #6366f1;
+    }
+    .mk-num:hover{transform:scale(1.15);box-shadow:0 5px 20px rgba(59,130,246,0.5),0 0 0 3px rgba(255,255,255,0.35);}
 
     /* Marker appear animation */
     @keyframes dropIn{
@@ -59,10 +65,10 @@
     .mk-drop{animation:dropIn 0.3s ease-out both;}
 
     /* Popup */
-    .leaflet-popup-content-wrapper{border-radius:16px!important;box-shadow:0 8px 32px rgba(0,0,0,0.25)!important;border:none!important;}
+    .leaflet-popup-content-wrapper{border-radius:16px!important;box-shadow:0 8px 32px rgba(0,0,0,0.25)!important;border:none!important;padding:0!important;overflow:hidden!important;}
     .leaflet-popup-content{margin:0!important;padding:0!important;font-family:'Inter',sans-serif!important;}
     .leaflet-popup-tip{box-shadow:0 4px 12px rgba(0,0,0,0.15)!important;}
-    .leaflet-popup-close-button{top:10px!important;right:10px!important;font-size:18px!important;color:#94a3b8!important;}
+    .leaflet-popup-close-button{top:8px!important;right:8px!important;font-size:16px!important;color:rgba(255,255,255,0.7)!important;z-index:10!important;}
 
     /* Layer chips */
     .lc{
@@ -225,7 +231,7 @@
   const API_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoid2ViX3VzZXIiLCJleHAiOjE3Nzk4Mzk0ODV9.WCy4ooIDvL0o8G5udEuba4POyJMMH2CnjM2FcgybG10';
   const EXT = 'https://duasr.uz/api4';
   const CTR = [41.3, 64.5], ZM = 6;
-  const BND = [[37.0, 55.9], [45.6, 73.2]];
+  const BND = [[35.5, 53.5], [47.0, 75.5]];
 
   const COL = ['#3b82f6','#06b6d4','#8b5cf6','#10b981','#f59e0b','#ec4899','#14b8a6','#f97316','#6366f1','#84cc16','#e11d48','#0ea5e9','#a855f7','#ef4444'];
 
@@ -354,7 +360,7 @@
     const vilF=vilGeo.features.find(f=>f.properties.name===vilNom);
     if(vilF){
       geoLyr.addLayer(L.geoJSON(vilF,{style:{fillColor:'transparent',fillOpacity:0,color:'#94a3b8',weight:2,dashArray:'10 5',opacity:0.4}}));
-      map.flyToBounds(L.geoJSON(vilF).getBounds(),{padding:[20,20],duration:0.5});
+      map.flyToBounds(L.geoJSON(vilF).getBounds(),{padding:[60,40],duration:0.5});
     }
 
     const tc=cnt('tuman',m=>m.viloyat===vilNom);
@@ -383,7 +389,7 @@
     const short=tumNom.replace(/ [Tt]umani$/,'').replace(/ [Ss]hahri$/,'');
     const pts=distributeInBounds(tumBounds,need);
     return pts.map((p,i)=>({
-      obekt_nomi:`${short} ${SYN_NAMES[i%SYN_NAMES.length]} #${i+1}`,
+      obekt_nomi:`${short} ${i+1}-sonli ${SYN_NAMES[i%SYN_NAMES.length]}`,
       viloyat:vilNom, tuman:tumNom,
       lat:p[0], lng:p[1],
       _synthetic:true
@@ -404,7 +410,7 @@
     if(tumF){
       geoLyr.addLayer(L.geoJSON(tumF,{style:{fillColor:'#3b82f6',fillOpacity:0.05,color:'#60a5fa',weight:2,opacity:0.5}}));
       tumBounds=L.geoJSON(tumF).getBounds();
-      map.flyToBounds(tumBounds,{padding:[40,40],duration:0.5});
+      map.flyToBounds(tumBounds,{padding:[80,60],duration:0.5});
     }
 
     let maktablar=allData.filter(m=>m.viloyat===vilNom&&m.tuman===tumNom);
@@ -440,8 +446,8 @@
       const icon=L.divIcon({
         className:'',
         html:`<div class="mk-num mk-drop" style="animation-delay:${i*25}ms">${num}</div>`,
-        iconSize:[30,30],
-        iconAnchor:[15,15],
+        iconSize:[34,39],
+        iconAnchor:[17,39],
       });
 
       const marker=L.marker([lat,lng],{icon});
@@ -459,24 +465,32 @@
         info+=`<div class="irow"><span>Sport zal</span><b>${sp}</b></div>`;
       }
 
+      // Nom tozalash — raqamlarni (1-sonli, #1, etc) olib tashlash popup uchun
+      const cleanNom = nom.replace(/\s*#\d+/g,'').replace(/\s*\d+-sonli\s*/,' ').trim();
+
       const popup=`
-        <div style="padding:14px;min-width:230px">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-            <div style="width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#3b82f6,#6366f1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <span style="font-family:'Inter';font-weight:800;font-size:16px;color:#fff">${num}</span>
+        <div style="padding:0;min-width:240px;overflow:hidden;border-radius:16px">
+          <div style="background:linear-gradient(135deg,#3b82f6,#6366f1);padding:14px 16px;display:flex;align-items:center;gap:10px">
+            <div style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;backdrop-filter:blur(8px)">
+              <span style="font-family:'Inter';font-weight:800;font-size:17px;color:#fff">${num}</span>
             </div>
             <div style="flex:1;min-width:0">
-              <div style="font-weight:700;font-size:12px;color:#0f172a;line-height:1.2">${nom}</div>
-              <div style="font-size:10px;color:#94a3b8;margin-top:1px">${tumNom.replace(/ [Tt]umani$/,'')} · ${vilNom.replace(' viloyati','')}</div>
+              <div style="font-weight:700;font-size:12.5px;color:#fff;line-height:1.25">${cleanNom}</div>
+              <div style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px;display:flex;align-items:center;gap:3px">
+                <span class="material-symbols-outlined" style="font-size:11px;font-variation-settings:'FILL' 1">location_on</span>
+                ${tumNom.replace(/ [Tt]umani$/,'')} · ${vilNom.replace(' viloyati','')}
+              </div>
             </div>
           </div>
-          <style>.irow{display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-bottom:1px solid #f1f5f9;}.irow span{color:#94a3b8;}.irow b{color:#0f172a;font-weight:600;}</style>
-          ${info}
-          <button onclick="ochMaktab('${esc(nom)}','${esc(vilNom)}','${esc(tumNom)}',${m._local&&m.id?m.id:'null'})"
-            style="margin-top:12px;width:100%;padding:10px;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border:none;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-            <span class="material-symbols-outlined" style="font-size:16px;font-variation-settings:'FILL' 1">fact_check</span>
-            Va'dalarni tekshirish
-          </button>
+          <div style="padding:12px 16px">
+            <style>.irow{display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:7px 0;border-bottom:1px solid #f1f5f9;}.irow:last-child{border-bottom:none;}.irow span{color:#64748b;display:flex;align-items:center;gap:4px;}.irow b{color:#0f172a;font-weight:600;}</style>
+            ${info||'<div style="text-align:center;padding:8px 0;color:#94a3b8;font-size:11px">Ma\'lumotlar yuklanmoqda...</div>'}
+            <button onclick="ochMaktab('${esc(nom)}','${esc(vilNom)}','${esc(tumNom)}',${m._local&&m.id?m.id:'null'})"
+              style="margin-top:10px;width:100%;padding:11px;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border:none;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 2px 8px rgba(59,130,246,0.3)">
+              <span class="material-symbols-outlined" style="font-size:16px;font-variation-settings:'FILL' 1">fact_check</span>
+              Va'dalarni tekshirish
+            </button>
+          </div>
         </div>`;
 
       marker.bindPopup(popup,{maxWidth:300,closeButton:true});
