@@ -90,8 +90,7 @@ def murojaat_yuborish(request):
     infratuzilma = data.get('infratuzilma', '').strip()
     sektor = data.get('sektor', '').strip()
 
-    if not all([viloyat, tuman, infratuzilma, sektor]):
-        return Response({'error': 'Viloyat, tuman, infratuzilma va sektor majburiy'}, status=status.HTTP_400_BAD_REQUEST)
+    # Barcha maydonlar ixtiyoriy — faqat telegram_user_id majburiy
 
     murojaat = Murojaat.objects.create(
         viloyat=viloyat,

@@ -93,8 +93,8 @@
           Foto va video dalillar <span class="text-slate-500 normal-case">(max 5 ta)</span>
         </label>
         <input type="file" id="rasmInput" name="rasmlar" accept="image/*,video/*" multiple class="hidden" />
-        <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" />
-        <input type="file" id="videoInput" accept="video/*" capture="environment" class="hidden" />
+        <input type="file" id="cameraInput" accept="image/*" class="hidden" />
+        <input type="file" id="videoInput" accept="video/*" class="hidden" />
         <div id="rasmGrid" class="grid gap-2" style="grid-template-columns: repeat(3, 1fr);">
           <!-- Preview kartalar JS dan -->
           <button type="button" onclick="document.getElementById('rasmInput').click()"
@@ -127,7 +127,7 @@
       <div class="grid grid-cols-2 gap-3 mb-5">
         <!-- Viloyat -->
         <div class="relative group col-span-2">
-          <select id="viloyat" required class="glass-input w-full h-12 pl-5 pr-10 rounded-full text-sm font-semibold appearance-none focus:ring-0 cursor-pointer">
+          <select id="viloyat" class="glass-input w-full h-12 pl-5 pr-10 rounded-full text-sm font-semibold appearance-none focus:ring-0 cursor-pointer">
             <option disabled selected value="">Viloyatni tanlang</option>
             <option value="toshkent_sh">Toshkent shahri</option>
             <option value="toshkent_v">Toshkent viloyati</option>
@@ -149,7 +149,7 @@
 
         <!-- Tuman -->
         <div class="relative group">
-          <select id="tuman" required class="glass-input w-full h-12 pl-5 pr-8 rounded-full text-sm font-semibold appearance-none focus:ring-0 cursor-pointer">
+          <select id="tuman" class="glass-input w-full h-12 pl-5 pr-8 rounded-full text-sm font-semibold appearance-none focus:ring-0 cursor-pointer">
             <option disabled selected value="">Tuman</option>
             <option value="Mirobod tumani">Mirobod</option>
             <option value="Yunusobod tumani">Yunusobod</option>
@@ -165,7 +165,7 @@
 
         <!-- Infratuzilma -->
         <div class="relative group">
-          <select id="infratuzilma" required class="glass-input w-full h-12 pl-5 pr-8 rounded-full text-sm font-semibold appearance-none focus:ring-0 cursor-pointer">
+          <select id="infratuzilma" class="glass-input w-full h-12 pl-5 pr-8 rounded-full text-sm font-semibold appearance-none focus:ring-0 cursor-pointer">
             <option disabled selected value="">Infratuzilma</option>
             <option value="maktab">Maktab</option>
             <option value="shifoxona">Shifoxona</option>
@@ -177,17 +177,6 @@
           <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" style="font-size:16px">expand_more</span>
         </div>
 
-        <!-- Sektor -->
-        <div class="relative group col-span-2">
-          <select id="sektor" required class="glass-input w-full h-12 pl-5 pr-10 rounded-full text-sm font-semibold appearance-none focus:ring-0 cursor-pointer">
-            <option disabled selected value="">Sektorni tanlang</option>
-            <option value="1-Sektor">1-Sektor</option>
-            <option value="2-Sektor">2-Sektor</option>
-            <option value="3-Sektor">3-Sektor</option>
-            <option value="4-Sektor">4-Sektor</option>
-          </select>
-          <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-primary transition-colors" style="font-size:18px">expand_more</span>
-        </div>
       </div>
 
       <!-- ── Izoh ────────────────────────────────────────── -->
@@ -247,11 +236,7 @@
     tg.ready();
     tg.expand();
 
-    // Telegram MainButton
-    tg.MainButton.setText('Yuborish');
-    tg.MainButton.setParams({ color: '#9d2bee', text_color: '#ffffff' });
-    tg.MainButton.show();
-    tg.MainButton.onClick(formYuborish);
+    // Telegram MainButton — o'chirildi, pastda o'z tugmamiz bor
 
     // Ko'p rasm preview
     let tanlangan_rasmlar = [];
@@ -316,24 +301,17 @@
       const viloyat = document.getElementById('viloyat').value;
       const tuman = document.getElementById('tuman').value;
       const infratuzilma = document.getElementById('infratuzilma').value;
-      const sektor = document.getElementById('sektor').value;
-
-      if (!viloyat || !tuman || !infratuzilma || !sektor) {
-        tg.showAlert("Iltimos, barcha majburiy maydonlarni to'ldiring!");
-        return;
-      }
 
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
       btn.innerHTML = '<div class="spinner"></div><span>Yuborilmoqda...</span>';
-      tg.MainButton.showProgress();
 
       const user = tg.initDataUnsafe?.user || {};
       const formData = new FormData();
       formData.append('viloyat', viloyat);
       formData.append('tuman', tuman);
-      formData.append('infratuzilma', infratuzilma);
-      formData.append('sektor', sektor);
+      formData.append('infratuzilma', infratuzilma || '');
+      formData.append('sektor', '');
       formData.append('izoh', document.getElementById('izoh').value);
       formData.append('telegram_user_id', user.id || '0');
       formData.append('telegram_username', user.username || '');
@@ -348,14 +326,12 @@
         try { data = JSON.parse(text); } catch(_) {
           throw new Error('Server javobi noto\'g\'ri (' + res.status + '). Qayta urinib ko\'ring.');
         }
-        tg.MainButton.hideProgress();
         if (res.ok && data.success) {
           document.getElementById('successModal').classList.remove('hidden');
         } else {
           throw new Error(data.error || 'Server xatosi: ' + res.status);
         }
       } catch(e) {
-        tg.MainButton.hideProgress();
         tg.showAlert('Xatolik: ' + e.message);
         btn.disabled = false;
         btn.innerHTML = '<span>Yuborish</span><span class="material-symbols-outlined" style="font-size:20px">send</span>';
