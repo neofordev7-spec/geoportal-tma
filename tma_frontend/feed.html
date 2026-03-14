@@ -252,7 +252,12 @@ async function load(reset){
     }
     offset+=d.results.length;
     hasMore=d.has_more;
-  }catch(e){console.error(e);}
+  }catch(e){
+    console.error(e);
+    hasMore=false;
+    // Xato bo'lsa bo'sh state ko'rsat
+    if(!offset) document.getElementById('empty').classList.remove('hidden');
+  }
   loading=false;
   if(!hasMore) document.getElementById('loader').classList.add('hidden');
 }
