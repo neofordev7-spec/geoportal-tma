@@ -8,7 +8,7 @@ from rest_framework import status
 from django.utils import timezone
 from .models import (
     Murojaat, MurojaatRasm, Statistika, Maktab, Vaada, Tekshiruv,
-    Like, Comment,
+    Like, Comment, MaktabIzoh,
     VILOYATLAR, INFRATUZILMA_TURLARI,
 )
 
@@ -245,6 +245,16 @@ def maktab_detail_api(request, maktab_id):
     jami_t = Tekshiruv.objects.filter(maktab=maktab).count()
     bajarildi_t = Tekshiruv.objects.filter(maktab=maktab, natija='bajarildi').count()
 
+    # Izohlar
+    izohlar = []
+    for iz in MaktabIzoh.objects.filter(maktab=maktab)[:20]:
+        izohlar.append({
+            'id': iz.id,
+            'user': iz.telegram_full_name or f'Fuqaro #{iz.telegram_user_id}',
+            'matn': iz.matn,
+            'vaqt': nisbiy_vaqt(iz.vaqt),
+        })
+
     return Response({
         'id': maktab.id,
         'nom': maktab.nom,
@@ -260,6 +270,8 @@ def maktab_detail_api(request, maktab_id):
         'mamnuniyat_foizi': round(bajarildi_t / jami_t * 100) if jami_t else None,
         'vaadalar': vaadalar,
         'so_nggi_tekshiruvlar': so_nggi_tekshiruvlar,
+        'izohlar': izohlar,
+        'izohlar_soni': MaktabIzoh.objects.filter(maktab=maktab).count(),
     })
 
 
@@ -760,6 +772,43 @@ def feed_comments_list(request, murojaat_id):
         'comments': data,
         'jami': Comment.objects.filter(murojaat_id=murojaat_id).count(),
     })
+
+
+# ─── API: Maktab izohlari ────────────────────────────────────────────────
+
+@api_view(['POST'])
+@parser_classes([JSONParser, FormParser])
+def maktab_izoh_yuborish(request):
+    """Maktab sahifasiga izoh/fikr qoldirish"""
+    maktab_id = request.data.get('maktab_id')
+    telegram_user_id = request.data.get('telegram_user_id')
+    matn = request.data.get('matn', '').strip()
+
+    if not maktab_id or not telegram_user_id or not matn:
+        return Response({'error': 'maktab_id, telegram_user_id va matn kerak'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        maktab = Maktab.objects.get(id=int(maktab_id))
+    except Maktab.DoesNotExist:
+        return Response({'error': 'Maktab topilmadi'}, status=status.HTTP_404_NOT_FOUND)
+
+    izoh = MaktabIzoh.objects.create(
+        maktab=maktab,
+        telegram_user_id=int(telegram_user_id),
+        telegram_full_name=request.data.get('telegram_full_name', ''),
+        matn=matn,
+    )
+
+    return Response({
+        'success': True,
+        'izoh': {
+            'id': izoh.id,
+            'user': izoh.telegram_full_name or f'Fuqaro #{izoh.telegram_user_id}',
+            'matn': izoh.matn,
+            'vaqt': 'Hozirgina',
+        },
+        'izohlar_soni': MaktabIzoh.objects.filter(maktab=maktab).count(),
+    }, status=status.HTTP_201_CREATED)
 
 
 # ─── API: Profil ─────────────────────────────────────────────────────────────

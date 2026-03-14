@@ -101,6 +101,37 @@
     </div>
   </div>
 
+  <!-- Izohlar bo'limi -->
+  <div class="px-3 mt-4 mb-28">
+    <div class="flex items-center justify-between mb-2">
+      <h2 class="text-xs font-black text-slate-500 uppercase tracking-widest">Izohlar</h2>
+      <span id="izohlarSoni" class="text-xs text-slate-400"></span>
+    </div>
+
+    <!-- Izoh yozish -->
+    <div class="glass rounded-2xl p-3 mb-3">
+      <div class="flex gap-2">
+        <div class="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center" style="background:rgba(157,43,238,0.1)">
+          <span class="material-symbols-outlined" style="font-size:16px;color:#9d2bee">chat_bubble</span>
+        </div>
+        <div class="flex-1">
+          <textarea id="izohInput" rows="2" placeholder="Fikringizni yozing..."
+            class="w-full px-3 py-2 rounded-xl text-sm text-slate-700 placeholder-slate-400 resize-none focus:outline-none"
+            style="background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.06)"></textarea>
+          <button onclick="izohYuborish()" id="izohBtn"
+            class="mt-1.5 px-4 py-1.5 rounded-full text-xs font-bold text-white active:scale-95 transition-transform"
+            style="background:#9d2bee">
+            Yuborish
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="izohlarList" class="space-y-2">
+      <div class="glass rounded-xl p-3 text-center text-slate-400 text-xs">Izohlar yo'q. Birinchi bo'lib fikr bildiring!</div>
+    </div>
+  </div>
+
   <!-- Fixed bottom: "Tekshirish" tugmasi -->
   <div class="fixed bottom-0 left-0 right-0 px-3 pb-4 pt-2 z-50" style="background:linear-gradient(to top,rgba(220,252,231,0.98) 60%,transparent)">
     <div class="flex items-center gap-2">
@@ -396,6 +427,69 @@
       }).join('');
     }
 
+    function renderIzohlar(izohlar) {
+      const container = document.getElementById('izohlarList');
+      const soni = document.getElementById('izohlarSoni');
+      soni.textContent = izohlar.length ? `${izohlar.length} ta` : '';
+      if (!izohlar.length) {
+        container.innerHTML = '<div class="glass rounded-xl p-3 text-center text-slate-400 text-xs">Izohlar yo\'q. Birinchi bo\'lib fikr bildiring!</div>';
+        return;
+      }
+      container.innerHTML = izohlar.map(iz => `
+        <div class="glass rounded-xl p-3 flex items-start gap-2.5">
+          <div class="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center" style="background:rgba(59,130,246,0.1)">
+            <span class="material-symbols-outlined" style="font-size:14px;color:#3b82f6">person</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-xs font-bold text-slate-700 truncate">${iz.user}</p>
+              <span class="text-[10px] text-slate-400 flex-shrink-0">${iz.vaqt}</span>
+            </div>
+            <p class="text-xs text-slate-600 mt-0.5 leading-relaxed">${iz.matn}</p>
+          </div>
+        </div>`).join('');
+    }
+
+    async function izohYuborish() {
+      const matn = document.getElementById('izohInput').value.trim();
+      if (!matn) return;
+
+      const btn = document.getElementById('izohBtn');
+      btn.disabled = true;
+      btn.textContent = 'Yuborilmoqda...';
+
+      const user = tg.initDataUnsafe?.user || {};
+      try {
+        const res = await fetch('/api/maktab-izoh/', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            maktab_id: maktabId,
+            telegram_user_id: user.id || '0',
+            telegram_full_name: `${user.first_name||''} ${user.last_name||''}`.trim(),
+            matn: matn,
+          })
+        });
+        const d = await res.json();
+        if (res.ok && d.success) {
+          document.getElementById('izohInput').value = '';
+          // Yangi izohni boshiga qo'shish
+          if (maktabData.izohlar) {
+            maktabData.izohlar.unshift(d.izoh);
+          } else {
+            maktabData.izohlar = [d.izoh];
+          }
+          renderIzohlar(maktabData.izohlar);
+          showToast('Izohingiz qo\'shildi!');
+        }
+      } catch(e) {
+        tg.showAlert('Xatolik yuz berdi');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Yuborish';
+      }
+    }
+
     async function yukla() {
       try {
         const res = await fetch(`/api/maktablar/${maktabId}/`);
@@ -432,6 +526,7 @@
 
         renderVaadalar(maktabData.vaadalar);
         renderTekshiruvlar(maktabData.so_nggi_tekshiruvlar);
+        renderIzohlar(maktabData.izohlar || []);
       } catch {
         document.getElementById('maktabNom').textContent = 'Xatolik yuz berdi';
       }

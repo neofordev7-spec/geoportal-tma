@@ -216,3 +216,20 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"{self.telegram_full_name}: {self.matn[:50]}"
+
+
+class MaktabIzoh(models.Model):
+    """Maktab sahifasidagi izohlar/fikrlar"""
+    maktab = models.ForeignKey(Maktab, on_delete=models.CASCADE, related_name='izohlar')
+    telegram_user_id = models.BigIntegerField()
+    telegram_full_name = models.CharField(max_length=200, blank=True)
+    matn = models.TextField(max_length=500)
+    vaqt = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-vaqt']
+        verbose_name = 'Maktab izohi'
+        verbose_name_plural = 'Maktab izohlari'
+
+    def __str__(self):
+        return f"{self.telegram_full_name}: {self.matn[:50]}"
