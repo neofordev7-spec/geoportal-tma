@@ -53,3 +53,15 @@ static_root/
 
 # Migrations (optional - comment out if you want to include)
 # */migrations/
+
+# Large binary files
+*.pdf
+*.xlsx
+*.pptx
+*.jpg
+*.jpeg
+*.png
+
+# Node
+node_modules/
+map_frontend/dist/

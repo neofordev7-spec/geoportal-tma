@@ -1,0 +1,64 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Leaflet tooltip styling */
+.viloyat-label {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-weight: 700;
+  font-size: 11px;
+  color: #1e293b;
+  text-shadow: 0 0 4px #fff, 0 0 4px #fff, 0 0 4px #fff;
+  white-space: nowrap;
+}
+
+.tuman-label {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-weight: 600;
+  font-size: 10px;
+  color: #334155;
+  text-shadow: 0 0 3px #fff, 0 0 3px #fff;
+  white-space: nowrap;
+}
+
+.badge-tooltip {
+  background: #1e293b !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 2px 8px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+}
+
+.badge-tooltip::before {
+  border-top-color: #1e293b !important;
+}
+
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.5); }
+  70% { box-shadow: 0 0 0 8px rgba(34,197,94,0); }
+  100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+}
+@keyframes pulse-yellow {
+  0% { box-shadow: 0 0 0 0 rgba(245,158,11,0.5); }
+  70% { box-shadow: 0 0 0 8px rgba(245,158,11,0); }
+  100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+}
+@keyframes pulse-red {
+  0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
+  70% { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
+  100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+}
