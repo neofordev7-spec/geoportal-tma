@@ -1,382 +1,660 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Ma'lumot qoldirish — GEOPORTAL</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Signal — GEOPORTAL</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,100..700,0..1&display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: { primary: "#9d2bee" },
-          fontFamily: { display: ["Inter","sans-serif"] }
-        }
-      }
-    }
-  </script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:"#9d2bee"},fontFamily:{display:["Inter","sans-serif"]}}}}</script>
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #0a0a0c;
-      background-image:
-        radial-gradient(at 0% 0%, #064e3b 0px, transparent 50%),
-        radial-gradient(at 100% 0%, #0c4a6e 0px, transparent 50%),
-        radial-gradient(at 100% 100%, #4c1d95 0px, transparent 50%),
-        radial-gradient(at 0% 100%, #064e3b 0px, transparent 50%);
-      min-height: 100vh;
-      color: #f1f5f9;
+    body{font-family:'Inter',sans-serif;background:#0a0a0c;min-height:100vh;color:#f1f5f9;overflow-x:hidden;}
+    body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+      background:radial-gradient(at 20% 0%,#064e3b 0,transparent 50%),radial-gradient(at 80% 0%,#0c4a6e 0,transparent 50%),radial-gradient(at 80% 100%,#4c1d95 0,transparent 50%),radial-gradient(at 20% 100%,#064e3b 0,transparent 50%);}
+    *{position:relative;z-index:1;}
+
+    .gl{background:rgba(26,16,34,0.55);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.1);}
+    .gl-input{background:rgba(255,255,255,0.06);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.12);color:#f1f5f9;}
+    .gl-input:focus{outline:none;border-color:rgba(157,43,238,0.6);box-shadow:0 0 0 3px rgba(157,43,238,0.15);}
+    select.gl-input option{background:#1a1022;color:#f1f5f9;}
+    ::-webkit-scrollbar{display:none;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp 0.35s ease-out both;}
+    .d1{animation-delay:0.05s}.d2{animation-delay:0.12s}.d3{animation-delay:0.2s}.d4{animation-delay:0.28s}
+
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.15)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .spinner{animation:spin 0.7s linear infinite;border:2.5px solid rgba(255,255,255,0.2);border-top-color:white;border-radius:50%;width:18px;height:18px;}
+
+    /* Signal FAB — markaziy pulsatsiya */
+    .sig-hero{
+      width:88px;height:88px;border-radius:50%;
+      background:linear-gradient(135deg,#9d2bee,#7c3aed);
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 0 40px rgba(157,43,238,0.5),0 0 80px rgba(157,43,238,0.2);
+      position:relative;
     }
-    .glass-panel {
-      background: rgba(26, 16, 34, 0.55);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+    .sig-hero::before,.sig-hero::after{
+      content:'';position:absolute;inset:-6px;border-radius:50%;
+      border:2px solid rgba(157,43,238,0.35);
+      animation:sigPulse 2.5s ease-out infinite;
     }
-    .glass-input {
-      background: rgba(255, 255, 255, 0.06);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: #f1f5f9;
+    .sig-hero::after{animation-delay:1.25s;}
+    @keyframes sigPulse{0%{transform:scale(1);opacity:0.5}100%{transform:scale(1.7);opacity:0}}
+
+    /* Tanlov kartochkalari */
+    .choice-card{
+      background:rgba(26,16,34,0.6);backdrop-filter:blur(16px);
+      border:1.5px solid rgba(255,255,255,0.08);
+      border-radius:24px;padding:20px;cursor:pointer;
+      transition:all 0.2s;position:relative;overflow:hidden;
     }
-    .glass-input:focus { outline: none; border-color: rgba(157,43,238,0.6); box-shadow: 0 0 0 3px rgba(157,43,238,0.15); }
-    select.glass-input option { background: #1a1022; color: #f1f5f9; }
-    textarea.glass-input::placeholder,
-    input.glass-input::placeholder { color: rgba(148,163,184,0.6); }
-    #uploadArea { transition: border-color 0.2s, background 0.2s; }
-    #previewImg { display: none; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .spinner { animation: spin 0.8s linear infinite; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; width: 18px; height: 18px; }
-    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-    .fade-up { animation: fadeUp 0.3s ease-out; }
-    .neon-purple { box-shadow: 0 0 30px rgba(157,43,238,0.45); }
-    .pulse-dot { animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.7;transform:scale(1.3)} }
+    .choice-card:active{transform:scale(0.97);}
+    .choice-card:hover{border-color:rgba(157,43,238,0.3);}
+    .choice-card .glow{position:absolute;width:120px;height:120px;border-radius:50%;filter:blur(50px);opacity:0.15;pointer-events:none;}
+
+    /* Gamifikatsiya progress bar */
+    .reach-bar{height:6px;border-radius:99px;background:rgba(255,255,255,0.08);overflow:hidden;}
+    .reach-fill{height:100%;border-radius:99px;transition:width 0.5s ease-out;
+      background:linear-gradient(90deg,#9d2bee,#3b82f6,#22c55e);}
+
+    /* Profil toggle */
+    .prof-opt{
+      flex:1;padding:12px;border-radius:16px;text-align:center;cursor:pointer;
+      border:1.5px solid rgba(255,255,255,0.08);transition:all 0.2s;
+    }
+    .prof-opt.active{border-color:#9d2bee;background:rgba(157,43,238,0.12);}
+
+    /* Media grid */
+    .media-thumb{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:1;background:rgba(255,255,255,0.04);}
+    .media-thumb img,.media-thumb video{width:100%;height:100%;object-fit:cover;}
+
+    /* Bottom tabs — barcha sahifalarda bir xil */
+    .btab{display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 12px;}
+    .btab-icon{font-size:20px;font-variation-settings:'FILL' 1;}
+    .btab-label{font-size:9px;font-weight:600;}
+    .signal-fab-sm{
+      width:48px;height:48px;border-radius:50%;margin-top:-18px;
+      background:linear-gradient(135deg,#9d2bee,#7c3aed);
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 4px 18px rgba(157,43,238,0.45);position:relative;
+    }
+    .signal-fab-sm::before,.signal-fab-sm::after{
+      content:'';position:absolute;inset:-3px;border-radius:50%;
+      border:1.5px solid rgba(157,43,238,0.35);
+      animation:sigPulse 2s ease-out infinite;
+    }
+    .signal-fab-sm::after{animation-delay:1s;}
   </style>
 </head>
-<body class="pb-36">
+<body class="pb-20">
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SCREEN 1: LANDING — profil turi + 2 ta tanlov         -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div id="screenLanding">
 
   <!-- Header -->
-  <header class="px-4 pt-4 pb-2">
-    <div class="glass-panel rounded-2xl px-4 py-3 flex items-center gap-3">
-      <button onclick="history.back()" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center active:scale-90 transition-transform flex-shrink-0">
-        <span class="material-symbols-outlined text-white" style="font-size:20px">arrow_back</span>
+  <header class="px-4 pt-4 pb-2 fade-up">
+    <div class="gl rounded-2xl px-4 py-2.5 flex items-center gap-3">
+      <button onclick="history.back()" class="w-9 h-9 rounded-full gl flex items-center justify-center active:scale-90 transition-transform flex-shrink-0">
+        <span class="material-symbols-outlined text-white" style="font-size:18px">arrow_back</span>
       </button>
       <div class="flex-1 min-w-0">
-        <h1 class="text-base font-extrabold text-white tracking-tight">Ma'lumot qoldirish</h1>
-        <p class="text-xs text-slate-400 truncate">GEOPORTAL raqamli infratuzilma xaritasi</p>
+        <h1 class="text-sm font-extrabold text-white tracking-tight">Signal yuborish</h1>
+        <p class="text-[10px] text-slate-400">Fuqarolik nazorati platformasi</p>
       </div>
-      <a href="/tma/profil/" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center active:scale-90 transition-transform flex-shrink-0">
-        <span class="material-symbols-outlined text-primary" style="font-size:20px">person</span>
-      </a>
     </div>
   </header>
 
-  <main class="px-4 pt-3 fade-up">
-    <div class="glass-panel rounded-3xl p-5 relative overflow-hidden shadow-2xl">
-      <!-- Ambient glow -->
-      <div class="absolute -top-16 -right-16 w-48 h-48 bg-primary/15 blur-3xl rounded-full pointer-events-none"></div>
-
-      <!-- Badge -->
-      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/20 border border-primary/30 mb-5">
-        <span class="w-1.5 h-1.5 rounded-full bg-primary pulse-dot"></span>
-        <span class="text-xs font-bold tracking-widest uppercase text-primary">Ma'lumot qoldirish</span>
-      </div>
-
-      <!-- ── Foto va video yuklash ─────────────────────────── -->
-      <div class="mb-5">
-        <label class="text-xs font-semibold text-slate-300 uppercase tracking-widest block mb-2">
-          Foto va video dalillar <span class="text-slate-500 normal-case">(max 5 ta)</span>
-        </label>
-        <!-- Galereyadan tanlash (rasm + video, ko'p tanlov) -->
-        <input type="file" id="rasmInput" name="rasmlar" accept="image/*,video/*" multiple class="hidden" />
-        <!-- Kameradan olish (rasm yoki video — telefon o'zi tanlaydi) -->
-        <input type="file" id="kameraInput" accept="image/*,video/*" class="hidden" />
-        <div id="rasmGrid" class="grid gap-2" style="grid-template-columns: repeat(3, 1fr);">
-          <button type="button" onclick="document.getElementById('rasmInput').click()"
-            id="addRasmBtn"
-            class="flex flex-col items-center justify-center rounded-2xl cursor-pointer transition-all active:scale-95"
-            style="min-height:100px; border: 2px dashed rgba(255,255,255,0.2); background: rgba(157,43,238,0.06);">
-            <span class="material-symbols-outlined text-primary" style="font-size:28px">add_photo_alternate</span>
-            <span class="text-xs text-slate-400 mt-1">Galereyadan</span>
-          </button>
-        </div>
-        <div class="mt-2">
-          <button type="button" onclick="document.getElementById('kameraInput').click()"
-            class="w-full flex items-center justify-center gap-2 rounded-xl py-3 active:scale-95 transition-all"
-            style="border:1.5px dashed rgba(255,255,255,0.2);background:rgba(34,197,94,0.06)">
-            <span class="material-symbols-outlined" style="font-size:20px;color:#22c55e">photo_camera</span>
-            <span class="text-sm font-semibold text-slate-300">Kameradan olish</span>
-          </button>
-        </div>
-        <p class="text-xs text-slate-500 mt-2">Rasm va video yuklash mumkin (max 5 ta)</p>
-      </div>
-
-      <!-- ── Dropdowns 2x2 ───────────────────────────────── -->
-      <div class="grid grid-cols-2 gap-3 mb-5">
-        <!-- Viloyat -->
-        <div class="relative group col-span-2">
-          <select id="viloyat" class="glass-input w-full h-12 pl-5 pr-10 rounded-full text-sm font-semibold appearance-none focus:ring-0 cursor-pointer">
-            <option disabled selected value="">Viloyatni tanlang</option>
-            <option value="toshkent_sh">Toshkent shahri</option>
-            <option value="toshkent_v">Toshkent viloyati</option>
-            <option value="samarqand">Samarqand viloyati</option>
-            <option value="fargona">Farg'ona viloyati</option>
-            <option value="andijon">Andijon viloyati</option>
-            <option value="namangan">Namangan viloyati</option>
-            <option value="buxoro">Buxoro viloyati</option>
-            <option value="xorazm">Xorazm viloyati</option>
-            <option value="qashqadaryo">Qashqadaryo viloyati</option>
-            <option value="surxondaryo">Surxondaryo viloyati</option>
-            <option value="jizzax">Jizzax viloyati</option>
-            <option value="sirdaryo">Sirdaryo viloyati</option>
-            <option value="navoiy">Navoiy viloyati</option>
-            <option value="qoraqalpogiston">Qoraqalpog'iston Resp.</option>
-          </select>
-          <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-primary transition-colors" style="font-size:18px">expand_more</span>
-        </div>
-
-        <!-- Tuman (viloyatga qarab dinamik) -->
-        <div class="relative group">
-          <select id="tuman" class="glass-input w-full h-12 pl-5 pr-8 rounded-full text-sm font-semibold appearance-none focus:ring-0 cursor-pointer" disabled>
-            <option disabled selected value="">Avval viloyat tanlang</option>
-          </select>
-          <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" style="font-size:16px">expand_more</span>
-        </div>
-
-        <!-- Infratuzilma -->
-        <div class="relative group">
-          <select id="infratuzilma" class="glass-input w-full h-12 pl-5 pr-8 rounded-full text-sm font-semibold appearance-none focus:ring-0 cursor-pointer">
-            <option disabled selected value="">Infratuzilma</option>
-            <option value="maktab">Maktab</option>
-            <option value="shifoxona">Shifoxona</option>
-            <option value="bogcha">Bog'cha</option>
-            <option value="yol">Yo'l infratuzilmasi</option>
-            <option value="sport">Sport inshootlari</option>
-            <option value="boshqa">Boshqa</option>
-          </select>
-          <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" style="font-size:16px">expand_more</span>
-        </div>
-
-      </div>
-
-      <!-- ── Izoh ────────────────────────────────────────── -->
-      <div class="mb-5">
-        <label class="text-xs font-semibold text-slate-300 uppercase tracking-widest block mb-2">Qo'shimcha izoh</label>
-        <textarea id="izoh" rows="4"
-          placeholder="Infratuzilmadagi muammolar haqida qo'shimcha izoh qoldiring."
-          class="glass-input w-full p-5 rounded-3xl text-sm resize-none focus:ring-0 placeholder-slate-500"></textarea>
-      </div>
-
-      <!-- ── Anonim toggle ────────────────────────────────── -->
-      <div class="flex items-center gap-3 mb-5">
-        <label class="flex items-center gap-2.5 cursor-pointer">
-          <input type="checkbox" id="isAnonim" class="w-5 h-5 rounded border-white/20 bg-white/10 text-primary focus:ring-primary/30">
-          <span class="text-sm font-semibold text-slate-300">Anonim yuborish</span>
-        </label>
-        <span class="text-xs text-slate-500">(ismingiz ko'rinmaydi)</span>
-      </div>
-
-      <!-- ── Info cards ───────────────────────────────────── -->
-      <div class="grid grid-cols-3 gap-2 mb-2">
-        <div class="glass-input rounded-2xl p-3 text-center">
-          <span class="material-symbols-outlined block mb-1 text-primary" style="font-size:18px">location_on</span>
-          <p class="text-xs text-slate-400 leading-tight">GPS avtomatik</p>
-        </div>
-        <div class="glass-input rounded-2xl p-3 text-center">
-          <span class="material-symbols-outlined block mb-1 text-primary" style="font-size:18px">security</span>
-          <p class="text-xs text-slate-400 leading-tight">Xavfsizlik kafolati</p>
-        </div>
-        <div class="glass-input rounded-2xl p-3 text-center">
-          <span class="material-symbols-outlined block mb-1 text-primary" style="font-size:18px">schedule</span>
-          <p class="text-xs text-slate-400 leading-tight">24 soat ichida</p>
-        </div>
-      </div>
-
+  <!-- Hero — pulsatsiya */  -->
+  <div class="flex flex-col items-center mt-6 mb-6 fade-up d1">
+    <div class="sig-hero">
+      <span class="material-symbols-outlined text-white" style="font-size:40px;font-variation-settings:'FILL' 1">campaign</span>
     </div>
-  </main>
+    <h2 class="text-lg font-black text-white mt-4 text-center">Ovozingiz muhim!</h2>
+    <p class="text-xs text-slate-400 text-center mt-1 max-w-[260px]">Hududingizdagi muammolarni xabar bering yoki davlat va'dalarini tekshiring</p>
+  </div>
 
-  <!-- ── Submit button (tab bar ustida) ─────────────────── -->
-  <div class="fixed left-0 right-0 px-4 pb-2 pt-2 z-50" style="bottom:56px;background: linear-gradient(to top, #0a0a0c 55%, transparent);">
-    <button id="submitBtn" onclick="formYuborish()"
-      class="neon-purple w-full py-4 rounded-full font-black text-base tracking-wide flex items-center justify-center gap-2.5 active:scale-95 transition-all bg-primary text-white">
-      <span>Yuborish</span>
-      <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform" style="font-size:20px">send</span>
+  <!-- Profil turi tanlash -->
+  <div class="px-4 mb-4 fade-up d2">
+    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 text-center">Profilingiz turi</p>
+    <div class="flex gap-3">
+      <div class="prof-opt active" id="profPublic" onclick="setProf('public')">
+        <span class="material-symbols-outlined block mx-auto mb-1" style="font-size:24px;color:#3b82f6;font-variation-settings:'FILL' 1">visibility</span>
+        <p class="text-xs font-bold text-white">Ommaviy</p>
+        <p class="text-[9px] text-slate-500 mt-0.5">Ismingiz ko'rinadi</p>
+      </div>
+      <div class="prof-opt" id="profAnon" onclick="setProf('anon')">
+        <span class="material-symbols-outlined block mx-auto mb-1" style="font-size:24px;color:#94a3b8;font-variation-settings:'FILL' 1">visibility_off</span>
+        <p class="text-xs font-bold text-white">Shaxsiy</p>
+        <p class="text-[9px] text-slate-500 mt-0.5">Anonim bo'lasiz</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 ta katta tanlov kartochkasi -->
+  <div class="px-4 space-y-3 fade-up d3">
+
+    <!-- KARTA 1: Muammo xabar berish -->
+    <div class="choice-card" onclick="showReportForm()">
+      <div class="glow" style="top:-30px;right:-30px;background:#ef4444;"></div>
+      <div class="flex items-start gap-4">
+        <div class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
+          style="background:linear-gradient(135deg,rgba(239,68,68,0.2),rgba(249,115,22,0.15))">
+          <span class="material-symbols-outlined" style="font-size:28px;color:#ef4444;font-variation-settings:'FILL' 1">report</span>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-base font-black text-white">Muammo haqida xabar</h3>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed">Hududingizdagi muammo yoki buzilishni rasm va video bilan xabar bering</p>
+          <div class="flex items-center gap-1.5 mt-2.5">
+            <span class="text-[10px] font-bold" style="color:#ef4444">Boshlash</span>
+            <span class="material-symbols-outlined" style="font-size:14px;color:#ef4444">arrow_forward</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KARTA 2: Va'da tekshirish — xaritaga o'tish -->
+    <div class="choice-card" onclick="showObjectPicker()">
+      <div class="glow" style="bottom:-30px;left:-30px;background:#3b82f6;"></div>
+      <div class="flex items-start gap-4">
+        <div class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
+          style="background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(99,102,241,0.15))">
+          <span class="material-symbols-outlined" style="font-size:28px;color:#3b82f6;font-variation-settings:'FILL' 1">fact_check</span>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-base font-black text-white">Va'dalar bajarilganmi?</h3>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed">Hududingizda qurilishi va'da qilingan ob'ektlarni xaritadan tekshiring</p>
+          <div class="flex items-center gap-1.5 mt-2.5">
+            <span class="text-[10px] font-bold" style="color:#3b82f6">Xaritada ko'rish</span>
+            <span class="material-symbols-outlined" style="font-size:14px;color:#3b82f6">arrow_forward</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pastki statistika -->
+  <div class="px-4 mt-5 fade-up d4">
+    <div class="gl rounded-2xl p-3 flex items-center justify-around">
+      <div class="text-center">
+        <p class="text-lg font-black text-white" id="landingStat1">—</p>
+        <p class="text-[9px] text-slate-500">Signal</p>
+      </div>
+      <div class="w-px h-8" style="background:rgba(255,255,255,0.08)"></div>
+      <div class="text-center">
+        <p class="text-lg font-black" style="color:#22c55e" id="landingStat2">—</p>
+        <p class="text-[9px] text-slate-500">Hal qilindi</p>
+      </div>
+      <div class="w-px h-8" style="background:rgba(255,255,255,0.08)"></div>
+      <div class="text-center">
+        <p class="text-lg font-black text-blue-400" id="landingStat3">—</p>
+        <p class="text-[9px] text-slate-500">Tekshiruv</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SCREEN 2: MUAMMO XABAR BERISH FORMASI                 -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div id="screenReport" class="hidden">
+
+  <!-- Header -->
+  <header class="px-4 pt-4 pb-2">
+    <div class="gl rounded-2xl px-4 py-2.5 flex items-center gap-3">
+      <button onclick="goLanding()" class="w-9 h-9 rounded-full gl flex items-center justify-center active:scale-90 transition-transform flex-shrink-0">
+        <span class="material-symbols-outlined text-white" style="font-size:18px">arrow_back</span>
+      </button>
+      <div class="flex-1 min-w-0">
+        <h1 class="text-sm font-extrabold text-white tracking-tight">Muammo xabar berish</h1>
+        <p class="text-[10px] text-slate-400">Rasm, video va izoh bilan</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Gamifikatsiya — ta'sir darajasi -->
+  <div class="px-4 mt-3 fade-up">
+    <div class="gl rounded-2xl p-3.5">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined" style="font-size:16px;color:#f59e0b;font-variation-settings:'FILL' 1">trending_up</span>
+          <span class="text-xs font-bold text-white">Ta'sir darajasi</span>
+        </div>
+        <span id="reachPercent" class="text-xs font-black" style="color:#f59e0b">0%</span>
+      </div>
+      <div class="reach-bar">
+        <div id="reachBar" class="reach-fill" style="width:0%"></div>
+      </div>
+      <p id="reachHint" class="text-[10px] text-slate-500 mt-1.5">Ko'proq ma'lumot bering — signalingiz ko'proq odamlarga yetib boradi</p>
+    </div>
+  </div>
+
+  <div class="px-4 mt-3 space-y-4 fade-up pb-28">
+
+    <!-- 1. Joylashuv -->
+    <div>
+      <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Joylashuv</label>
+      <button onclick="getGPS()" id="gpsBtn"
+        class="w-full gl-input rounded-2xl p-3.5 flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-transform text-left">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(34,197,94,0.12)">
+          <span class="material-symbols-outlined" style="font-size:20px;color:#22c55e;font-variation-settings:'FILL' 1" id="gpsIcon">my_location</span>
+        </div>
+        <div>
+          <p class="text-sm font-bold text-white" id="gpsText">Joylashuvimni aniqlash</p>
+          <p class="text-[10px] text-slate-500" id="gpsSubtext">GPS orqali avtomatik</p>
+        </div>
+      </button>
+      <input type="hidden" id="gpsLat" value="">
+      <input type="hidden" id="gpsLng" value="">
+    </div>
+
+    <!-- 2. Rasm va video -->
+    <div>
+      <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">
+        Foto va video <span class="normal-case text-slate-600">(max 5)</span>
+      </label>
+      <input type="file" id="mediaInput" accept="image/*,video/*" multiple class="hidden"/>
+      <input type="file" id="cameraInput" accept="image/*,video/*" capture="environment" class="hidden"/>
+
+      <div id="mediaGrid" class="grid grid-cols-3 gap-2">
+        <button type="button" onclick="document.getElementById('mediaInput').click()"
+          class="media-thumb flex flex-col items-center justify-center cursor-pointer active:scale-95 transition-transform"
+          style="border:2px dashed rgba(255,255,255,0.15);">
+          <span class="material-symbols-outlined" style="font-size:26px;color:#9d2bee">add_photo_alternate</span>
+          <span class="text-[9px] text-slate-500 mt-1">Galereyadan</span>
+        </button>
+      </div>
+      <button type="button" onclick="document.getElementById('cameraInput').click()"
+        class="w-full mt-2 flex items-center justify-center gap-2 rounded-xl py-2.5 active:scale-95 transition-all"
+        style="border:1.5px dashed rgba(255,255,255,0.12);background:rgba(34,197,94,0.05)">
+        <span class="material-symbols-outlined" style="font-size:18px;color:#22c55e">photo_camera</span>
+        <span class="text-xs font-semibold text-slate-400">Kameradan olish</span>
+      </button>
+    </div>
+
+    <!-- 3. Izoh -->
+    <div>
+      <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Izoh va tafsilotlar</label>
+      <textarea id="izohInput" rows="4"
+        oninput="calcReach()"
+        placeholder="Muammoni batafsil yozing. Qanchalik ko'p ma'lumot bersangiz, signalingiz shunchalik ko'proq tarqaladi..."
+        class="gl-input w-full p-4 rounded-2xl text-sm resize-none"></textarea>
+      <p class="text-[10px] text-slate-600 mt-1 text-right"><span id="charCount">0</span> / 500</p>
+    </div>
+
+    <!-- 4. Qo'shimcha: Infratuzilma turi -->
+    <div>
+      <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-2">Muammo turi <span class="normal-case text-slate-600">(ixtiyoriy)</span></label>
+      <div class="grid grid-cols-3 gap-2" id="typeGrid">
+        <button onclick="selectType(this,'yol')" class="type-btn gl-input rounded-xl py-2.5 px-2 text-center active:scale-95 transition-all">
+          <span class="material-symbols-outlined block mx-auto mb-0.5" style="font-size:20px;color:#f59e0b;font-variation-settings:'FILL' 1">road</span>
+          <span class="text-[10px] font-semibold text-slate-400">Yo'l</span>
+        </button>
+        <button onclick="selectType(this,'maktab')" class="type-btn gl-input rounded-xl py-2.5 px-2 text-center active:scale-95 transition-all">
+          <span class="material-symbols-outlined block mx-auto mb-0.5" style="font-size:20px;color:#3b82f6;font-variation-settings:'FILL' 1">school</span>
+          <span class="text-[10px] font-semibold text-slate-400">Maktab</span>
+        </button>
+        <button onclick="selectType(this,'shifoxona')" class="type-btn gl-input rounded-xl py-2.5 px-2 text-center active:scale-95 transition-all">
+          <span class="material-symbols-outlined block mx-auto mb-0.5" style="font-size:20px;color:#ef4444;font-variation-settings:'FILL' 1">local_hospital</span>
+          <span class="text-[10px] font-semibold text-slate-400">Shifoxona</span>
+        </button>
+        <button onclick="selectType(this,'bogcha')" class="type-btn gl-input rounded-xl py-2.5 px-2 text-center active:scale-95 transition-all">
+          <span class="material-symbols-outlined block mx-auto mb-0.5" style="font-size:20px;color:#22c55e;font-variation-settings:'FILL' 1">child_care</span>
+          <span class="text-[10px] font-semibold text-slate-400">Bog'cha</span>
+        </button>
+        <button onclick="selectType(this,'sport')" class="type-btn gl-input rounded-xl py-2.5 px-2 text-center active:scale-95 transition-all">
+          <span class="material-symbols-outlined block mx-auto mb-0.5" style="font-size:20px;color:#8b5cf6;font-variation-settings:'FILL' 1">fitness_center</span>
+          <span class="text-[10px] font-semibold text-slate-400">Sport</span>
+        </button>
+        <button onclick="selectType(this,'boshqa')" class="type-btn gl-input rounded-xl py-2.5 px-2 text-center active:scale-95 transition-all">
+          <span class="material-symbols-outlined block mx-auto mb-0.5" style="font-size:20px;color:#94a3b8;font-variation-settings:'FILL' 1">more_horiz</span>
+          <span class="text-[10px] font-semibold text-slate-400">Boshqa</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Submit button -->
+  <div class="fixed left-0 right-0 px-4 pb-2 pt-2 z-50" style="bottom:56px;background:linear-gradient(to top,#0a0a0c 55%,transparent);">
+    <button id="submitBtn" onclick="submitReport()"
+      class="w-full py-4 rounded-full font-black text-base flex items-center justify-center gap-2.5 active:scale-95 transition-all text-white"
+      style="background:linear-gradient(135deg,#9d2bee,#7c3aed);box-shadow:0 0 25px rgba(157,43,238,0.4);">
+      <span class="material-symbols-outlined" style="font-size:20px;font-variation-settings:'FILL' 1">send</span>
+      <span>Signal yuborish</span>
     </button>
   </div>
+</div>
 
-  <!-- ═══ Bottom tabs ═══ -->
-  <div class="fixed bottom-0 left-0 right-0 z-50" style="background:rgba(10,10,12,0.85);backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,0.08);">
-    <div class="flex justify-around py-2 px-2">
-      <a href="/tma/" class="flex flex-col items-center gap-0.5 px-3 py-1">
-        <span class="material-symbols-outlined text-slate-500" style="font-size:22px">map</span>
-        <span class="text-xs font-semibold text-slate-500">Xarita</span>
-      </a>
-      <a href="/tma/murojaat/" class="flex flex-col items-center gap-0.5 px-3 py-1">
-        <span class="material-symbols-outlined" style="font-size:22px;color:#9d2bee">campaign</span>
-        <span class="text-xs font-bold" style="color:#9d2bee">Signal</span>
-      </a>
-      <a href="/tma/feed/" class="flex flex-col items-center gap-0.5 px-3 py-1">
-        <span class="material-symbols-outlined text-slate-500" style="font-size:22px">dynamic_feed</span>
-        <span class="text-xs font-semibold text-slate-500">Lenta</span>
-      </a>
-      <a href="/tma/tahlil/" class="flex flex-col items-center gap-0.5 px-3 py-1">
-        <span class="material-symbols-outlined text-slate-500" style="font-size:22px">bar_chart</span>
-        <span class="text-xs font-semibold text-slate-500">Tahlil</span>
-      </a>
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SCREEN 3: OB'EKT TURI TANLASH (va'da tekshirish)      -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div id="screenPicker" class="hidden">
+  <header class="px-4 pt-4 pb-2">
+    <div class="gl rounded-2xl px-4 py-2.5 flex items-center gap-3">
+      <button onclick="goLanding()" class="w-9 h-9 rounded-full gl flex items-center justify-center active:scale-90 transition-transform flex-shrink-0">
+        <span class="material-symbols-outlined text-white" style="font-size:18px">arrow_back</span>
+      </button>
+      <div class="flex-1">
+        <h1 class="text-sm font-extrabold text-white tracking-tight">Qanaqa ob'ektni ko'ramiz?</h1>
+        <p class="text-[10px] text-slate-400">Turni tanlang — xaritada ko'rsatamiz</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="px-4 mt-6 space-y-3 fade-up">
+    <!-- Maktab -->
+    <a href="/tma/" class="choice-card flex items-center gap-4" style="border-color:rgba(59,130,246,0.2)">
+      <div class="glow" style="top:-20px;left:-20px;background:#3b82f6;"></div>
+      <div class="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0"
+        style="background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(99,102,241,0.1))">
+        <span class="material-symbols-outlined" style="font-size:32px;color:#3b82f6;font-variation-settings:'FILL' 1">school</span>
+      </div>
+      <div class="flex-1">
+        <h3 class="text-base font-black text-white">Maktablar</h3>
+        <p class="text-xs text-slate-400 mt-0.5">Maktablarga berilgan va'dalarni tekshiring</p>
+        <div class="flex items-center gap-1 mt-2">
+          <span class="text-[10px] font-bold text-blue-400">Xaritada ochish</span>
+          <span class="material-symbols-outlined" style="font-size:12px;color:#60a5fa">arrow_forward</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- Shifoxona — coming soon -->
+    <div class="choice-card flex items-center gap-4" style="opacity:0.5;cursor:not-allowed;">
+      <div class="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0"
+        style="background:rgba(239,68,68,0.08)">
+        <span class="material-symbols-outlined" style="font-size:32px;color:#ef4444;font-variation-settings:'FILL' 1">local_hospital</span>
+      </div>
+      <div class="flex-1">
+        <h3 class="text-base font-bold text-white">Shifoxonalar</h3>
+        <p class="text-xs text-slate-500 mt-0.5">Tez orada qo'shiladi</p>
+        <span class="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold" style="background:rgba(255,255,255,0.06);color:#64748b;">Tez kunda</span>
+      </div>
+    </div>
+
+    <!-- Bog'cha — coming soon -->
+    <div class="choice-card flex items-center gap-4" style="opacity:0.5;cursor:not-allowed;">
+      <div class="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0"
+        style="background:rgba(34,197,94,0.08)">
+        <span class="material-symbols-outlined" style="font-size:32px;color:#22c55e;font-variation-settings:'FILL' 1">child_care</span>
+      </div>
+      <div class="flex-1">
+        <h3 class="text-base font-bold text-white">Bog'chalar</h3>
+        <p class="text-xs text-slate-500 mt-0.5">Tez orada qo'shiladi</p>
+        <span class="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold" style="background:rgba(255,255,255,0.06);color:#64748b;">Tez kunda</span>
+      </div>
     </div>
   </div>
+</div>
 
-  <!-- ── Muvaffaqiyat modali ─────────────────────────────── -->
-  <div id="successModal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-5" style="background:rgba(0,0,0,0.75);backdrop-filter:blur(6px)">
-    <div class="glass-panel rounded-3xl p-8 text-center w-full max-w-sm fade-up">
-      <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
-        style="background:rgba(34,197,94,0.15);border:2px solid rgba(34,197,94,0.4)">
-        <span class="material-symbols-outlined text-green-400" style="font-size:32px">check_circle</span>
-      </div>
-      <h2 class="text-xl font-black text-white mb-2">Rahmat!</h2>
-      <p class="text-sm text-slate-400 mb-6">Murojaatingiz qabul qilindi.<br/>24 soat ichida ko'rib chiqiladi.</p>
-      <button onclick="window.Telegram.WebApp.close()"
-        class="w-full py-3.5 rounded-full font-black text-sm bg-primary text-white neon-purple">
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- Muvaffaqiyat modali                                    -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div id="successModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center px-5" style="background:rgba(0,0,0,0.75);backdrop-filter:blur(8px)">
+  <div class="gl rounded-3xl p-7 text-center w-full max-w-sm fade-up" style="background:rgba(26,16,34,0.9)">
+    <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style="background:rgba(34,197,94,0.15);border:2px solid rgba(34,197,94,0.3)">
+      <span class="material-symbols-outlined" style="font-size:32px;color:#22c55e;font-variation-settings:'FILL' 1">check_circle</span>
+    </div>
+    <h2 class="text-xl font-black text-white mb-1">Rahmat!</h2>
+    <p class="text-sm text-slate-400 mb-2">Signalingiz qabul qilindi va lentaga joylandi.</p>
+    <div id="successReach" class="gl rounded-xl p-3 mb-5">
+      <p class="text-[10px] text-slate-500">Signalingiz ta'sir darajasi</p>
+      <p class="text-2xl font-black text-white mt-1" id="successReachVal">—</p>
+    </div>
+    <div class="flex gap-2">
+      <a href="/tma/feed/" class="flex-1 py-3 rounded-full font-bold text-sm text-white text-center active:scale-95 transition-transform" style="background:#9d2bee">
+        Lentada ko'rish
+      </a>
+      <button onclick="goLanding();document.getElementById('successModal').classList.add('hidden')"
+        class="flex-1 py-3 rounded-full font-bold text-sm text-slate-300 text-center active:scale-95 transition-transform" style="background:rgba(255,255,255,0.08)">
         Yopish
       </button>
     </div>
   </div>
+</div>
 
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- Bottom Tabs                                           -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="fixed bottom-0 left-0 right-0 z-50" style="background:rgba(10,10,12,0.88);backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,0.06);">
+  <div class="flex items-end justify-around py-1.5 px-1">
+    <a href="/tma/" class="btab"><span class="material-symbols-outlined btab-icon text-slate-500">map</span><span class="btab-label text-slate-500">Xarita</span></a>
+    <a href="/tma/feed/" class="btab"><span class="material-symbols-outlined btab-icon text-slate-500">dynamic_feed</span><span class="btab-label text-slate-500">Lenta</span></a>
+    <a href="/tma/murojaat/" class="flex flex-col items-center">
+      <div class="signal-fab-sm"><span class="material-symbols-outlined text-white" style="font-size:22px;font-variation-settings:'FILL' 1">campaign</span></div>
+      <span class="text-[9px] font-bold mt-0.5" style="color:#9d2bee">Signal</span>
+    </a>
+    <a href="/tma/tahlil/" class="btab"><span class="material-symbols-outlined btab-icon text-slate-500">bar_chart</span><span class="btab-label text-slate-500">Tahlil</span></a>
+    <a href="/tma/profil/" class="btab"><span class="material-symbols-outlined btab-icon text-slate-500">person</span><span class="btab-label text-slate-500">Profil</span></a>
+  </div>
+</div>
 
-    // ── Viloyat → Tuman mapping (to'liq O'zbekiston) ──────────────
-    const TUMANLARI = {
-      toshkent_sh: ['Bektemir','Chilonzor','Mirobod','Mirzo Ulug\'bek','Olmazor','Sergeli','Shayxontohur','Uchtepa','Yakkasaroy','Yashnobod','Yunusobod'],
-      toshkent_v: ['Angren','Bekobod','Chirchiq','Olmaliq','Ohangaron','Bo\'ka','Bo\'stonliq','Chinoz','Qibray','Oqqo\'rg\'on','Ohangaron tumani','Parkent','Piskent','Toshkent tumani','Zangiota','Yuqorichirchiq','Quyi Chirchiq'],
-      samarqand: ['Samarqand shahri','Bulung\'ur','Ishtixon','Jomboy','Kattaqo\'rg\'on','Narpay','Nurobod','Oqdaryo','Pastdarg\'om','Payariq','Qo\'shrabot','Samarqand tumani','Toyloq','Urgut'],
-      fargona: ['Farg\'ona shahri','Marg\'ilon','Quvasoy','Qo\'qon','Rishton','Beshariq','Bog\'dod','Buvayda','Dang\'ara','Furqat','O\'zbekiston','Qo\'shtepa','Rishton tumani','So\'x','Toshloq','Uchko\'prik','Yozyovon'],
-      andijon: ['Andijon shahri','Xonobod','Andijon tumani','Asaka','Baliqchi','Bo\'z','Buloqboshi','Izboskan','Jalolquduq','Marhamat','Oltinko\'l','Paxtaobod','Qo\'rg\'ontepa','Shahrixon','Ulug\'nor','Xo\'jaobod'],
-      namangan: ['Namangan shahri','Chortoq','Chust','Kosonsoy','Mingbuloq','Namangan tumani','Norin','Pop','To\'raqo\'rg\'on','Uchqo\'rg\'on','Uychi','Yangiqo\'rg\'on'],
-      buxoro: ['Buxoro shahri','Kogon','Buxoro tumani','G\'ijduvon','Jondor','Kogon tumani','Olot','Peshku','Qorako\'l','Qorovulbozor','Romitan','Shofirkon','Vobkent'],
-      xorazm: ['Urganch shahri','Xiva','Bog\'ot','Gurlan','Qo\'shko\'pir','Shovot','Urganch tumani','Xazorasp','Xiva tumani','Yangiariq','Yangibozor'],
-      qashqadaryo: ['Qarshi shahri','Shahrisabz','Chiroqchi','Dehqonobod','G\'uzor','Kasbi','Kitob','Koson','Mirishkor','Muborak','Nishon','Qarshi tumani','Shahrisabz tumani','Yakkabog\''],
-      surxondaryo: ['Termiz shahri','Angor','Bandixon','Boysun','Denov','Jarqo\'rg\'on','Muzrabot','Oltinsoy','Qiziriq','Qumqo\'rg\'on','Sariosiyo','Sherobod','Sho\'rchi','Termiz tumani','Uzun'],
-      jizzax: ['Jizzax shahri','Arnasoy','Baxmal','Do\'stlik','Forish','G\'allaorol','Mirzacho\'l','Paxtakor','Yangiobod','Zafarobod','Zarband','Zarbdor','Zomin'],
-      sirdaryo: ['Guliston shahri','Sirdaryo shahri','Yangiyer shahri','Boyovut','Guliston tumani','Mirzaobod','Oqoltin','Sardoba','Sayxunobod','Sirdaryo tumani','Xovos'],
-      navoiy: ['Navoiy shahri','Zarafshon','Karmana','Konimex','Navbahor','Nurota','Qiziltepa','Tomdi','Uchquduq','Xatirchi'],
-      qoraqalpogiston: ['Nukus shahri','Amudaryo','Beruniy','Chimboy','Ellikqala','Kegeyli','Mo\'ynoq','Nukus tumani','Qonliko\'l','Qo\'ng\'irot','Shumanay','Taxtako\'pir','To\'rtko\'l','Xo\'jayli','Taxiatosh'],
-    };
+<script>
+  const tg = window.Telegram.WebApp;
+  tg.ready(); tg.expand();
+  const user = tg.initDataUnsafe?.user || {};
 
-    // Viloyat tanlaganda tumanlarni yangilash
-    document.getElementById('viloyat').addEventListener('change', function() {
-      const sel = document.getElementById('tuman');
-      const tumans = TUMANLARI[this.value] || [];
-      sel.innerHTML = '<option disabled selected value="">Tumanni tanlang</option>';
-      tumans.forEach(t => {
-        sel.innerHTML += `<option value="${t}">${t}</option>`;
-      });
-      sel.disabled = false;
+  let isAnonim = false;
+  let selectedType = '';
+  let mediaFiles = [];
+  let gpsCoords = null;
+
+  // ── Profil turi ────────────────────────────────────────
+  function setProf(type) {
+    isAnonim = type === 'anon';
+    document.getElementById('profPublic').classList.toggle('active', !isAnonim);
+    document.getElementById('profAnon').classList.toggle('active', isAnonim);
+  }
+
+  // ── Ekranlar o'tishi ──────────────────────────────────
+  function showScreen(id) {
+    document.querySelectorAll('[id^="screen"]').forEach(s => s.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+    window.scrollTo(0, 0);
+  }
+  function goLanding() { showScreen('screenLanding'); }
+  function showReportForm() { showScreen('screenReport'); calcReach(); }
+  function showObjectPicker() { showScreen('screenPicker'); }
+
+  // ── GPS ────────────────────────────────────────────────
+  function getGPS() {
+    const btn = document.getElementById('gpsBtn');
+    const icon = document.getElementById('gpsIcon');
+    const txt = document.getElementById('gpsText');
+    const sub = document.getElementById('gpsSubtext');
+    icon.textContent = 'sync';
+    icon.style.animation = 'spin 1s linear infinite';
+    txt.textContent = 'Aniqlanmoqda...';
+
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        gpsCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        document.getElementById('gpsLat').value = gpsCoords.lat;
+        document.getElementById('gpsLng').value = gpsCoords.lng;
+        icon.textContent = 'check_circle';
+        icon.style.animation = '';
+        icon.style.color = '#22c55e';
+        txt.textContent = 'Joylashuv aniqlandi';
+        sub.textContent = `${gpsCoords.lat.toFixed(4)}, ${gpsCoords.lng.toFixed(4)}`;
+        btn.style.borderColor = 'rgba(34,197,94,0.3)';
+        calcReach();
+      },
+      err => {
+        icon.textContent = 'location_off';
+        icon.style.animation = '';
+        icon.style.color = '#ef4444';
+        txt.textContent = 'GPS xatosi — qayta urinib ko\'ring';
+        sub.textContent = 'Ruxsat berilmagan yoki GPS o\'chiq';
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }
+
+  // ── Media upload ──────────────────────────────────────
+  function addFiles(files) {
+    Array.from(files).forEach(f => {
+      if (mediaFiles.length >= 5) return;
+      if (mediaFiles.find(m => m.name === f.name && m.size === f.size)) return;
+      mediaFiles.push(f);
     });
+    renderMedia();
+    calcReach();
+  }
+  document.getElementById('mediaInput').addEventListener('change', function() { addFiles(this.files); this.value = ''; });
+  document.getElementById('cameraInput').addEventListener('change', function() { addFiles(this.files); this.value = ''; });
 
-    // ── Fayl yuklash (universal — barcha telefonlar) ────────────
-    let tanlangan_rasmlar = [];
+  function removeMedia(i) { mediaFiles.splice(i, 1); renderMedia(); calcReach(); }
 
-    function faylQoshish(files) {
-      Array.from(files).forEach(f => {
-        if (tanlangan_rasmlar.length >= 5) return;
-        if (tanlangan_rasmlar.find(r => r.name === f.name && r.size === f.size)) return;
-        tanlangan_rasmlar.push(f);
-      });
-      rasmGridRender();
+  function renderMedia() {
+    const grid = document.getElementById('mediaGrid');
+    let html = mediaFiles.map((f, i) => {
+      const url = URL.createObjectURL(f);
+      const isVideo = f.type.startsWith('video/');
+      const preview = isVideo
+        ? `<div class="w-full h-full flex flex-col items-center justify-center" style="background:rgba(239,68,68,0.08)">
+            <span class="material-symbols-outlined" style="font-size:28px;color:#ef4444;font-variation-settings:'FILL' 1">videocam</span>
+            <span class="text-[8px] text-slate-500 mt-0.5">Video</span></div>`
+        : `<img src="${url}"/>`;
+      return `<div class="media-thumb">
+        ${preview}
+        <button type="button" onclick="removeMedia(${i})"
+          class="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center" style="background:rgba(0,0,0,0.7)">
+          <span class="material-symbols-outlined text-white" style="font-size:12px">close</span>
+        </button>
+      </div>`;
+    }).join('');
+
+    if (mediaFiles.length < 5) {
+      html += `<button type="button" onclick="document.getElementById('mediaInput').click()"
+        class="media-thumb flex flex-col items-center justify-center cursor-pointer active:scale-95 transition-transform"
+        style="border:2px dashed rgba(255,255,255,0.15);">
+        <span class="material-symbols-outlined" style="font-size:26px;color:#9d2bee">add_photo_alternate</span>
+        <span class="text-[9px] text-slate-500 mt-1">Qo'shish</span>
+      </button>`;
     }
+    grid.innerHTML = html;
+  }
 
-    document.getElementById('rasmInput').addEventListener('change', function() {
-      faylQoshish(this.files); this.value = '';
+  // ── Infratuzilma turi tanlash ─────────────────────────
+  function selectType(el, type) {
+    selectedType = selectedType === type ? '' : type;
+    document.querySelectorAll('.type-btn').forEach(b => {
+      b.style.borderColor = 'rgba(255,255,255,0.12)';
+      b.style.background = 'rgba(255,255,255,0.06)';
     });
-    document.getElementById('kameraInput').addEventListener('change', function() {
-      faylQoshish(this.files); this.value = '';
-    });
-
-    function rasmGridRender() {
-      const grid = document.getElementById('rasmGrid');
-      const kartalar = tanlangan_rasmlar.map((f, i) => {
-        const url = URL.createObjectURL(f);
-        const isVideo = f.type.startsWith('video/');
-        const preview = isVideo
-          ? `<div class="w-full h-full flex flex-col items-center justify-center" style="min-height:100px;background:rgba(239,68,68,0.1)">
-              <span class="material-symbols-outlined" style="font-size:32px;color:#ef4444">videocam</span>
-              <span class="text-xs text-slate-400 mt-1">Video</span>
-            </div>`
-          : `<img src="${url}" class="w-full h-full object-cover" style="min-height:100px;"/>`;
-        return `<div class="relative rounded-2xl overflow-hidden" style="min-height:100px;">
-          ${preview}
-          <button type="button" onclick="rasmOchir(${i})"
-            class="absolute top-1 right-1 w-6 h-6 rounded-full flex items-center justify-center"
-            style="background:rgba(0,0,0,0.7)">
-            <span class="material-symbols-outlined text-white" style="font-size:14px">close</span>
-          </button>
-        </div>`;
-      }).join('');
-
-      const addBtn = tanlangan_rasmlar.length < 5
-        ? `<button type="button" onclick="document.getElementById('rasmInput').click()"
-            class="flex flex-col items-center justify-center rounded-2xl cursor-pointer active:scale-95"
-            style="min-height:100px; border:2px dashed rgba(255,255,255,0.2); background:rgba(157,43,238,0.06);">
-            <span class="material-symbols-outlined text-primary" style="font-size:28px">add_photo_alternate</span>
-            <span class="text-xs text-slate-400 mt-1">Galereyadan</span>
-          </button>` : '';
-
-      grid.innerHTML = kartalar + addBtn;
+    if (selectedType) {
+      el.style.borderColor = 'rgba(157,43,238,0.5)';
+      el.style.background = 'rgba(157,43,238,0.1)';
     }
+    calcReach();
+  }
 
-    function rasmOchir(i) {
-      tanlangan_rasmlar.splice(i, 1);
-      rasmGridRender();
+  // ── Gamifikatsiya: ta'sir darajasi ────────────────────
+  function calcReach() {
+    let score = 0;
+    const izoh = (document.getElementById('izohInput')?.value || '').trim();
+
+    // GPS: +20
+    if (gpsCoords) score += 20;
+    // Media: +15 har biri (max 5 = 75... lekin jami 100 uchun limit)
+    score += Math.min(mediaFiles.length, 3) * 15; // max 45
+    // Izoh uzunligi: max 25
+    if (izoh.length > 10) score += Math.min(Math.floor(izoh.length / 20) * 5, 25);
+    // Tur tanlash: +10
+    if (selectedType) score += 10;
+
+    score = Math.min(score, 100);
+
+    document.getElementById('reachBar').style.width = score + '%';
+    document.getElementById('reachPercent').textContent = score + '%';
+
+    // Char count
+    const cc = document.getElementById('charCount');
+    if (cc) cc.textContent = izoh.length;
+
+    // Hint
+    const hint = document.getElementById('reachHint');
+    if (score < 20) hint.textContent = "Rasm yoki video qo'shing — signalingiz e'tiborga tushsin";
+    else if (score < 50) hint.textContent = "GPS va batafsil izoh qo'shsangiz, ta'sir 2x oshadi";
+    else if (score < 80) hint.textContent = "Yaxshi! Yana biroz izoh yozing — top signallarga chiqadi";
+    else hint.textContent = "Zo'r! Signalingiz maksimal tarqaladi va tezroq hal qilinadi";
+
+    // Rang
+    const pct = document.getElementById('reachPercent');
+    if (score >= 80) pct.style.color = '#22c55e';
+    else if (score >= 50) pct.style.color = '#3b82f6';
+    else if (score >= 20) pct.style.color = '#f59e0b';
+    else pct.style.color = '#ef4444';
+  }
+
+  // ── Yuborish ──────────────────────────────────────────
+  async function submitReport() {
+    const izoh = document.getElementById('izohInput').value.trim();
+    if (!izoh && mediaFiles.length === 0) {
+      tg.showAlert("Iltimos, izoh yoki rasm/video qo'shing");
+      return;
     }
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div><span>Yuborilmoqda...</span>';
 
-    async function formYuborish() {
-      const viloyat = document.getElementById('viloyat').value;
-      const tuman = document.getElementById('tuman').value;
-      const infratuzilma = document.getElementById('infratuzilma').value;
+    const formData = new FormData();
+    formData.append('viloyat', '');
+    formData.append('tuman', '');
+    formData.append('infratuzilma', selectedType || 'boshqa');
+    formData.append('sektor', '');
+    formData.append('is_anonim', isAnonim ? 'true' : 'false');
+    formData.append('izoh', izoh);
+    formData.append('telegram_user_id', user.id || '0');
+    formData.append('telegram_username', user.username || '');
+    formData.append('telegram_full_name', `${user.first_name || ''} ${user.last_name || ''}`.trim());
+    if (gpsCoords) {
+      formData.append('lat', gpsCoords.lat);
+      formData.append('lng', gpsCoords.lng);
+    }
+    mediaFiles.forEach(f => formData.append('rasmlar', f));
 
-      const btn = document.getElementById('submitBtn');
-      btn.disabled = true;
-      btn.innerHTML = '<div class="spinner"></div><span>Yuborilmoqda...</span>';
-
-      const user = tg.initDataUnsafe?.user || {};
-      const formData = new FormData();
-      formData.append('viloyat', viloyat);
-      formData.append('tuman', tuman);
-      formData.append('infratuzilma', infratuzilma || '');
-      formData.append('sektor', '');
-      formData.append('is_anonim', document.getElementById('isAnonim').checked ? 'true' : 'false');
-      formData.append('izoh', document.getElementById('izoh').value);
-      formData.append('telegram_user_id', user.id || '0');
-      formData.append('telegram_username', user.username || '');
-      formData.append('telegram_full_name', `${user.first_name || ''} ${user.last_name || ''}`.trim());
-
-      tanlangan_rasmlar.forEach(f => formData.append('rasmlar', f));
-
-      try {
-        const res = await fetch('/api/murojaat/', { method: 'POST', body: formData });
-        let data;
-        const text = await res.text();
-        try { data = JSON.parse(text); } catch(_) {
-          throw new Error('Server javobi noto\'g\'ri (' + res.status + '). Qayta urinib ko\'ring.');
-        }
-        if (res.ok && data.success) {
-          document.getElementById('successModal').classList.remove('hidden');
-        } else {
-          throw new Error(data.error || 'Server xatosi: ' + res.status);
-        }
-      } catch(e) {
-        tg.showAlert('Xatolik: ' + e.message);
-        btn.disabled = false;
-        btn.innerHTML = '<span>Yuborish</span><span class="material-symbols-outlined" style="font-size:20px">send</span>';
+    try {
+      const res = await fetch('/api/murojaat/', { method: 'POST', body: formData });
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch { throw new Error('Server xatosi'); }
+      if (res.ok && data.success) {
+        // Muvaffaqiyat
+        const reach = parseInt(document.getElementById('reachPercent').textContent);
+        document.getElementById('successReachVal').textContent = reach + '%';
+        document.getElementById('successModal').classList.remove('hidden');
+        // Reset
+        mediaFiles = [];
+        gpsCoords = null;
+        selectedType = '';
+      } else {
+        throw new Error(data.error || 'Xatolik');
       }
+    } catch (e) {
+      tg.showAlert('Xatolik: ' + e.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:20px;font-variation-settings:\'FILL\' 1">send</span><span>Signal yuborish</span>';
     }
-  </script>
+  }
+
+  // ── Landing statistika ────────────────────────────────
+  async function loadStats() {
+    try {
+      const r = await fetch('/api/statistika/');
+      const d = await r.json();
+      document.getElementById('landingStat1').textContent = d.murojaatlar_soni || 0;
+      document.getElementById('landingStat2').textContent = d.hal_qilingan || 0;
+      document.getElementById('landingStat3').textContent = d.jami_tekshiruv || 0;
+    } catch {}
+  }
+  loadStats();
+</script>
 </body>
 </html>
