@@ -10,53 +10,89 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config={theme:{extend:{fontFamily:{sans:["Inter","sans-serif"]}}}}</script>
   <style>
-    body{font-family:'Inter',sans-serif;background:#000;color:#fff;-webkit-tap-highlight-color:transparent;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter',sans-serif;background:#000;color:#fff;-webkit-tap-highlight-color:transparent;overflow-x:hidden;}
     ::-webkit-scrollbar{display:none;}
 
     /* ── Post ── */
-    .post{background:#000;border-bottom:0.5px solid rgba(255,255,255,0.08);padding-bottom:4px;margin-bottom:4px;}
+    .post{background:#000;border-bottom:0.5px solid rgba(255,255,255,0.06);padding-bottom:2px;margin-bottom:2px;opacity:0;transform:translateY(16px);}
+    .post.show{opacity:1;transform:translateY(0);transition:opacity 0.4s ease-out,transform 0.4s ease-out;}
 
     /* ── Video ── */
-    .vid-wrap{position:relative;background:#000;width:100%;overflow:hidden;}
-    .vid-wrap video{width:100%;display:block;max-height:75vh;object-fit:contain;}
+    .vid-wrap{position:relative;background:#000;width:100%;overflow:hidden;cursor:pointer;}
+    .vid-wrap video{width:100%;display:block;max-height:80vh;object-fit:contain;background:#000;}
     .play-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;pointer-events:none;}
     .play-icon.show{opacity:1;}
-    .play-icon div{width:56px;height:56px;border-radius:50%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);}
+    .play-icon div{width:64px;height:64px;border-radius:50%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(16px);border:2px solid rgba(255,255,255,0.08);}
+    .vid-progress{position:absolute;bottom:0;left:0;height:3px;background:linear-gradient(90deg,#9333ea,#ec4899);border-radius:0 2px 0 0;transition:width 0.2s linear;z-index:5;}
+    .mute-btn{position:absolute;bottom:14px;right:14px;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,0.5);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:6;border:1px solid rgba(255,255,255,0.08);cursor:pointer;transition:transform 0.15s;}
+    .mute-btn:active{transform:scale(0.85);}
 
-    /* ── Carousel ── */
-    .car{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;}
-    .car>div{scroll-snap-align:start;flex:0 0 100%;min-width:100%;}
-    .car img{width:100%;display:block;max-height:75vh;object-fit:cover;background:#111;}
-    .ind{position:absolute;top:12px;right:12px;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);}
-    .dots{display:flex;gap:4px;justify-content:center;padding:8px 0;}
-    .dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.2);transition:all 0.25s;}
-    .dot.on{background:#fff;width:18px;border-radius:3px;}
+    /* ── Double-tap heart ── */
+    .dbl-heart{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:10;}
+    .dbl-heart span{font-size:80px;color:#fff;opacity:0;transform:scale(0);font-variation-settings:'FILL' 1;filter:drop-shadow(0 4px 20px rgba(0,0,0,0.4));}
+    @keyframes dblPop{0%{opacity:1;transform:scale(0)}15%{opacity:1;transform:scale(1.2)}30%{opacity:1;transform:scale(0.95)}45%{opacity:1;transform:scale(1)}80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1)}}
+    .dbl-heart span.pop{animation:dblPop 0.9s ease-out forwards;}
 
     /* ── Actions ── */
-    .actions{display:flex;align-items:center;padding:10px 14px;gap:16px;}
-    .abtn{display:flex;align-items:center;gap:5px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
-    .abtn .mi{font-size:24px;transition:transform 0.15s;}
-    .abtn:active .mi{transform:scale(0.85);}
-    .abtn .num{font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);}
-    @keyframes heartBeat{0%{transform:scale(1)}15%{transform:scale(1.3)}30%{transform:scale(1)}45%{transform:scale(1.15)}60%{transform:scale(1)}}
+    .actions{display:flex;align-items:center;padding:12px 16px;gap:20px;}
+    .abtn{display:flex;align-items:center;gap:6px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform 0.1s;}
+    .abtn:active{transform:scale(0.9);}
+    .abtn .mi{font-size:26px;transition:transform 0.15s;}
+    .abtn .num{font-size:13px;font-weight:700;color:rgba(255,255,255,0.4);}
+    @keyframes heartBeat{0%{transform:scale(1)}15%{transform:scale(1.35)}30%{transform:scale(0.95)}50%{transform:scale(1.1)}70%{transform:scale(1)}}
     .heart-beat{animation:heartBeat 0.5s ease-out;}
 
-    /* ── Text ── */
-    .desc{padding:0 14px 8px;font-size:13px;line-height:1.5;color:rgba(255,255,255,0.85);}
-    .desc .name{font-weight:800;color:#fff;}
-    .desc .more{color:rgba(255,255,255,0.35);font-weight:600;cursor:pointer;}
+    /* ── Status badge ── */
+    .status-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:10px;font-weight:700;letter-spacing:0.02em;}
+    .status-kutilmoqda{background:rgba(250,204,21,0.1);color:#facc15;}
+    .status-korib_chiqilmoqda{background:rgba(59,130,246,0.1);color:#60a5fa;}
+    .status-hal_qilindi{background:rgba(34,197,94,0.1);color:#22c55e;}
 
-    /* ── Comment sheet ── */
-    .sheet-bg{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,0.5);display:none;}
-    .sheet-bg.open{display:block;}
-    .sheet{position:fixed;bottom:0;left:0;right:0;z-index:61;background:#262626;border-radius:16px 16px 0 0;max-height:70vh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform 0.3s ease-out;}
+    /* ── Text ── */
+    .desc{padding:2px 16px 12px;font-size:14px;line-height:1.5;color:rgba(255,255,255,0.8);}
+    .desc .name{font-weight:800;color:#fff;margin-right:5px;}
+    .desc .more{color:rgba(255,255,255,0.3);font-weight:600;cursor:pointer;}
+
+    /* ── Location ── */
+    .loc{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:rgba(255,255,255,0.25);font-weight:500;}
+
+    /* ── Comment sheet (modern) ── */
+    .sheet-bg{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,0);pointer-events:none;transition:background 0.35s;}
+    .sheet-bg.open{background:rgba(0,0,0,0.6);pointer-events:auto;}
+    .sheet{position:fixed;bottom:0;left:0;right:0;z-index:61;background:#1c1c1e;border-radius:16px 16px 0 0;max-height:80vh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.32,0.72,0,1);}
     .sheet.open{transform:translateY(0);}
-    .c-item{display:flex;gap:10px;padding:10px 0;}
-    .c-av{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-    .c-av span{font-size:11px;font-weight:800;color:rgba(255,255,255,0.5);}
-    .c-name{font-size:12px;font-weight:700;color:#fff;}
-    .c-time{font-size:11px;color:rgba(255,255,255,0.25);margin-left:6px;}
-    .c-text{font-size:13px;color:rgba(255,255,255,0.7);margin-top:2px;line-height:1.4;}
+
+    .c-header{display:flex;align-items:center;justify-content:center;position:relative;padding:14px 16px 12px;}
+    .c-handle{width:36px;height:4px;border-radius:99px;background:rgba(255,255,255,0.12);position:absolute;top:8px;left:50%;transform:translateX(-50%);}
+    .c-title{font-size:14px;font-weight:700;letter-spacing:-0.01em;}
+    .c-close{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.15s;}
+    .c-close:active{transform:translateY(-50%) scale(0.85);}
+
+    .c-list{flex:1;overflow-y:auto;padding:0 16px 8px;overscroll-behavior:contain;}
+    .c-item{display:flex;gap:12px;padding:14px 0;border-bottom:0.5px solid rgba(255,255,255,0.04);}
+    .c-item:last-child{border-bottom:none;}
+    .c-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:800;color:#fff;}
+    .c-av-gradient{background:linear-gradient(135deg,#667eea,#764ba2);}
+    .c-av-anon{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.3);}
+    .c-meta{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+    .c-name{font-size:13px;font-weight:700;color:#fff;}
+    .c-time{font-size:11px;color:rgba(255,255,255,0.18);font-weight:500;}
+    .c-text{font-size:14px;color:rgba(255,255,255,0.7);line-height:1.45;word-break:break-word;}
+    .c-like-btn{display:flex;flex-direction:column;align-items:center;gap:2px;margin-left:auto;flex-shrink:0;padding-top:4px;cursor:pointer;}
+    .c-like-btn span{font-size:16px;color:rgba(255,255,255,0.15);transition:all 0.15s;}
+
+    .c-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;}
+    .c-empty-icon{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;margin-bottom:12px;border:1px solid rgba(255,255,255,0.04);}
+
+    .c-input-wrap{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:0.5px solid rgba(255,255,255,0.06);background:#1c1c1e;}
+    .c-input-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#9333ea,#ec4899);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:800;color:#fff;}
+    .c-input{flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.04);border-radius:20px;padding:10px 16px;font-size:14px;color:#fff;outline:none;font-family:inherit;resize:none;max-height:80px;line-height:1.4;transition:border-color 0.2s;}
+    .c-input::placeholder{color:rgba(255,255,255,0.18);}
+    .c-input:focus{border-color:rgba(147,51,234,0.4);}
+    .c-send{width:36px;height:36px;border-radius:50%;background:rgba(147,51,234,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all 0.2s;border:none;opacity:0.4;pointer-events:none;}
+    .c-send.active{background:#9333ea;opacity:1;pointer-events:auto;}
+    .c-send:active{transform:scale(0.85);}
 
     /* ── Bottom nav ── */
     @keyframes sigPulse{0%{transform:scale(1);opacity:0.4}100%{transform:scale(1.6);opacity:0}}
@@ -64,56 +100,58 @@
     .fab::before{content:'';position:absolute;inset:-3px;border-radius:50%;border:1.5px solid rgba(147,51,234,0.3);animation:sigPulse 2s ease-out infinite;}
 
     @keyframes spin{to{transform:rotate(360deg)}}
-    .spinner{animation:spin 0.7s linear infinite;border:2.5px solid rgba(255,255,255,0.1);border-top-color:#fff;border-radius:50%;width:24px;height:24px;}
+    .spinner{animation:spin 0.7s linear infinite;border:2.5px solid rgba(255,255,255,0.06);border-top-color:#9333ea;border-radius:50%;width:24px;height:24px;}
   </style>
 </head>
-<body class="pb-[60px]">
+<body class="pb-[64px]">
 
 <!-- Header -->
-<div class="sticky top-0 z-40" style="background:rgba(0,0,0,0.88);backdrop-filter:blur(20px) saturate(180%);">
-  <div class="flex items-center justify-between px-4 h-11">
-    <span class="text-[15px] font-extrabold tracking-tight">Real Holat</span>
-    <a href="/tma/profil/" class="w-7 h-7 rounded-full bg-white/8 flex items-center justify-center">
-      <span class="material-symbols-outlined text-white/60" style="font-size:16px;font-variation-settings:'FILL' 1">person</span>
+<div class="sticky top-0 z-40" style="background:rgba(0,0,0,0.92);backdrop-filter:blur(24px) saturate(180%);">
+  <div class="flex items-center justify-between px-4 h-12">
+    <div class="flex items-center gap-2">
+      <span class="text-[17px] font-black tracking-tight">Real Holat</span>
+      <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-purple-500/15 text-purple-400" style="letter-spacing:0.04em;">BETA</span>
+    </div>
+    <a href="/tma/profil/" class="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center active:scale-90 transition-transform">
+      <span class="material-symbols-outlined text-white/50" style="font-size:18px;font-variation-settings:'FILL' 1">person</span>
     </a>
   </div>
 </div>
 
 <!-- Feed -->
 <div id="feed"></div>
-<div id="empty" class="hidden flex flex-col items-center justify-center py-24 px-6">
-  <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-    <span class="material-symbols-outlined text-white/15" style="font-size:32px">dynamic_feed</span>
-  </div>
-  <p class="text-sm font-bold text-white/30">Hali postlar yo'q</p>
-  <p class="text-xs text-white/15 mt-1">Birinchi bo'lib signal yuboring!</p>
-</div>
-<div id="loader" class="py-8 flex justify-center"><div class="spinner"></div></div>
 
 <!-- Comment Sheet -->
 <div id="sheetBg" class="sheet-bg" onclick="closeC()"></div>
 <div id="sheet" class="sheet">
-  <div class="px-4 pt-3 pb-1">
-    <div class="w-9 h-1 bg-white/15 rounded-full mx-auto mb-3"></div>
-    <div class="flex items-center justify-between mb-1">
-      <h3 class="text-[13px] font-bold">Izohlar</h3>
-      <button onclick="closeC()" class="text-white/30 active:scale-90 transition-transform">
-        <span class="material-symbols-outlined" style="font-size:20px">close</span>
-      </button>
+  <div class="c-header">
+    <div class="c-handle"></div>
+    <span class="c-title">Izohlar</span>
+    <div class="c-close" onclick="closeC()">
+      <span class="material-symbols-outlined text-white/40" style="font-size:16px">close</span>
     </div>
   </div>
-  <div id="cList" class="flex-1 overflow-y-auto px-4 pb-2" style="min-height:100px;max-height:calc(70vh - 110px)"></div>
-  <div id="cEmpty" class="hidden px-4 py-8 text-center text-xs text-white/20">Birinchi izohni yozing!</div>
-  <div class="px-3 py-2.5 flex gap-2" style="border-top:1px solid rgba(255,255,255,0.06);background:#262626;">
-    <input id="cInput" class="flex-1 bg-white/6 rounded-full px-4 py-2 text-[13px] text-white placeholder-white/25 focus:outline-none focus:ring-1 focus:ring-purple-500/30" placeholder="Izoh qo'shing..."/>
-    <button onclick="sendC()" class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center shrink-0 active:scale-90 transition-transform">
-      <span class="material-symbols-outlined text-white" style="font-size:15px">arrow_upward</span>
+  <div id="cList" class="c-list" style="min-height:80px;max-height:calc(80vh - 130px)"></div>
+  <div id="cEmpty" class="hidden">
+    <div class="c-empty">
+      <div class="c-empty-icon">
+        <span class="material-symbols-outlined text-white/10" style="font-size:24px">chat_bubble_outline</span>
+      </div>
+      <p class="text-[13px] font-semibold text-white/20 mb-1">Hali izohlar yo'q</p>
+      <p class="text-[11px] text-white/10">Birinchi bo'lib fikringizni bildiring</p>
+    </div>
+  </div>
+  <div class="c-input-wrap">
+    <div class="c-input-av" id="cAvatar">?</div>
+    <textarea id="cInput" class="c-input" placeholder="Izoh qo'shish..." rows="1" oninput="autoGrow(this);toggleSend()"></textarea>
+    <button id="cSendBtn" class="c-send" onclick="sendC()">
+      <span class="material-symbols-outlined text-white" style="font-size:18px">arrow_upward</span>
     </button>
   </div>
 </div>
 
 <!-- Bottom Nav -->
-<div class="fixed bottom-0 left-0 right-0 z-50" style="background:rgba(0,0,0,0.94);backdrop-filter:blur(20px);border-top:0.5px solid rgba(255,255,255,0.06);">
+<div class="fixed bottom-0 left-0 right-0 z-50" style="background:rgba(0,0,0,0.96);backdrop-filter:blur(24px);border-top:0.5px solid rgba(255,255,255,0.05);">
   <div class="flex items-end justify-around py-1.5 px-6">
     <a href="/tma/feed/" class="flex flex-col items-center gap-0.5 py-1">
       <span class="material-symbols-outlined text-white" style="font-size:24px;font-variation-settings:'FILL' 1">dynamic_feed</span>
@@ -124,8 +162,8 @@
       <span class="text-[9px] font-bold mt-1" style="color:#a855f7">Signal</span>
     </a>
     <a href="/tma/tahlil/" class="flex flex-col items-center gap-0.5 py-1">
-      <span class="material-symbols-outlined text-white/35" style="font-size:24px;font-variation-settings:'FILL' 1">bar_chart</span>
-      <span class="text-[9px] font-semibold text-white/35">Tahlil</span>
+      <span class="material-symbols-outlined text-white/30" style="font-size:24px;font-variation-settings:'FILL' 1">bar_chart</span>
+      <span class="text-[9px] font-semibold text-white/30">Tahlil</span>
     </a>
   </div>
 </div>
@@ -133,175 +171,333 @@
 <script>
 const tg=window.Telegram.WebApp;tg.ready();tg.expand();
 const U=tg.initDataUnsafe?.user||{},UID=U.id||'',UNAME=`${U.first_name||''} ${U.last_name||''}`.trim();
-let offset=0,loading=false,hasMore=true,activePost=null;
-const isVid=u=>/\.(mp4|mov|webm)/i.test(u);
-const fmt=n=>{if(!n)return'0';if(n>=1000)return(n/1000).toFixed(1)+'K';return''+n;};
 
-function card(p){
+// Set avatar in comment input
+document.getElementById('cAvatar').textContent=(UNAME[0]||'?').toUpperCase();
+
+const fmt=n=>{if(!n)return'0';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return''+n;};
+const statusCls={'kutilmoqda':'status-kutilmoqda','korib_chiqilmoqda':'status-korib_chiqilmoqda','hal_qilindi':'status-hal_qilindi'};
+const statusIcon={'kutilmoqda':'schedule','korib_chiqilmoqda':'visibility','hal_qilindi':'check_circle'};
+
+// ── Hardcoded feed data ──
+const POSTS=[
+  {
+    id:1,
+    user:'Aziz Karimov',
+    is_anonim:false,
+    izoh:'Qarshi–Yakkabo\'g\' yo\'lida ta\'mirlash ishlari boshlanganiga 3 oy bo\'ldi, lekin hali ham tugallanmagan. Har kuni bu yo\'ldan minglab mashina o\'tadi. Fuqarolar xavfsizligi xavf ostida!',
+    viloyat:'Qashqadaryo',
+    tuman:'Qarshi',
+    infratuzilma:'Yo\'l',
+    holat:'Kutilmoqda',
+    holat_kod:'kutilmoqda',
+    rasmlar:['/media/lenta/qarshi_yakkaboq.mp4'],
+    likes_soni:47,
+    comments_soni:4,
+    is_liked:false,
+    vaqt:'3 soat'
+  },
+  {
+    id:2,
+    user:'Sardor Rahimov',
+    is_anonim:false,
+    izoh:'Asfalt yotqizish ishlari nihoyat boshlandi! Rahmat tegishli tashkilotlarga. Umid qilamiz sifatli bo\'ladi va uzoq xizmat qiladi.',
+    viloyat:'Qashqadaryo',
+    tuman:'Qarshi sh.',
+    infratuzilma:'Yo\'l',
+    holat:'Hal qilindi',
+    holat_kod:'hal_qilindi',
+    rasmlar:['/media/lenta/asfalt.mp4'],
+    likes_soni:124,
+    comments_soni:5,
+    is_liked:false,
+    vaqt:'5 soat'
+  },
+  {
+    id:3,
+    user:'Anonim fuqaro',
+    is_anonim:true,
+    izoh:'Mahalliy ko\'cha 2 yildan beri buzilgan holatda. Bolalar maktabga xavfli sharoitda borishmoqda. Iltimos, e\'tibor qarating!',
+    viloyat:'Qashqadaryo',
+    tuman:'Shahrisabz',
+    infratuzilma:'Yo\'l',
+    holat:'Ko\'rib chiqilmoqda',
+    holat_kod:'korib_chiqilmoqda',
+    rasmlar:['/media/lenta/kocha.jpg'],
+    likes_soni:89,
+    comments_soni:6,
+    is_liked:false,
+    vaqt:'8 soat'
+  }
+];
+
+let activePost=null;
+
+// ── Build card ──
+function card(p,idx){
   const av=p.is_anonim
-    ?`<div class="w-8 h-8 rounded-full bg-white/8 flex items-center justify-center"><span class="material-symbols-outlined text-white/30" style="font-size:16px">person</span></div>`
-    :`<div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center"><span class="text-[11px] font-black text-white">${(p.user[0]||'').toUpperCase()}</span></div>`;
+    ?`<div class="w-10 h-10 rounded-full bg-white/[0.06] flex items-center justify-center" style="border:1px solid rgba(255,255,255,0.04);"><span class="material-symbols-outlined text-white/20" style="font-size:18px">person_off</span></div>`
+    :`<div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:linear-gradient(135deg,${idx===0?'#7c3aed,#ec4899':'#667eea,#764ba2'});"><span class="text-[13px] font-black text-white">${(p.user[0]||'').toUpperCase()}</span></div>`;
 
-  // Media
+  const loc=(p.viloyat||p.tuman)?`<div class="loc"><span class="material-symbols-outlined" style="font-size:12px;font-variation-settings:'FILL' 1">location_on</span>${[p.viloyat,p.tuman].filter(Boolean).join(', ')}</div>`:'';
+  const sBadge=p.holat_kod?`<span class="status-badge ${statusCls[p.holat_kod]||''}"><span class="material-symbols-outlined" style="font-size:11px;font-variation-settings:'FILL' 1">${statusIcon[p.holat_kod]||'info'}</span>${p.holat}</span>`:'';
+
+  const isVideo=/\.(mp4|mov|webm)/i.test(p.rasmlar[0]||'');
   let media='';
-  if(p.rasmlar?.length){
-    if(p.rasmlar.length===1){
-      const u=p.rasmlar[0];
-      media=isVid(u)
-        ?`<div class="vid-wrap" onclick="togglePlay(this)">
-            <video src="${u}" playsinline preload="metadata" loop muted></video>
-            <div class="play-icon show" id="pi-${p.id}"><div><span class="material-symbols-outlined text-white" style="font-size:28px;font-variation-settings:'FILL' 1">play_arrow</span></div></div>
-          </div>`
-        :`<img src="${u}" loading="lazy" style="width:100%;max-height:75vh;object-fit:cover;background:#111;display:block;" onerror="this.style.display='none'"/>`;
-    }else{
-      const slides=p.rasmlar.map(u=>
-        isVid(u)?`<div><div class="vid-wrap" onclick="togglePlay(this)"><video src="${u}" playsinline preload="metadata" loop muted></video><div class="play-icon show"><div><span class="material-symbols-outlined text-white" style="font-size:28px;font-variation-settings:'FILL' 1">play_arrow</span></div></div></div></div>`
-        :`<div><img src="${u}" loading="lazy" style="width:100%;max-height:75vh;object-fit:cover;background:#111;"/></div>`
-      ).join('');
-      media=`<div class="relative">
-        <div class="car" id="car-${p.id}" onscroll="onScr(${p.id},${p.rasmlar.length})">${slides}</div>
-        <div class="ind"><span id="ci-${p.id}">1</span>/${p.rasmlar.length}</div>
-      </div>
-      <div class="dots" id="dots-${p.id}">${p.rasmlar.map((_,i)=>`<div class="dot${i?'':' on'}"></div>`).join('')}</div>`;
-    }
+  const u=p.rasmlar[0];
+  if(isVideo){
+    media=`<div class="vid-wrap" data-vid="1">
+      <video src="${u}" playsinline preload="auto" loop muted></video>
+      <div class="play-icon show" id="pi-${p.id}"><div><span class="material-symbols-outlined text-white" style="font-size:32px;font-variation-settings:'FILL' 1">play_arrow</span></div></div>
+      <div class="vid-progress" id="vp-${p.id}" style="width:0%"></div>
+      <div class="mute-btn" onclick="event.stopPropagation();toggleMute(this)" data-muted="1"><span class="material-symbols-outlined text-white/60" style="font-size:16px;font-variation-settings:'FILL' 1">volume_off</span></div>
+      <div class="dbl-heart"><span class="material-symbols-outlined">favorite</span></div>
+    </div>`;
+  }else{
+    media=`<div class="relative"><img src="${u}" style="width:100%;max-height:80vh;object-fit:cover;background:#111;display:block;" onerror="this.parentElement.style.display='none'"/><div class="dbl-heart"><span class="material-symbols-outlined">favorite</span></div></div>`;
   }
 
-  // Text
   const t=p.izoh||'';
-  const long=t.length>100;
+  const long=t.length>120;
   const desc=t?`<div class="desc">
-    <span class="name">${p.user}</span> <span id="dt-${p.id}" style="${long?'display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden':''}">${t}</span>
-    ${long?`<span class="more" onclick="xpand(${p.id})"> ...yana</span>`:''}
+    <span class="name">${p.user}</span><span id="dt-${p.id}" style="${long?'display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden':''}">${t}</span>
+    ${long?`<span class="more" onclick="xpand(${p.id})"> ...ko'proq</span>`:''}
   </div>`:'';
 
-  const lk=p.is_liked;
-
-  return`<div class="post" id="post-${p.id}">
-    <div class="flex items-center gap-2.5 px-3.5 py-2.5">
+  return`<div class="post" id="post-${p.id}" data-pid="${p.id}">
+    <div class="flex items-center gap-3 px-4 py-3">
       ${av}
       <div class="flex-1 min-w-0">
-        <span class="text-[13px] font-bold">${p.user}</span>
-        ${p.infratuzilma?`<span class="text-[11px] text-white/25 ml-1.5">· ${p.infratuzilma}</span>`:''}
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-[14px] font-bold leading-tight">${p.user}</span>
+          ${sBadge}
+        </div>
+        <div class="flex items-center gap-2 mt-0.5">
+          ${p.infratuzilma?`<span class="text-[11px] text-white/25 font-medium">${p.infratuzilma}</span>`:''}
+          ${p.infratuzilma&&(p.viloyat||p.tuman)?'<span class="text-[11px] text-white/10">·</span>':''}
+          ${loc}
+        </div>
       </div>
-      <span class="text-[11px] text-white/20">${p.vaqt}</span>
+      <span class="text-[11px] text-white/15 font-medium self-start mt-1">${p.vaqt}</span>
     </div>
     ${media}
     <div class="actions">
       <div class="abtn" onclick="doLike(${p.id})">
-        <span class="material-symbols-outlined mi ${lk?'text-red-500':'text-white'}" style="${lk?'font-variation-settings:\"FILL\" 1':''}" id="lk-${p.id}">favorite</span>
+        <span class="material-symbols-outlined mi text-white/70" style="font-variation-settings:'FILL' 0" id="lk-${p.id}">favorite</span>
         <span class="num" id="ln-${p.id}">${fmt(p.likes_soni)}</span>
       </div>
       <div class="abtn" onclick="openC(${p.id})">
-        <span class="material-symbols-outlined mi text-white">chat_bubble_outline</span>
+        <span class="material-symbols-outlined mi text-white/70" style="font-variation-settings:'FILL' 0">chat_bubble</span>
         <span class="num" id="cn-${p.id}">${fmt(p.comments_soni)}</span>
       </div>
       <div class="abtn" onclick="doShare(${p.id})">
-        <span class="material-symbols-outlined mi text-white" style="font-size:22px">send</span>
+        <span class="material-symbols-outlined mi text-white/70" style="font-size:22px;font-variation-settings:'FILL' 1">send</span>
+      </div>
+      <div class="flex-1"></div>
+      <div class="abtn" onclick="doBookmark(this)">
+        <span class="material-symbols-outlined mi text-white/20" style="font-size:24px;font-variation-settings:'FILL' 0">bookmark</span>
       </div>
     </div>
     ${desc}
-    ${p.comments_soni>0?`<div class="px-3.5 pb-2.5"><span class="text-[12px] text-white/25 cursor-pointer" onclick="openC(${p.id})">${p.comments_soni} ta izohni ko'rish</span></div>`:''}
+    ${p.comments_soni>0?`<div class="px-4 pb-3"><span class="text-[12px] text-white/20 font-medium cursor-pointer active:text-white/30" onclick="openC(${p.id})">${p.comments_soni} ta izohni ko'rish</span></div>`:''}
   </div>`;
 }
 
-// ── Video play/pause ──
-function togglePlay(wrap){
-  const v=wrap.querySelector('video');
+// ── Render feed ──
+function renderFeed(){
+  const el=document.getElementById('feed');
+  POSTS.forEach((p,i)=>el.insertAdjacentHTML('beforeend',card(p,i)));
+  // Stagger show animation
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('.post').forEach((p,i)=>{
+      setTimeout(()=>p.classList.add('show'),i*120);
+    });
+  });
+  // Setup video observers
+  setupVideos();
+}
+
+// ── Video autoplay on scroll ──
+function setupVideos(){
+  const vidObserver=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      const v=e.target.querySelector('video');if(!v)return;
+      if(e.isIntersecting){
+        v.play().catch(()=>{});
+        e.target.querySelector('.play-icon')?.classList.remove('show');
+      }else{
+        v.pause();
+        e.target.querySelector('.play-icon')?.classList.add('show');
+      }
+    });
+  },{threshold:0.5});
+
+  document.querySelectorAll('.vid-wrap[data-vid]').forEach(w=>{
+    vidObserver.observe(w);
+    const v=w.querySelector('video');
+    if(v){
+      v.addEventListener('timeupdate',()=>{
+        const bar=w.querySelector('.vid-progress');
+        if(bar&&v.duration)bar.style.width=(v.currentTime/v.duration*100)+'%';
+      });
+    }
+  });
+}
+
+// ── Video tap play/pause ──
+document.addEventListener('click',e=>{
+  const wrap=e.target.closest('.vid-wrap');
+  if(!wrap||e.target.closest('.mute-btn'))return;
+  const v=wrap.querySelector('video');if(!v)return;
   const pi=wrap.querySelector('.play-icon');
-  if(!v)return;
   if(v.paused){
-    v.muted=false;v.play();
+    v.play().catch(()=>{});
     if(pi){pi.classList.remove('show');pi.querySelector('.material-symbols-outlined').textContent='play_arrow';}
   }else{
     v.pause();
     if(pi){pi.classList.add('show');pi.querySelector('.material-symbols-outlined').textContent='pause';}
   }
+});
+
+function toggleMute(btn){
+  const wrap=btn.closest('.vid-wrap');
+  const v=wrap?.querySelector('video');if(!v)return;
+  v.muted=!v.muted;
+  btn.querySelector('.material-symbols-outlined').textContent=v.muted?'volume_off':'volume_up';
 }
 
-// ── Carousel ──
-function onScr(id,total){
-  const c=document.getElementById('car-'+id);if(!c)return;
-  const i=Math.round(c.scrollLeft/c.offsetWidth);
-  const d=document.getElementById('dots-'+id);
-  if(d)d.querySelectorAll('.dot').forEach((x,j)=>x.classList.toggle('on',j===i));
-  const ci=document.getElementById('ci-'+id);
-  if(ci)ci.textContent=i+1;
-}
+// ── Double tap to like ──
+let lastTap=0,lastTapTarget=null;
+document.addEventListener('touchend',e=>{
+  const post=e.target.closest('.post');if(!post)return;
+  const media=e.target.closest('.vid-wrap, .relative');if(!media)return;
+  const now=Date.now();
+  if(lastTapTarget===post&&now-lastTap<300){
+    e.preventDefault();
+    const pid=parseInt(post.dataset.pid);
+    const ic=document.getElementById('lk-'+pid);
+    if(ic&&!ic.classList.contains('text-red-500'))doLike(pid);
+    const heart=media.querySelector('.dbl-heart span');
+    if(heart){heart.classList.remove('pop');void heart.offsetWidth;heart.classList.add('pop');}
+    lastTap=0;lastTapTarget=null;
+  }else{lastTap=now;lastTapTarget=post;}
+});
 
 function xpand(id){
   const el=document.getElementById('dt-'+id);
   if(el){el.style.display='inline';el.style.webkitLineClamp='unset';}
-  const p=el?.parentElement;
-  const m=p?.querySelector('.more');if(m)m.remove();
+  el?.parentElement?.querySelector('.more')?.remove();
 }
-
-// ── Feed load ──
-async function load(reset){
-  if(loading||(!hasMore&&!reset))return;
-  if(reset){offset=0;hasMore=true;}
-  loading=true;
-  document.getElementById('loader').classList.remove('hidden');
-  try{
-    const d=await(await fetch(`/api/feed/?limit=10&offset=${offset}&user_id=${UID}`)).json();
-    const el=document.getElementById('feed');
-    if(reset)el.innerHTML='';
-    if((!d.results||!d.results.length)&&!offset)document.getElementById('empty').classList.remove('hidden');
-    else if(d.results){document.getElementById('empty').classList.add('hidden');d.results.forEach(p=>el.insertAdjacentHTML('beforeend',card(p)));}
-    offset+=(d.results||[]).length;hasMore=d.has_more||false;
-  }catch(e){console.error(e);hasMore=false;if(!offset)document.getElementById('empty').classList.remove('hidden');}
-  loading=false;
-  if(!hasMore)document.getElementById('loader').classList.add('hidden');
-}
-new IntersectionObserver(e=>{if(e[0].isIntersecting&&hasMore)load();},{rootMargin:'400px'}).observe(document.getElementById('loader'));
 
 // ── Like ──
 function doLike(id){
-  if(!UID)return;
   const ic=document.getElementById('lk-'+id),cn=document.getElementById('ln-'+id);
+  if(!ic||!cn)return;
   const liked=ic.classList.contains('text-red-500');
   const cur=parseInt(cn.textContent)||0;
-  if(liked){ic.className='material-symbols-outlined mi text-white';ic.style.fontVariationSettings='';cn.textContent=fmt(Math.max(0,cur-1));}
-  else{ic.className='material-symbols-outlined mi text-red-500';ic.style.fontVariationSettings='"FILL" 1';ic.classList.add('heart-beat');cn.textContent=fmt(cur+1);setTimeout(()=>ic.classList.remove('heart-beat'),500);}
-  fetch('/api/feed/like/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({murojaat_id:id,telegram_user_id:UID})}).catch(()=>{});
+  if(liked){
+    ic.className='material-symbols-outlined mi text-white/70';
+    ic.style.fontVariationSettings='"FILL" 0';
+    cn.textContent=fmt(Math.max(0,cur-1));
+  }else{
+    ic.className='material-symbols-outlined mi text-red-500';
+    ic.style.fontVariationSettings='"FILL" 1';
+    ic.classList.add('heart-beat');
+    cn.textContent=fmt(cur+1);
+    setTimeout(()=>ic.classList.remove('heart-beat'),500);
+  }
+  if(UID)fetch('/api/feed/like/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({murojaat_id:id,telegram_user_id:UID})}).catch(()=>{});
 }
 
-// ── Comments ──
+function doBookmark(btn){
+  const ic=btn.querySelector('.material-symbols-outlined');
+  const filled=ic.style.fontVariationSettings.includes('1');
+  ic.style.fontVariationSettings=filled?'"FILL" 0':'"FILL" 1';
+  ic.classList.toggle('text-white/20',filled);
+  ic.classList.toggle('text-white',!filled);
+}
+
+function doShare(id){if(navigator.share)navigator.share({title:'Real Holat',url:location.origin+'/tma/feed/#post-'+id}).catch(()=>{});}
+
+// ── Comments (modern) ──
+const COMMENT_COLORS=['#7c3aed,#ec4899','#667eea,#764ba2','#f59e0b,#ef4444','#10b981,#3b82f6','#8b5cf6,#06b6d4'];
+
 function openC(id){
   activePost=id;
   document.getElementById('sheetBg').classList.add('open');
   document.getElementById('sheet').classList.add('open');
+  document.body.style.overflow='hidden';
   loadC(id);
 }
 function closeC(){
   document.getElementById('sheet').classList.remove('open');
-  setTimeout(()=>document.getElementById('sheetBg').classList.remove('open'),300);
+  setTimeout(()=>{document.getElementById('sheetBg').classList.remove('open');document.body.style.overflow='';},350);
   activePost=null;
 }
+
+function commentHTML(c,i){
+  const colors=COMMENT_COLORS[i%COMMENT_COLORS.length];
+  const initial=(c.user[0]||'?').toUpperCase();
+  const isAnon=c.user.includes('Anonim');
+  return`<div class="c-item" style="animation:fadeUp 0.25s ease-out ${i*0.05}s both">
+    <div class="c-av ${isAnon?'c-av-anon':'c-av-gradient'}" style="${isAnon?'':`background:linear-gradient(135deg,${colors})`}">${initial}</div>
+    <div class="flex-1 min-w-0">
+      <div class="c-meta">
+        <span class="c-name">${c.user}</span>
+        <span class="c-time">${c.vaqt}</span>
+      </div>
+      <p class="c-text">${c.matn}</p>
+    </div>
+    <div class="c-like-btn" onclick="this.classList.toggle('liked');const s=this.querySelector('span');if(this.classList.contains('liked')){s.style.fontVariationSettings='\"FILL\" 1';s.style.color='#ef4444';}else{s.style.fontVariationSettings='\"FILL\" 0';s.style.color='rgba(255,255,255,0.15)';}">
+      <span class="material-symbols-outlined" style="font-size:16px;font-variation-settings:'FILL' 0">favorite</span>
+    </div>
+  </div>`;
+}
+
 async function loadC(id){
   const list=document.getElementById('cList'),emp=document.getElementById('cEmpty');
-  list.innerHTML='<div class="flex justify-center py-6"><div class="spinner"></div></div>';
+  list.innerHTML='<div class="flex justify-center py-10"><div class="spinner"></div></div>';
   emp.classList.add('hidden');
   try{
     const d=await(await fetch(`/api/feed/${id}/comments/`)).json();
     if(!d.comments?.length){list.innerHTML='';emp.classList.remove('hidden');}
-    else list.innerHTML=d.comments.map(c=>`<div class="c-item">
-      <div class="c-av"><span>${(c.user[0]||'?').toUpperCase()}</span></div>
-      <div class="flex-1"><div><span class="c-name">${c.user}</span><span class="c-time">${c.vaqt}</span></div><p class="c-text">${c.matn}</p></div>
-    </div>`).join('');
-  }catch{list.innerHTML='<p class="text-center text-xs text-red-400 py-4">Xatolik</p>';}
+    else{emp.classList.add('hidden');list.innerHTML=d.comments.map((c,i)=>commentHTML(c,i)).join('');}
+  }catch{list.innerHTML='<p class="text-center text-xs text-white/20 py-8">Xatolik yuz berdi</p>';}
 }
-async function sendC(){
-  if(!activePost||!UID)return;
-  const inp=document.getElementById('cInput'),m=inp.value.trim();if(!m)return;inp.value='';
-  try{
-    const d=await(await fetch('/api/feed/comment/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({murojaat_id:activePost,telegram_user_id:UID,telegram_full_name:UNAME,matn:m})})).json();
-    if(d.success){const cn=document.getElementById('cn-'+activePost);if(cn)cn.textContent=fmt(d.comments_soni);loadC(activePost);}
-  }catch{}
-}
-document.getElementById('cInput').addEventListener('keypress',e=>{if(e.key==='Enter')sendC();});
-function doShare(id){if(navigator.share)navigator.share({title:'Real Holat',url:location.origin+'/tma/feed/#post-'+id});}
 
-load(true);
+function autoGrow(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,80)+'px';}
+function toggleSend(){
+  const btn=document.getElementById('cSendBtn');
+  const val=document.getElementById('cInput').value.trim();
+  btn.classList.toggle('active',!!val);
+}
+
+async function sendC(){
+  if(!activePost)return;
+  const inp=document.getElementById('cInput'),m=inp.value.trim();if(!m)return;
+  inp.value='';inp.style.height='auto';toggleSend();
+  // Optimistic add
+  const list=document.getElementById('cList');
+  const emp=document.getElementById('cEmpty');emp.classList.add('hidden');
+  const tempHTML=commentHTML({user:UNAME||'Siz',matn:m,vaqt:'Hozirgina'},list.children.length);
+  list.insertAdjacentHTML('beforeend',tempHTML);
+  list.scrollTop=list.scrollHeight;
+  // Update count
+  const cn=document.getElementById('cn-'+activePost);
+  if(cn)cn.textContent=fmt((parseInt(cn.textContent)||0)+1);
+  // Send to API
+  if(UID){
+    try{
+      await fetch('/api/feed/comment/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({murojaat_id:activePost,telegram_user_id:UID,telegram_full_name:UNAME,matn:m})});
+    }catch{}
+  }
+}
+
+document.getElementById('cInput').addEventListener('keypress',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendC();}});
+document.getElementById('sheet').addEventListener('touchmove',e=>e.stopPropagation());
+
+// ── Init ──
+renderFeed();
 </script>
 </body>
 </html>
