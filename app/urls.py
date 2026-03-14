@@ -8,6 +8,7 @@ urlpatterns = [
     path('tma/maktablar/', views.tma_maktablar, name='tma_maktablar'),
     path('tma/maktablar/<int:maktab_id>/', views.tma_maktab_detail, name='tma_maktab_detail'),
     path('tma/tahlil/', views.tma_tahlil, name='tma_tahlil'),
+    path('tma/feed/', views.tma_feed, name='tma_feed'),
 
     # ── REST API ────────────────────────────────────────────────
     path('api/statistika/', views.statistika_api, name='api_statistika'),
@@ -21,4 +22,10 @@ urlpatterns = [
     path('api/meta/', views.meta_api, name='api_meta'),
     path('api/viloyatlar/', views.viloyatlar_api, name='api_viloyatlar'),
     path('api/tumanlari/', views.tumanlari_api, name='api_tumanlari'),
+
+    # ── Feed API ───────────────────────────────────────────────
+    path('api/feed/', views.feed_api, name='api_feed'),
+    path('api/feed/like/', views.feed_like, name='api_feed_like'),
+    path('api/feed/comment/', views.feed_comment, name='api_feed_comment'),
+    path('api/feed/<int:murojaat_id>/comments/', views.feed_comments_list, name='api_feed_comments'),
 ]

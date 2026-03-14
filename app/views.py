@@ -5,8 +5,10 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from rest_framework import status
 
+from django.utils import timezone
 from .models import (
     Murojaat, MurojaatRasm, Statistika, Maktab, Vaada, Tekshiruv,
+    Like, Comment,
     VILOYATLAR, INFRATUZILMA_TURLARI,
 )
 
@@ -45,6 +47,9 @@ def tma_maktab_detail(request, maktab_id):
 
 def tma_tahlil(request):
     return render(request, 'tahlil.html')
+
+def tma_feed(request):
+    return render(request, 'feed.html')
 
 
 # ─── API: Statistika ─────────────────────────────────────────────────────────
@@ -101,6 +106,7 @@ def murojaat_yuborish(request):
         telegram_user_id=int(telegram_user_id),
         telegram_username=data.get('telegram_username', ''),
         telegram_full_name=data.get('telegram_full_name', ''),
+        is_anonim=data.get('is_anonim', 'false') == 'true',
     )
     # Ko'p rasm saqlash
     rasmlar = request.FILES.getlist('rasmlar')
@@ -550,3 +556,173 @@ def tumanlari_api(request):
             'vaadalar_soni': vaadalar_soni,
         })
     return Response(result)
+
+
+# ─── Nisbiy vaqt helper ──────────────────────────────────────────────────────
+
+def nisbiy_vaqt(dt):
+    """DateTimeField → 'Hozirgina', '5 daqiqa oldin', '2 soat oldin', 'Kecha', '12.03.2026'"""
+    now = timezone.now()
+    diff = now - dt
+    seconds = int(diff.total_seconds())
+    if seconds < 60:
+        return 'Hozirgina'
+    minutes = seconds // 60
+    if minutes < 60:
+        return f'{minutes} daqiqa oldin'
+    hours = minutes // 60
+    if hours < 24:
+        return f'{hours} soat oldin'
+    days = hours // 24
+    if days == 1:
+        return 'Kecha'
+    if days < 7:
+        return f'{days} kun oldin'
+    return dt.strftime('%d.%m.%Y')
+
+
+# ─── API: Feed (Lenta) ───────────────────────────────────────────────────────
+
+HOLAT_LABELS = {
+    'kutilmoqda': 'Kutilmoqda',
+    'korib_chiqilmoqda': "Ko'rib chiqilmoqda",
+    'hal_qilindi': 'Hal qilindi',
+}
+
+
+@api_view(['GET'])
+def feed_api(request):
+    """Ommaviy feed — barcha murojaatlar, pagination + like/comment soni"""
+    limit = min(int(request.query_params.get('limit', 10)), 50)
+    offset = int(request.query_params.get('offset', 0))
+    user_id = request.query_params.get('user_id', '')
+    infratuzilma = request.query_params.get('infratuzilma', '')
+
+    qs = Murojaat.objects.annotate(
+        likes_soni=Count('likes'),
+        comments_soni=Count('comments'),
+    ).order_by('-yuborilgan_vaqt')
+
+    if infratuzilma:
+        qs = qs.filter(infratuzilma=infratuzilma)
+
+    jami = qs.count()
+    items = qs[offset:offset + limit]
+
+    # User liked qaysilarini oldindan olish
+    liked_ids = set()
+    if user_id:
+        liked_ids = set(
+            Like.objects.filter(
+                telegram_user_id=int(user_id),
+                murojaat_id__in=[m.id for m in items],
+            ).values_list('murojaat_id', flat=True)
+        )
+
+    results = []
+    for m in items:
+        # Rasmlar
+        rasmlar = list(m.rasmlar.values_list('rasm', flat=True))
+        rasm_urls = [f'/media/{r}' for r in rasmlar]
+        if not rasm_urls and m.rasm:
+            rasm_urls = [m.rasm.url]
+
+        # User nomi
+        if m.is_anonim:
+            user_nom = 'Anonim fuqaro'
+        else:
+            user_nom = m.telegram_full_name or f'Fuqaro #{m.telegram_user_id}'
+
+        results.append({
+            'id': m.id,
+            'user': user_nom,
+            'is_anonim': m.is_anonim,
+            'izoh': m.izoh,
+            'viloyat': m.get_viloyat_display() if m.viloyat else '',
+            'tuman': m.tuman,
+            'infratuzilma': m.get_infratuzilma_display() if m.infratuzilma else '',
+            'infratuzilma_kod': m.infratuzilma,
+            'holat': HOLAT_LABELS.get(m.holat, m.holat),
+            'holat_kod': m.holat,
+            'rasmlar': rasm_urls,
+            'likes_soni': m.likes_soni,
+            'comments_soni': m.comments_soni,
+            'is_liked': m.id in liked_ids,
+            'vaqt': nisbiy_vaqt(m.yuborilgan_vaqt),
+        })
+
+    return Response({
+        'results': results,
+        'jami': jami,
+        'has_more': offset + limit < jami,
+    })
+
+
+@api_view(['POST'])
+@parser_classes([JSONParser, FormParser])
+def feed_like(request):
+    """Like toggle — bossa qo'shadi, yana bossa olib tashlaydi"""
+    murojaat_id = request.data.get('murojaat_id')
+    telegram_user_id = request.data.get('telegram_user_id')
+
+    if not murojaat_id or not telegram_user_id:
+        return Response({'error': 'murojaat_id va telegram_user_id kerak'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        like = Like.objects.get(murojaat_id=int(murojaat_id), telegram_user_id=int(telegram_user_id))
+        like.delete()
+        liked = False
+    except Like.DoesNotExist:
+        Like.objects.create(murojaat_id=int(murojaat_id), telegram_user_id=int(telegram_user_id))
+        liked = True
+
+    likes_soni = Like.objects.filter(murojaat_id=int(murojaat_id)).count()
+    return Response({'success': True, 'liked': liked, 'likes_soni': likes_soni})
+
+
+@api_view(['POST'])
+@parser_classes([JSONParser, FormParser])
+def feed_comment(request):
+    """Yangi izoh qo'shish"""
+    murojaat_id = request.data.get('murojaat_id')
+    telegram_user_id = request.data.get('telegram_user_id')
+    matn = request.data.get('matn', '').strip()
+
+    if not murojaat_id or not telegram_user_id or not matn:
+        return Response({'error': 'murojaat_id, telegram_user_id va matn kerak'}, status=status.HTTP_400_BAD_REQUEST)
+
+    comment = Comment.objects.create(
+        murojaat_id=int(murojaat_id),
+        telegram_user_id=int(telegram_user_id),
+        telegram_full_name=request.data.get('telegram_full_name', ''),
+        matn=matn,
+    )
+
+    comments_soni = Comment.objects.filter(murojaat_id=int(murojaat_id)).count()
+    return Response({
+        'success': True,
+        'comment': {
+            'id': comment.id,
+            'user': comment.telegram_full_name or f'Fuqaro #{comment.telegram_user_id}',
+            'matn': comment.matn,
+            'vaqt': 'Hozirgina',
+        },
+        'comments_soni': comments_soni,
+    }, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET'])
+def feed_comments_list(request, murojaat_id):
+    """Murojaat izohlarini olish"""
+    comments = Comment.objects.filter(murojaat_id=murojaat_id)[:50]
+    data = [{
+        'id': c.id,
+        'user': c.telegram_full_name or f'Fuqaro #{c.telegram_user_id}',
+        'matn': c.matn,
+        'vaqt': nisbiy_vaqt(c.vaqt),
+    } for c in comments]
+
+    return Response({
+        'comments': data,
+        'jami': Comment.objects.filter(murojaat_id=murojaat_id).count(),
+    })

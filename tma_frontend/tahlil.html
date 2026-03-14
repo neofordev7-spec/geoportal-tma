@@ -24,7 +24,7 @@
     .bar-anim{animation:growWidth 0.8s ease-out forwards;}
   </style>
 </head>
-<body class="pb-6">
+<body class="pb-20">
 
   <!-- Header -->
   <div class="sticky top-0 z-50 px-3 pt-3 pb-2" style="background:linear-gradient(to bottom,rgba(220,252,231,0.95) 70%,transparent)">
@@ -463,5 +463,27 @@
 
     yukla();
   </script>
+
+  <!-- ═══ Bottom tabs ═══ -->
+  <div class="fixed bottom-0 left-0 right-0 z-50" style="background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);border-top:1px solid rgba(0,0,0,0.06);">
+    <div class="flex justify-around py-2 px-2">
+      <a href="/tma/" class="flex flex-col items-center gap-0.5 px-3 py-1">
+        <span class="material-symbols-outlined text-slate-400" style="font-size:22px">map</span>
+        <span class="text-xs font-semibold text-slate-400">Xarita</span>
+      </a>
+      <a href="/tma/murojaat/" class="flex flex-col items-center gap-0.5 px-3 py-1">
+        <span class="material-symbols-outlined text-slate-400" style="font-size:22px">campaign</span>
+        <span class="text-xs font-semibold text-slate-400">Signal</span>
+      </a>
+      <a href="/tma/feed/" class="flex flex-col items-center gap-0.5 px-3 py-1">
+        <span class="material-symbols-outlined text-slate-400" style="font-size:22px">dynamic_feed</span>
+        <span class="text-xs font-semibold text-slate-400">Lenta</span>
+      </a>
+      <a href="/tma/tahlil/" class="flex flex-col items-center gap-0.5 px-3 py-1">
+        <span class="material-symbols-outlined" style="font-size:22px;color:#9d2bee">bar_chart</span>
+        <span class="text-xs font-bold" style="color:#9d2bee">Tahlil</span>
+      </a>
+    </div>
+  </div>
 </body>
 </html>

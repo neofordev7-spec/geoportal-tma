@@ -53,6 +53,7 @@ class Murojaat(models.Model):
     telegram_full_name = models.CharField(max_length=200, blank=True)
     yuborilgan_vaqt = models.DateTimeField(auto_now_add=True)
     holat = models.CharField(max_length=50, choices=HOLAT_TURLARI, default='kutilmoqda')
+    is_anonim = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-yuborilgan_vaqt']
@@ -183,3 +184,35 @@ class Tekshiruv(models.Model):
 
     def __str__(self):
         return f"{self.maktab.nom} — {self.get_natija_display()} — {self.telegram_full_name or self.telegram_user_id}"
+
+
+# ─── Feed modellari ──────────────────────────────────────────────────────────
+
+class Like(models.Model):
+    murojaat = models.ForeignKey(Murojaat, on_delete=models.CASCADE, related_name='likes')
+    telegram_user_id = models.BigIntegerField()
+    vaqt = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('murojaat', 'telegram_user_id')
+        verbose_name = 'Like'
+        verbose_name_plural = 'Likelar'
+
+    def __str__(self):
+        return f"Like: {self.telegram_user_id} → Murojaat #{self.murojaat_id}"
+
+
+class Comment(models.Model):
+    murojaat = models.ForeignKey(Murojaat, on_delete=models.CASCADE, related_name='comments')
+    telegram_user_id = models.BigIntegerField()
+    telegram_full_name = models.CharField(max_length=200, blank=True)
+    matn = models.TextField(max_length=500)
+    vaqt = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-vaqt']
+        verbose_name = 'Izoh'
+        verbose_name_plural = 'Izohlar'
+
+    def __str__(self):
+        return f"{self.telegram_full_name}: {self.matn[:50]}"

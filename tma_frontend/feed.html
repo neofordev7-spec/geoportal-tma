@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Lenta | GEOPORTAL</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:"#9d2bee"},fontFamily:{display:["Inter","sans-serif"]}}}}</script>
+  <style>
+    body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#dcfce7 0%,#e0f2fe 50%,#f3e8ff 100%);min-height:100vh;color:#0f172a;}
+    .glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.7);}
+    .glass-sm{background:rgba(255,255,255,0.4);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.6);}
+    ::-webkit-scrollbar{display:none;}
+    .scroll-x{overflow-x:auto;scrollbar-width:none;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp 0.3s ease-out forwards;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .spinner{animation:spin 0.8s linear infinite;border:2px solid rgba(0,0,0,0.1);border-top-color:#9d2bee;border-radius:50%;width:24px;height:24px;}
+    .like-pop{animation:likePop 0.35s ease-out}
+    @keyframes likePop{0%{transform:scale(1)}30%{transform:scale(1.3)}100%{transform:scale(1)}}
+    @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    .slide-up{animation:slideUp 0.3s ease-out forwards;}
+    .chip-active{background:#9d2bee !important;color:#fff !important;border-color:#9d2bee !important;}
+  </style>
+</head>
+<body class="pb-20">
+
+  <!-- ═══ Header ═══ -->
+  <div class="sticky top-0 z-50 px-3 pt-3 pb-1" style="background:linear-gradient(to bottom,rgba(220,252,231,0.95) 70%,transparent)">
+    <nav class="glass rounded-full px-4 py-2.5 flex items-center justify-between shadow-sm">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-full bg-blue-500 flex items-center justify-center">
+          <span class="material-symbols-outlined text-white" style="font-size:15px">public</span>
+        </div>
+        <span class="font-black text-base tracking-tight text-slate-900">Lenta</span>
+      </div>
+      <div id="feedCount" class="glass-sm rounded-full px-3 py-1 flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-primary" style="font-size:14px">dynamic_feed</span>
+        <span id="jamiPosts" class="text-xs font-bold text-slate-700">0</span>
+      </div>
+    </nav>
+  </div>
+
+  <!-- ═══ Filter chips ═══ -->
+  <div class="scroll-x px-3 py-2 flex gap-2">
+    <button onclick="filterFeed('')" class="chip-active shrink-0 glass-sm rounded-full px-3.5 py-1.5 text-xs font-bold text-slate-600 border border-white/50 active:scale-95 transition-all" data-filter="">
+      Hammasi
+    </button>
+    <button onclick="filterFeed('maktab')" class="shrink-0 glass-sm rounded-full px-3.5 py-1.5 text-xs font-bold text-slate-600 border border-white/50 active:scale-95 transition-all" data-filter="maktab">
+      Maktab
+    </button>
+    <button onclick="filterFeed('shifoxona')" class="shrink-0 glass-sm rounded-full px-3.5 py-1.5 text-xs font-bold text-slate-600 border border-white/50 active:scale-95 transition-all" data-filter="shifoxona">
+      Shifoxona
+    </button>
+    <button onclick="filterFeed('bogcha')" class="shrink-0 glass-sm rounded-full px-3.5 py-1.5 text-xs font-bold text-slate-600 border border-white/50 active:scale-95 transition-all" data-filter="bogcha">
+      Bog'cha
+    </button>
+    <button onclick="filterFeed('yol')" class="shrink-0 glass-sm rounded-full px-3.5 py-1.5 text-xs font-bold text-slate-600 border border-white/50 active:scale-95 transition-all" data-filter="yol">
+      Yo'l
+    </button>
+    <button onclick="filterFeed('sport')" class="shrink-0 glass-sm rounded-full px-3.5 py-1.5 text-xs font-bold text-slate-600 border border-white/50 active:scale-95 transition-all" data-filter="sport">
+      Sport
+    </button>
+  </div>
+
+  <!-- ═══ Feed list ═══ -->
+  <div id="feedList" class="px-3 space-y-3">
+    <!-- Cards rendered by JS -->
+  </div>
+
+  <!-- Empty state -->
+  <div id="emptyState" class="hidden px-3 py-16 text-center">
+    <span class="material-symbols-outlined text-slate-300" style="font-size:56px">dynamic_feed</span>
+    <p class="text-base font-bold text-slate-400 mt-3">Hali postlar yo'q</p>
+    <p class="text-xs text-slate-400 mt-1">Birinchi bo'lib muammo haqida xabar bering!</p>
+    <a href="/tma/murojaat/" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 rounded-full bg-primary text-white text-sm font-bold active:scale-95 transition-all">
+      <span class="material-symbols-outlined" style="font-size:18px">add</span>
+      Ma'lumot qoldirish
+    </a>
+  </div>
+
+  <!-- Loading spinner -->
+  <div id="feedLoader" class="py-6 flex justify-center">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- ═══ Floating + button ═══ -->
+  <a href="/tma/murojaat/"
+     class="fixed z-40 w-14 h-14 rounded-full bg-primary text-white shadow-lg flex items-center justify-center active:scale-90 transition-transform"
+     style="bottom:76px; right:16px; box-shadow:0 4px 20px rgba(157,43,238,0.4)">
+    <span class="material-symbols-outlined" style="font-size:28px">add</span>
+  </a>
+
+  <!-- ═══ Comment bottom sheet ═══ -->
+  <div id="commentSheet" class="hidden fixed inset-0 z-50">
+    <div class="absolute inset-0" style="background:rgba(0,0,0,0.4);backdrop-filter:blur(4px)" onclick="closeComments()"></div>
+    <div class="absolute bottom-0 left-0 right-0 glass rounded-t-3xl slide-up" style="max-height:70vh;background:rgba(255,255,255,0.92)">
+      <div class="p-4">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-black text-slate-800">Izohlar</h3>
+          <button onclick="closeComments()" class="w-8 h-8 rounded-full glass-sm flex items-center justify-center">
+            <span class="material-symbols-outlined text-slate-500" style="font-size:18px">close</span>
+          </button>
+        </div>
+        <div id="commentsList" class="space-y-3 overflow-y-auto" style="max-height:calc(70vh - 120px)">
+          <!-- Comments rendered by JS -->
+        </div>
+        <div id="commentsEmpty" class="hidden py-6 text-center">
+          <p class="text-xs text-slate-400">Hali izohlar yo'q. Birinchi bo'ling!</p>
+        </div>
+      </div>
+      <div class="sticky bottom-0 p-3 flex gap-2" style="background:rgba(255,255,255,0.95);border-top:1px solid rgba(0,0,0,0.06)">
+        <input id="commentInput" class="flex-1 glass-sm rounded-full px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30" placeholder="Izoh yozing...">
+        <button onclick="sendComment()" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center shrink-0 active:scale-90 transition-transform">
+          <span class="material-symbols-outlined text-white" style="font-size:18px">send</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Bottom tabs ═══ -->
+  <div class="fixed bottom-0 left-0 right-0 z-50" style="background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);border-top:1px solid rgba(0,0,0,0.06);">
+    <div class="flex justify-around py-2 px-2">
+      <a href="/tma/" class="flex flex-col items-center gap-0.5 px-3 py-1">
+        <span class="material-symbols-outlined text-slate-400" style="font-size:22px">map</span>
+        <span class="text-xs font-semibold text-slate-400">Xarita</span>
+      </a>
+      <a href="/tma/murojaat/" class="flex flex-col items-center gap-0.5 px-3 py-1">
+        <span class="material-symbols-outlined text-slate-400" style="font-size:22px">campaign</span>
+        <span class="text-xs font-semibold text-slate-400">Signal</span>
+      </a>
+      <a href="/tma/feed/" class="flex flex-col items-center gap-0.5 px-3 py-1">
+        <span class="material-symbols-outlined" style="font-size:22px;color:#9d2bee">dynamic_feed</span>
+        <span class="text-xs font-bold" style="color:#9d2bee">Lenta</span>
+      </a>
+      <a href="/tma/tahlil/" class="flex flex-col items-center gap-0.5 px-3 py-1">
+        <span class="material-symbols-outlined text-slate-400" style="font-size:22px">bar_chart</span>
+        <span class="text-xs font-semibold text-slate-400">Tahlil</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready(); tg.expand();
+    const TG_USER = tg.initDataUnsafe?.user || {};
+    const USER_ID = TG_USER.id || '';
+    const USER_NAME = `${TG_USER.first_name || ''} ${TG_USER.last_name || ''}`.trim();
+
+    // ── Feed state ──
+    let feedOffset = 0;
+    const FEED_LIMIT = 10;
+    let feedLoading = false;
+    let feedHasMore = true;
+    let currentFilter = '';
+    let activeMurojaatId = null;
+
+    // ── Holat ranglari ──
+    const HOLAT_RANG = {
+      'kutilmoqda': { bg: 'rgba(245,158,11,0.12)', color: '#f59e0b', icon: 'schedule' },
+      'korib_chiqilmoqda': { bg: 'rgba(59,130,246,0.12)', color: '#3b82f6', icon: 'visibility' },
+      'hal_qilindi': { bg: 'rgba(34,197,94,0.12)', color: '#22c55e', icon: 'check_circle' },
+    };
+
+    // ── Card render ──
+    function postCard(p) {
+      const h = HOLAT_RANG[p.holat_kod] || HOLAT_RANG.kutilmoqda;
+      const avatar = p.is_anonim
+        ? `<div class="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
+             <span class="material-symbols-outlined text-slate-400" style="font-size:18px">person_off</span>
+           </div>`
+        : `<div class="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+             <span class="text-sm font-black text-primary">${(p.user[0] || '?').toUpperCase()}</span>
+           </div>`;
+
+      const img = p.rasmlar.length
+        ? `<div class="rounded-2xl overflow-hidden mt-2.5 bg-slate-100" style="max-height:300px">
+             <img src="${p.rasmlar[0]}" alt="" class="w-full object-cover" style="max-height:300px" loading="lazy"
+               onerror="this.parentElement.style.display='none'"/>
+           </div>`
+        : '';
+
+      const location = (p.viloyat || p.tuman)
+        ? `<div class="flex items-center gap-1 mt-2">
+             <span class="material-symbols-outlined text-slate-400" style="font-size:14px">location_on</span>
+             <span class="text-xs text-slate-500">${[p.viloyat, p.tuman].filter(Boolean).join(', ')}</span>
+             ${p.infratuzilma ? `<span class="ml-1 px-2 py-0.5 rounded-full text-xs font-semibold" style="background:rgba(157,43,238,0.08);color:#9d2bee">${p.infratuzilma}</span>` : ''}
+           </div>`
+        : '';
+
+      const heartClass = p.is_liked ? 'text-red-500' : 'text-slate-400';
+      const heartFill = p.is_liked ? 'font-variation-settings:"FILL"1' : '';
+
+      return `<div class="glass rounded-2xl p-4 shadow-sm fade-up" id="post-${p.id}">
+        <!-- Header -->
+        <div class="flex items-center gap-2.5">
+          ${avatar}
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-bold text-slate-800 truncate">${p.user}</p>
+            <p class="text-xs text-slate-400">${p.vaqt}</p>
+          </div>
+          <div class="px-2 py-1 rounded-full flex items-center gap-1" style="background:${h.bg}">
+            <span class="material-symbols-outlined" style="font-size:12px;color:${h.color}">${h.icon}</span>
+            <span class="text-xs font-semibold" style="color:${h.color}">${p.holat}</span>
+          </div>
+        </div>
+        <!-- Media -->
+        ${img}
+        <!-- Location -->
+        ${location}
+        <!-- Description -->
+        ${p.izoh ? `<p class="text-sm text-slate-700 mt-2 leading-relaxed" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${p.izoh}</p>` : ''}
+        <!-- Actions -->
+        <div class="flex items-center gap-5 mt-3 pt-2.5" style="border-top:1px solid rgba(0,0,0,0.05)">
+          <button onclick="toggleLike(${p.id})" class="flex items-center gap-1.5 active:scale-90 transition-transform" id="likeBtn-${p.id}">
+            <span class="material-symbols-outlined ${heartClass}" style="font-size:22px;${heartFill}" id="likeIcon-${p.id}">favorite</span>
+            <span class="text-xs font-bold text-slate-500" id="likeCnt-${p.id}">${p.likes_soni}</span>
+          </button>
+          <button onclick="openComments(${p.id})" class="flex items-center gap-1.5 active:scale-90 transition-transform">
+            <span class="material-symbols-outlined text-slate-400" style="font-size:22px">chat_bubble_outline</span>
+            <span class="text-xs font-bold text-slate-500" id="commentCnt-${p.id}">${p.comments_soni}</span>
+          </button>
+          <button onclick="sharePost(${p.id}, '${p.izoh ? p.izoh.substring(0,60).replace(/'/g,"\\'") : ''}')" class="flex items-center gap-1.5 active:scale-90 transition-transform ml-auto">
+            <span class="material-symbols-outlined text-slate-400" style="font-size:20px">share</span>
+          </button>
+        </div>
+      </div>`;
+    }
+
+    // ── Load feed ──
+    async function loadFeed(reset = false) {
+      if (feedLoading || (!feedHasMore && !reset)) return;
+      if (reset) { feedOffset = 0; feedHasMore = true; }
+      feedLoading = true;
+      document.getElementById('feedLoader').classList.remove('hidden');
+
+      try {
+        const url = `/api/feed/?limit=${FEED_LIMIT}&offset=${feedOffset}&user_id=${USER_ID}` +
+          (currentFilter ? `&infratuzilma=${currentFilter}` : '');
+        const res = await fetch(url);
+        const data = await res.json();
+
+        const list = document.getElementById('feedList');
+        if (reset) list.innerHTML = '';
+
+        if (data.results.length === 0 && feedOffset === 0) {
+          document.getElementById('emptyState').classList.remove('hidden');
+        } else {
+          document.getElementById('emptyState').classList.add('hidden');
+          data.results.forEach(p => {
+            list.insertAdjacentHTML('beforeend', postCard(p));
+          });
+        }
+
+        document.getElementById('jamiPosts').textContent = data.jami;
+        feedOffset += data.results.length;
+        feedHasMore = data.has_more;
+      } catch(e) {
+        console.error('Feed load error:', e);
+      }
+      feedLoading = false;
+      if (!feedHasMore) {
+        document.getElementById('feedLoader').classList.add('hidden');
+      }
+    }
+
+    // ── Infinite scroll ──
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && feedHasMore) loadFeed();
+    }, { rootMargin: '200px' });
+    observer.observe(document.getElementById('feedLoader'));
+
+    // ── Filter ──
+    function filterFeed(infra) {
+      currentFilter = infra;
+      document.querySelectorAll('[data-filter]').forEach(btn => {
+        btn.classList.toggle('chip-active', btn.dataset.filter === infra);
+      });
+      loadFeed(true);
+    }
+
+    // ── Like toggle ──
+    async function toggleLike(id) {
+      if (!USER_ID) { tg.showAlert('Telegram orqali kiring'); return; }
+      const icon = document.getElementById(`likeIcon-${id}`);
+      const cnt = document.getElementById(`likeCnt-${id}`);
+      const isLiked = icon.classList.contains('text-red-500');
+
+      // Optimistic update
+      if (isLiked) {
+        icon.classList.remove('text-red-500'); icon.classList.add('text-slate-400');
+        icon.style = 'font-size:22px';
+        cnt.textContent = Math.max(0, parseInt(cnt.textContent) - 1);
+      } else {
+        icon.classList.remove('text-slate-400'); icon.classList.add('text-red-500');
+        icon.style = 'font-size:22px;font-variation-settings:"FILL"1';
+        icon.classList.add('like-pop');
+        cnt.textContent = parseInt(cnt.textContent) + 1;
+        setTimeout(() => icon.classList.remove('like-pop'), 350);
+      }
+
+      try {
+        await fetch('/api/feed/like/', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ murojaat_id: id, telegram_user_id: USER_ID })
+        });
+      } catch(e) {}
+    }
+
+    // ── Comments ──
+    function openComments(murojaatId) {
+      activeMurojaatId = murojaatId;
+      document.getElementById('commentSheet').classList.remove('hidden');
+      loadComments(murojaatId);
+    }
+
+    function closeComments() {
+      document.getElementById('commentSheet').classList.add('hidden');
+      activeMurojaatId = null;
+    }
+
+    async function loadComments(murojaatId) {
+      const list = document.getElementById('commentsList');
+      const empty = document.getElementById('commentsEmpty');
+      list.innerHTML = '<div class="flex justify-center py-4"><div class="spinner"></div></div>';
+      empty.classList.add('hidden');
+
+      try {
+        const res = await fetch(`/api/feed/${murojaatId}/comments/`);
+        const data = await res.json();
+        if (data.comments.length === 0) {
+          list.innerHTML = '';
+          empty.classList.remove('hidden');
+        } else {
+          list.innerHTML = data.comments.map(c => `
+            <div class="flex gap-2.5">
+              <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <span class="text-xs font-black text-primary">${(c.user[0] || '?').toUpperCase()}</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-slate-800">${c.user}</span>
+                  <span class="text-xs text-slate-400">${c.vaqt}</span>
+                </div>
+                <p class="text-sm text-slate-600 mt-0.5">${c.matn}</p>
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch(e) {
+        list.innerHTML = '<p class="text-xs text-red-400 text-center py-4">Xatolik yuz berdi</p>';
+      }
+    }
+
+    async function sendComment() {
+      if (!activeMurojaatId || !USER_ID) return;
+      const input = document.getElementById('commentInput');
+      const matn = input.value.trim();
+      if (!matn) return;
+      input.value = '';
+
+      try {
+        const res = await fetch('/api/feed/comment/', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            murojaat_id: activeMurojaatId,
+            telegram_user_id: USER_ID,
+            telegram_full_name: USER_NAME,
+            matn: matn,
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          // Update count in card
+          const cnt = document.getElementById(`commentCnt-${activeMurojaatId}`);
+          if (cnt) cnt.textContent = data.comments_soni;
+          // Reload comments
+          loadComments(activeMurojaatId);
+        }
+      } catch(e) {}
+    }
+
+    // ── Share ──
+    function sharePost(id, text) {
+      const url = window.location.origin + '/tma/feed/#post-' + id;
+      if (navigator.share) {
+        navigator.share({ title: 'Real Holat', text: text || 'Muammo haqida xabar', url: url });
+      } else {
+        tg.showAlert('Havola nusxalandi!');
+      }
+    }
+
+    // ── Enter sends comment ──
+    document.getElementById('commentInput').addEventListener('keypress', e => {
+      if (e.key === 'Enter') sendComment();
+    });
+
+    // ── Init ──
+    loadFeed(true);
+  </script>
+</body>
+</html>
