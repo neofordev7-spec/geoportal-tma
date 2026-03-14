@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     # ── TMA sahifalari ──────────────────────────────────────────
     path('tma/', views.tma_dashboard, name='tma_dashboard'),
+    path('tma/xarita/', views.tma_xarita, name='tma_xarita'),
     path('tma/murojaat/', views.tma_murojaat, name='tma_murojaat'),
     path('tma/maktablar/', views.tma_maktablar, name='tma_maktablar'),
     path('tma/maktablar/<int:maktab_id>/', views.tma_maktab_detail, name='tma_maktab_detail'),

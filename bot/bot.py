@@ -39,7 +39,7 @@ Quyidagi tugmani bosib, ilovani oching 👇
 
 @dp.message(CommandStart())
 async def start_handler(message: Message):
-    webapp_url = f"{APP_URL}/tma/"
+    webapp_url = f"{APP_URL}/tma/feed/"
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
@@ -101,7 +101,7 @@ async def web_app_data_handler(message: Message):
 
 @dp.message()
 async def fallback_handler(message: Message):
-    webapp_url = f"{APP_URL}/tma/"
+    webapp_url = f"{APP_URL}/tma/feed/"
     keyboard = InlineKeyboardMarkup(inline_keyboard=[[
         InlineKeyboardButton(
             text="🌍 GEOPORTAL ochish",

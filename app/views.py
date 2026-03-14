@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.db.models import Count
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
@@ -34,6 +34,9 @@ VILOYAT_COORDS = {
 # ─── TMA sahifalari ──────────────────────────────────────────────────────────
 
 def tma_dashboard(request):
+    return redirect('/tma/feed/')
+
+def tma_xarita(request):
     return render(request, 'index.html')
 
 def tma_murojaat(request):
