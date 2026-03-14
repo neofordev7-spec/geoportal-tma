@@ -10,6 +10,24 @@ from .models import (
     VILOYATLAR, INFRATUZILMA_TURLARI,
 )
 
+# Viloyat markazlari koordinatalari
+VILOYAT_COORDS = {
+    'toshkent_sh':    {'lat': 41.2995, 'lng': 69.2401},
+    'toshkent_v':     {'lat': 41.1173, 'lng': 69.7028},
+    'samarqand':      {'lat': 39.6547, 'lng': 66.9758},
+    'fargona':        {'lat': 40.3897, 'lng': 71.7857},
+    'andijon':        {'lat': 40.8829, 'lng': 72.3234},
+    'namangan':       {'lat': 41.0011, 'lng': 71.6726},
+    'buxoro':         {'lat': 39.7747, 'lng': 64.4286},
+    'xorazm':         {'lat': 41.5531, 'lng': 60.6325},
+    'qashqadaryo':    {'lat': 38.8610, 'lng': 65.7870},
+    'surxondaryo':    {'lat': 37.9404, 'lng': 67.5659},
+    'jizzax':         {'lat': 40.1158, 'lng': 67.8422},
+    'sirdaryo':       {'lat': 40.8363, 'lng': 68.6642},
+    'navoiy':         {'lat': 40.1007, 'lng': 65.3791},
+    'qoraqalpogiston':{'lat': 43.8006, 'lng': 59.0031},
+}
+
 
 # ─── TMA sahifalari ──────────────────────────────────────────────────────────
 
@@ -130,8 +148,14 @@ def murojaatlar_royxati(request):
 
 @api_view(['GET'])
 def maktablar_royxati(request):
-    """Barcha maktablar ro'yxati + real-time statistika"""
+    """Barcha maktablar ro'yxati + real-time statistika. ?viloyat=X&tuman=Y filter qilish mumkin"""
     maktablar = Maktab.objects.prefetch_related('tekshiruvlar', 'vaadalar').all()
+    viloyat_filter = request.query_params.get('viloyat')
+    tuman_filter = request.query_params.get('tuman')
+    if viloyat_filter:
+        maktablar = maktablar.filter(viloyat=viloyat_filter)
+    if tuman_filter:
+        maktablar = maktablar.filter(tuman=tuman_filter)
     data = []
     for m in maktablar:
         jami = Tekshiruv.objects.filter(maktab=m).count()
@@ -373,3 +397,55 @@ def meta_api(request):
         'viloyatlar': [{'value': v[0], 'label': v[1]} for v in VILOYATLAR],
         'infratuzilma_turlari': [{'value': i[0], 'label': i[1]} for i in INFRATUZILMA_TURLARI],
     })
+
+
+# ─── API: Viloyatlar (xarita uchun) ──────────────────────────────────────────
+
+@api_view(['GET'])
+def viloyatlar_api(request):
+    """Har bir viloyat uchun maktab va va'da soni (xaritada bubble ko'rsatish)"""
+    result = []
+    for kod, nom in VILOYATLAR:
+        coords = VILOYAT_COORDS.get(kod, {'lat': 41.2995, 'lng': 69.2401})
+        maktablar = Maktab.objects.filter(viloyat=kod)
+        if not maktablar.exists():
+            continue
+        maktab_ids = list(maktablar.values_list('id', flat=True))
+        vaadalar_soni = Vaada.objects.filter(maktab_id__in=maktab_ids).count()
+        result.append({
+            'kod': kod,
+            'nom': nom,
+            'lat': coords['lat'],
+            'lng': coords['lng'],
+            'maktablar_soni': maktablar.count(),
+            'vaadalar_soni': vaadalar_soni,
+        })
+    return Response(result)
+
+
+@api_view(['GET'])
+def tumanlari_api(request):
+    """Berilgan viloyatdagi tumanlar va har birida nechta maktab/va'da bor"""
+    viloyat = request.query_params.get('viloyat')
+    if not viloyat:
+        return Response({'error': 'viloyat parametri kerak'}, status=status.HTTP_400_BAD_REQUEST)
+
+    tumanlari = (
+        Maktab.objects.filter(viloyat=viloyat)
+        .values('tuman')
+        .annotate(maktablar_soni=Count('id'))
+        .order_by('tuman')
+    )
+
+    result = []
+    for t in tumanlari:
+        maktab_ids = list(
+            Maktab.objects.filter(viloyat=viloyat, tuman=t['tuman']).values_list('id', flat=True)
+        )
+        vaadalar_soni = Vaada.objects.filter(maktab_id__in=maktab_ids).count()
+        result.append({
+            'nom': t['tuman'],
+            'maktablar_soni': t['maktablar_soni'],
+            'vaadalar_soni': vaadalar_soni,
+        })
+    return Response(result)

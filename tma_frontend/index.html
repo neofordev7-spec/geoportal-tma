@@ -98,16 +98,27 @@
       <button onclick="setSubTab('loyihalar')" id="sub-loyihalar" class="tab-pill flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">Eng yirik loyihalar</button>
     </div>
 
-    <!-- Sub-tab: Top viloyatlar -->
+    <!-- Sub-tab: Xarita (viloyatlar drill-down) -->
     <div id="sub-page-viloyatlar" class="space-y-2">
+      <!-- Uzbekiston xaritasi -->
       <div class="glass rounded-2xl overflow-hidden shadow-sm">
-        <div id="viloyatlarList" class="divide-y divide-white/40">
-          <!-- JS dan to'ldiriladi -->
+        <div class="px-4 py-2 border-b border-white/20 flex items-center gap-2">
+          <span class="material-icons text-green-500 text-base">map</span>
+          <span class="text-xs font-semibold text-slate-600">Viloyatni bosing — loyihalarni ko'ring</span>
         </div>
+        <div id="leafletMap" style="height:340px;width:100%;z-index:1;"></div>
       </div>
-      <!-- Leaflet Xarita -->
-      <div class="glass rounded-2xl overflow-hidden mt-2 shadow-sm">
-        <div id="leafletMap" style="height:320px;width:100%;border-radius:1rem;z-index:1;"></div>
+      <!-- Drill-down panel (viloyat bosilganda ko'rinadi) -->
+      <div id="drillPanel" class="hidden glass rounded-2xl overflow-hidden shadow-sm">
+        <div class="flex items-center gap-2 px-4 py-3 border-b border-white/20">
+          <button onclick="drillBack()" class="flex items-center gap-1 text-slate-600">
+            <span class="material-icons text-base">arrow_back_ios</span>
+            <span id="drillBackLabel" class="text-xs font-medium">Orqaga</span>
+          </button>
+          <span class="text-sm font-bold text-slate-700 flex-1 text-center pr-6" id="drillTitle"></span>
+        </div>
+        <div id="drillContent" class="divide-y divide-white/30 max-h-64 overflow-y-auto">
+        </div>
       </div>
     </div>
 
@@ -724,43 +735,132 @@
     }
     renderInternetBars();
 
-    // ── Leaflet Xarita ────────────────────────────────────────────────────
+    // ── Leaflet Xarita — Viloyatlar Drill-down ───────────────────────────────
     let leafletMap = null;
+    let viloyatMarkers = [];
+    let drillStack = [];
+
     function initMap() {
       if (leafletMap) return;
-      leafletMap = L.map('leafletMap', { zoomControl: true }).setView([41.2995, 69.2401], 6);
+      const UZB_BOUNDS = [[37.1, 55.9], [45.6, 73.1]];
+      leafletMap = L.map('leafletMap', {
+        zoomControl: true,
+        maxBounds: UZB_BOUNDS,
+        minZoom: 5,
+        maxZoom: 11,
+        maxBoundsViscosity: 1.0,
+      });
+      leafletMap.fitBounds(UZB_BOUNDS);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap',
         maxZoom: 18,
       }).addTo(leafletMap);
+      loadViloyatBubbles();
+    }
 
-      fetch('/api/maktablar/')
+    function loadViloyatBubbles() {
+      fetch('/api/viloyatlar/')
         .then(r => r.json())
         .then(data => {
-          data.forEach(m => {
-            if (!m.lat || !m.lng) return;
-            const rang = m.mamnuniyat_foizi === null ? '#94a3b8'
-              : m.mamnuniyat_foizi >= 70 ? '#22c55e'
-              : m.mamnuniyat_foizi >= 40 ? '#f59e0b' : '#ef4444';
+          viloyatMarkers.forEach(m => m.remove());
+          viloyatMarkers = [];
+          const max = Math.max(...data.map(v => v.vaadalar_soni), 1);
+          data.forEach(v => {
+            const r = 20 + Math.round((v.vaadalar_soni / max) * 20);
             const icon = L.divIcon({
               className: '',
-              html: `<div style="width:14px;height:14px;border-radius:50%;background:${rang};border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>`,
-              iconSize: [14, 14],
-              iconAnchor: [7, 7],
+              html: `<div style="width:${r*2}px;height:${r*2}px;border-radius:50%;background:rgba(71,244,37,0.8);border:2px solid #22c55e;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.35);flex-direction:column;gap:0;">
+                <span style="font-size:${r>28?'12':'10'}px;font-weight:800;color:#0a3a1a;line-height:1.1;">${v.vaadalar_soni}</span>
+                <span style="font-size:8px;color:#0a3a1a;line-height:1;">loyiha</span>
+              </div>`,
+              iconSize: [r*2, r*2],
+              iconAnchor: [r, r],
             });
-            L.marker([m.lat, m.lng], { icon })
+            const marker = L.marker([v.lat, v.lng], { icon })
               .addTo(leafletMap)
-              .bindPopup(`<b>${m.nom}</b><br>${m.viloyat}<br>Mamnuniyat: ${m.mamnuniyat_foizi ?? '—'}%`);
+              .bindTooltip(v.nom, { permanent: false, direction: 'top' })
+              .on('click', () => ochViloyatPanel(v.kod, v.nom));
+            viloyatMarkers.push(marker);
           });
           setTimeout(() => leafletMap.invalidateSize(), 200);
         }).catch(() => {});
     }
 
+    function ochViloyatPanel(viloyatKod, viloyatNom) {
+      drillStack = [{ level: 'viloyat', kod: viloyatKod, nom: viloyatNom }];
+      document.getElementById('drillTitle').textContent = viloyatNom;
+      document.getElementById('drillBackLabel').textContent = 'Orqaga';
+      document.getElementById('drillPanel').classList.remove('hidden');
+      document.getElementById('drillContent').innerHTML =
+        '<div class="px-4 py-3 text-sm text-slate-500">Yuklanmoqda...</div>';
+
+      fetch(`/api/tumanlari/?viloyat=${viloyatKod}`)
+        .then(r => r.json())
+        .then(data => {
+          document.getElementById('drillContent').innerHTML = data.map(t => `
+            <div class="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-white/10"
+                 onclick="ochTumanPanel('${viloyatKod}', '${t.nom.replace(/'/g,"\\'")}', '${viloyatNom.replace(/'/g,"\\'")}')">
+              <div>
+                <p class="text-sm font-semibold text-slate-700">${t.nom}</p>
+                <p class="text-xs text-slate-500">${t.maktablar_soni} ta ob'ekt</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-green-600">${t.vaadalar_soni} loyiha</span>
+                <span class="material-icons text-slate-400 text-base">chevron_right</span>
+              </div>
+            </div>`).join('') ||
+            '<div class="px-4 py-3 text-sm text-slate-500">Ma\'lumot topilmadi</div>';
+        }).catch(() => {});
+    }
+
+    function ochTumanPanel(viloyatKod, tumanNom, viloyatNom) {
+      drillStack.push({ level: 'tuman', kod: viloyatKod, nom: tumanNom, parentNom: viloyatNom });
+      document.getElementById('drillTitle').textContent = tumanNom;
+      document.getElementById('drillBackLabel').textContent = viloyatNom;
+      document.getElementById('drillContent').innerHTML =
+        '<div class="px-4 py-3 text-sm text-slate-500">Yuklanmoqda...</div>';
+
+      fetch(`/api/maktablar/?viloyat=${viloyatKod}&tuman=${encodeURIComponent(tumanNom)}`)
+        .then(r => r.json())
+        .then(data => {
+          const list = Array.isArray(data) ? data : (data.maktablar || []);
+          document.getElementById('drillContent').innerHTML = list.map(m => {
+            const rang = m.mamnuniyat_foizi === null ? '#94a3b8'
+              : m.mamnuniyat_foizi >= 70 ? '#22c55e'
+              : m.mamnuniyat_foizi >= 40 ? '#f59e0b' : '#ef4444';
+            const foizText = m.mamnuniyat_foizi !== null ? `${m.mamnuniyat_foizi}%` : 'Tekshirilmagan';
+            return `
+              <div class="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-white/10"
+                   onclick="window.location='/tma/maktablar/${m.id}/'">
+                <div class="flex items-center gap-2">
+                  <span class="material-icons text-slate-400 text-base">school</span>
+                  <div>
+                    <p class="text-sm font-semibold text-slate-700">${m.nom}</p>
+                    <p class="text-xs text-slate-500">${m.vaadalar_soni || 0} ta va'da</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1">
+                  <span class="w-2.5 h-2.5 rounded-full" style="background:${rang}"></span>
+                  <span class="text-xs font-bold" style="color:${rang}">${foizText}</span>
+                </div>
+              </div>`;
+          }).join('') ||
+          '<div class="px-4 py-3 text-sm text-slate-500">Ob\'ektlar topilmadi</div>';
+        }).catch(() => {});
+    }
+
+    function drillBack() {
+      drillStack.pop();
+      if (drillStack.length === 0) {
+        document.getElementById('drillPanel').classList.add('hidden');
+      } else {
+        const prev = drillStack[drillStack.length - 1];
+        drillStack = [];
+        ochViloyatPanel(prev.kod, prev.nom);
+      }
+    }
+
     // Xarita tab ochilganda init qil
-    const origSetTab = window.setTab;
-    window.setTab = function(name) {
-      origSetTab ? origSetTab(name) : setTab(name);
-    };
     document.getElementById('tab-xarita').addEventListener('click', () => setTimeout(initMap, 100));
     setTimeout(initMap, 300);
   </script>

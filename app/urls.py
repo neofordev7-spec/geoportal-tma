@@ -18,4 +18,6 @@ urlpatterns = [
     path('api/tekshiruv/', views.tekshiruv_yuborish, name='api_tekshiruv'),
     path('api/tahlil/', views.tahlil_api, name='api_tahlil'),
     path('api/meta/', views.meta_api, name='api_meta'),
+    path('api/viloyatlar/', views.viloyatlar_api, name='api_viloyatlar'),
+    path('api/tumanlari/', views.tumanlari_api, name='api_tumanlari'),
 ]
