@@ -51,6 +51,9 @@ def tma_tahlil(request):
 def tma_feed(request):
     return render(request, 'feed.html')
 
+def tma_profil(request):
+    return render(request, 'profil.html')
+
 
 # ─── API: Statistika ─────────────────────────────────────────────────────────
 
@@ -298,6 +301,37 @@ def tekshiruv_yuborish(request):
         telegram_username=data.get('telegram_username', ''),
         telegram_full_name=data.get('telegram_full_name', ''),
     )
+
+    # ── Lentaga avtomatik post qo'shish ──
+    vaada_nom = vaada.nom if vaada else ''
+    natija_label = 'Bajarildi' if natija == 'bajarildi' else 'Muammo'
+    izoh_text = data.get('izoh', '')
+    lenta_izoh = f"[Tekshiruv] {maktab.nom}"
+    if vaada_nom:
+        lenta_izoh += f" — {vaada_nom}"
+    lenta_izoh += f": {natija_label}"
+    if izoh_text:
+        lenta_izoh += f". {izoh_text}"
+
+    lenta_holat = 'hal_qilindi' if natija == 'bajarildi' else 'kutilmoqda'
+    lenta_post = Murojaat.objects.create(
+        viloyat=maktab.viloyat,
+        tuman=maktab.tuman,
+        infratuzilma='maktab',
+        sektor='',
+        izoh=lenta_izoh,
+        telegram_user_id=int(telegram_user_id),
+        telegram_username=data.get('telegram_username', ''),
+        telegram_full_name=data.get('telegram_full_name', ''),
+        holat=lenta_holat,
+    )
+    # Rasmni Lenta postiga ham qo'shish
+    rasm_file = data.get('rasm')
+    if rasm_file:
+        try:
+            MurojaatRasm.objects.create(murojaat=lenta_post, rasm=rasm_file)
+        except Exception:
+            pass
 
     # Maktab holatini yangilash
     jami = Tekshiruv.objects.filter(maktab=maktab).count()
@@ -725,4 +759,133 @@ def feed_comments_list(request, murojaat_id):
     return Response({
         'comments': data,
         'jami': Comment.objects.filter(murojaat_id=murojaat_id).count(),
+    })
+
+
+# ─── API: Profil ─────────────────────────────────────────────────────────────
+
+BADGES = [
+    {'nom': 'Birinchi qadam', 'shart': 1, 'tur': 'jami', 'icon': 'emoji_events', 'rang': '#22c55e',
+     'tavsif': 'Birinchi tekshiruvingizni bajardingiz!'},
+    {'nom': 'Faol fuqaro', 'shart': 5, 'tur': 'jami', 'icon': 'verified', 'rang': '#3b82f6',
+     'tavsif': '5 ta tekshiruv bajardingiz!'},
+    {'nom': 'Fotograf', 'shart': 3, 'tur': 'rasmli', 'icon': 'photo_camera', 'rang': '#14b8a6',
+     'tavsif': '3 ta rasmli tekshiruv!'},
+    {'nom': 'Ekspert', 'shart': 15, 'tur': 'jami', 'icon': 'workspace_premium', 'rang': '#f59e0b',
+     'tavsif': '15 ta tekshiruv — siz ekspertsiz!'},
+    {'nom': 'Ovoz beruvchi', 'shart': 10, 'tur': 'jami', 'icon': 'record_voice_over', 'rang': '#9d2bee',
+     'tavsif': '10 ta tekshiruv bajardingiz!'},
+    {'nom': 'Signalchi', 'shart': 3, 'tur': 'signal', 'icon': 'campaign', 'rang': '#ef4444',
+     'tavsif': '3 ta signal yubordingiz!'},
+    {'nom': 'Muhokamachi', 'shart': 5, 'tur': 'izoh', 'icon': 'forum', 'rang': '#0ea5e9',
+     'tavsif': '5 ta izoh yozdingiz!'},
+]
+
+
+@api_view(['GET'])
+def profil_api(request):
+    """Foydalanuvchi profili — statistika, badgelar, oxirgi faoliyatlar"""
+    user_id = request.query_params.get('user_id')
+    if not user_id:
+        return Response({'error': 'user_id kerak'}, status=status.HTTP_400_BAD_REQUEST)
+
+    uid = int(user_id)
+
+    # Statistika
+    tekshiruvlar = Tekshiruv.objects.filter(telegram_user_id=uid)
+    jami_tekshiruv = tekshiruvlar.count()
+    rasmli_tekshiruv = tekshiruvlar.exclude(rasm='').exclude(rasm__isnull=True).count()
+
+    murojaatlar = Murojaat.objects.filter(telegram_user_id=uid)
+    jami_signal = murojaatlar.count()
+
+    jami_izoh = Comment.objects.filter(telegram_user_id=uid).count()
+    jami_like = Like.objects.filter(telegram_user_id=uid).count()
+
+    # Ball
+    ball = jami_tekshiruv * 10 + rasmli_tekshiruv * 5 + jami_signal * 8 + jami_izoh * 3 + jami_like * 1
+
+    # Badgelar
+    earned_badges = []
+    for b in BADGES:
+        if b['tur'] == 'jami':
+            qiymat = jami_tekshiruv
+        elif b['tur'] == 'rasmli':
+            qiymat = rasmli_tekshiruv
+        elif b['tur'] == 'signal':
+            qiymat = jami_signal
+        elif b['tur'] == 'izoh':
+            qiymat = jami_izoh
+        else:
+            qiymat = 0
+
+        earned = qiymat >= b['shart']
+        earned_badges.append({
+            'nom': b['nom'],
+            'icon': b['icon'],
+            'rang': b['rang'],
+            'tavsif': b['tavsif'],
+            'shart': b['shart'],
+            'tur': b['tur'],
+            'earned': earned,
+            'progress': min(qiymat, b['shart']),
+        })
+
+    # Daraja
+    if ball >= 200:
+        daraja = {'nom': 'Ekspert fuqaro', 'rang': '#f59e0b', 'icon': 'workspace_premium'}
+    elif ball >= 100:
+        daraja = {'nom': 'Faol fuqaro', 'rang': '#3b82f6', 'icon': 'verified'}
+    elif ball >= 30:
+        daraja = {'nom': 'Ishtirokchi', 'rang': '#22c55e', 'icon': 'emoji_events'}
+    else:
+        daraja = {'nom': 'Yangi foydalanuvchi', 'rang': '#94a3b8', 'icon': 'person'}
+
+    # Oxirgi faoliyatlar (tekshiruv + signal aralash, vaqt bo'yicha)
+    faoliyatlar = []
+    for t in tekshiruvlar.select_related('maktab', 'vaada')[:5]:
+        faoliyatlar.append({
+            'tur': 'tekshiruv',
+            'icon': 'check_circle' if t.natija == 'bajarildi' else 'error',
+            'rang': '#22c55e' if t.natija == 'bajarildi' else '#ef4444',
+            'matn': f"{t.maktab.nom}" + (f" — {t.vaada.nom}" if t.vaada else ''),
+            'natija': t.get_natija_display(),
+            'vaqt': nisbiy_vaqt(t.vaqt),
+            'rasm': t.rasm.url if t.rasm else None,
+        })
+    for m in murojaatlar.filter(is_anonim=False)[:5]:
+        faoliyatlar.append({
+            'tur': 'signal',
+            'icon': 'campaign',
+            'rang': '#9d2bee',
+            'matn': m.izoh[:80] if m.izoh else f"{m.get_infratuzilma_display()} — {m.tuman}",
+            'natija': m.get_holat_display(),
+            'vaqt': nisbiy_vaqt(m.yuborilgan_vaqt),
+            'rasm': None,
+        })
+
+    # Vaqt bo'yicha tartiblash
+    faoliyatlar.sort(key=lambda x: x['vaqt'], reverse=False)
+    faoliyatlar = faoliyatlar[:10]
+
+    # User nomi (birinchi tekshiruv yoki murojaatdan)
+    user_nom = ''
+    if tekshiruvlar.exists():
+        user_nom = tekshiruvlar.first().telegram_full_name
+    elif murojaatlar.exists():
+        user_nom = murojaatlar.first().telegram_full_name
+
+    return Response({
+        'user_nom': user_nom,
+        'ball': ball,
+        'daraja': daraja,
+        'statistika': {
+            'tekshiruvlar': jami_tekshiruv,
+            'signallar': jami_signal,
+            'izohlar': jami_izoh,
+            'likelar': jami_like,
+            'rasmli': rasmli_tekshiruv,
+        },
+        'badgelar': earned_badges,
+        'faoliyatlar': faoliyatlar,
     })
