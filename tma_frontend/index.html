@@ -54,20 +54,6 @@
 
     <!-- ── STEP 1: O'zbekiston xaritasi ── -->
     <div id="step-xarita" class="fade-up">
-      <!-- Umumiy statistika -->
-      <div class="glass rounded-2xl p-3 shadow-sm mb-3">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Jami ob'ektlar</p>
-            <p class="text-xl font-black text-slate-900" id="jamiObektlar">—</p>
-          </div>
-          <div class="text-right">
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Viloyatlar</p>
-            <p class="text-xl font-black" style="color:#22c55e">14</p>
-          </div>
-        </div>
-      </div>
-
       <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Viloyatni tanlang</p>
 
       <!-- SVG Xarita -->
@@ -185,7 +171,6 @@
           }));
         } catch { allMaktablar = []; }
       }
-      document.getElementById('jamiObektlar').textContent = allMaktablar.length.toLocaleString();
       renderXarita();
       renderViloyatlarList();
     }
