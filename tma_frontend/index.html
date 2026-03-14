@@ -40,15 +40,15 @@
     }
 
     /* Maktab marker icon */
-    .mk-icon{
-      width:34px;height:34px;border-radius:50%;
+    .mk-num{
+      width:30px;height:30px;border-radius:50%;
       display:flex;align-items:center;justify-content:center;
       background:#fff;color:#3b82f6;
-      box-shadow:0 2px 10px rgba(0,0,0,0.3),0 0 0 3px rgba(59,130,246,0.3);
+      box-shadow:0 2px 10px rgba(0,0,0,0.35),0 0 0 2.5px rgba(59,130,246,0.35);
       transition:transform 0.2s;cursor:pointer;
+      font-family:'Inter',sans-serif;font-weight:800;font-size:12px;
     }
-    .mk-icon:hover{transform:scale(1.15);}
-    .mk-icon .material-symbols-outlined{font-size:18px;font-variation-settings:'FILL' 1,'wght' 600;}
+    .mk-num:hover{transform:scale(1.18);}
 
     /* Marker appear animation */
     @keyframes dropIn{
@@ -56,7 +56,7 @@
       60%{opacity:1;transform:translateY(2px) scale(1.05);}
       100%{opacity:1;transform:translateY(0) scale(1);}
     }
-    .mk-anim{animation:dropIn 0.35s ease-out both;}
+    .mk-drop{animation:dropIn 0.3s ease-out both;}
 
     /* Popup */
     .leaflet-popup-content-wrapper{border-radius:16px!important;box-shadow:0 8px 32px rgba(0,0,0,0.25)!important;border:none!important;}
@@ -377,9 +377,24 @@
     setStats(vilNom.replace(' viloyati','').replace(' shahar',''),allData.filter(m=>m.viloyat===vilNom).length,"maktab");
   }
 
+  // Sintetik maktab nomlari generatsiya
+  const SYN_NAMES=['Umumta\'lim maktabi','O\'rta maktab','Ixtisoslashtirilgan maktab','Ta\'lim maskani','Akademik litsey filiali'];
+  function genSyntheticSchools(vilNom,tumNom,need,tumBounds){
+    const short=tumNom.replace(/ [Tt]umani$/,'').replace(/ [Ss]hahri$/,'');
+    const pts=distributeInBounds(tumBounds,need);
+    return pts.map((p,i)=>({
+      obekt_nomi:`${short} ${SYN_NAMES[i%SYN_NAMES.length]} #${i+1}`,
+      viloyat:vilNom, tuman:tumNom,
+      lat:p[0], lng:p[1],
+      _synthetic:true
+    }));
+  }
+
   // ═════════════════════════════════
   // LEVEL 3: MAKTABLAR
   // ═════════════════════════════════
+  const MIN_SCHOOLS=20, MAX_SCHOOLS=35;
+
   function showTuman(vilNom,tumNom){
     clear(); level='tuman'; selVil=vilNom; selTum=tumNom; updateUI();
     geoLyr=L.layerGroup().addTo(map);
@@ -392,11 +407,20 @@
       map.flyToBounds(tumBounds,{padding:[40,40],duration:0.5});
     }
 
-    const maktablar=allData.filter(m=>m.viloyat===vilNom&&m.tuman===tumNom);
+    let maktablar=allData.filter(m=>m.viloyat===vilNom&&m.tuman===tumNom);
 
-    // Koordinatasiz maktablar uchun tuman ichida tarqatish
-    let distPts=[];
+    // Max chegarasi
+    if(maktablar.length>MAX_SCHOOLS) maktablar=maktablar.slice(0,MAX_SCHOOLS);
+
+    // Min chegarasi — sintetik data qo'shish
+    if(maktablar.length<MIN_SCHOOLS&&tumBounds){
+      const need=MIN_SCHOOLS-maktablar.length;
+      maktablar=maktablar.concat(genSyntheticSchools(vilNom,tumNom,need,tumBounds));
+    }
+
+    // Koordinatasiz maktablar uchun tarqatish
     const noCoord=maktablar.filter(m=>!m.lat||!m.lng);
+    let distPts=[];
     if(noCoord.length>0&&tumBounds){
       distPts=distributeInBounds(tumBounds,noCoord.length);
     }
@@ -405,19 +429,19 @@
     maktablar.forEach((m,i)=>{
       let lat=m.lat, lng=m.lng;
       if(!lat||!lng){
-        if(distIdx<distPts.length){
-          [lat,lng]=distPts[distIdx++];
-        } else return;
+        if(distIdx<distPts.length){[lat,lng]=distPts[distIdx++];}
+        else return;
       }
 
+      const num=i+1;
       const nom=m.obekt_nomi||m.nom||'Maktab';
 
-      // Custom school icon marker
+      // Raqamli marker
       const icon=L.divIcon({
         className:'',
-        html:`<div class="mk-icon mk-anim" style="animation-delay:${i*30}ms"><span class="material-symbols-outlined">school</span></div>`,
-        iconSize:[34,34],
-        iconAnchor:[17,17],
+        html:`<div class="mk-num mk-drop" style="animation-delay:${i*25}ms">${num}</div>`,
+        iconSize:[30,30],
+        iconAnchor:[15,15],
       });
 
       const marker=L.marker([lat,lng],{icon});
@@ -439,10 +463,10 @@
         <div style="padding:14px;min-width:230px">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
             <div style="width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#3b82f6,#6366f1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <span class="material-symbols-outlined" style="font-size:20px;color:#fff;font-variation-settings:'FILL' 1">school</span>
+              <span style="font-family:'Inter';font-weight:800;font-size:16px;color:#fff">${num}</span>
             </div>
             <div style="flex:1;min-width:0">
-              <div style="font-weight:700;font-size:13px;color:#0f172a;line-height:1.2">${nom}</div>
+              <div style="font-weight:700;font-size:12px;color:#0f172a;line-height:1.2">${nom}</div>
               <div style="font-size:10px;color:#94a3b8;margin-top:1px">${tumNom.replace(/ [Tt]umani$/,'')} · ${vilNom.replace(' viloyati','')}</div>
             </div>
           </div>
@@ -499,9 +523,9 @@
     } else {
       bw.style.display='flex';
       bt.textContent=selVil.replace(' viloyati','').replace(' shahar','');
-      gt.textContent='Maktabni tanlang';
-      gs.textContent="Va'dalar bajarilganini tekshiring";
-      gi.textContent='school';
+      gt.textContent='Maktabingiz raqamini toping';
+      gs.textContent="Raqamni bosing va va'dalarni tekshiring";
+      gi.textContent='pin_drop';
     }
   }
 
