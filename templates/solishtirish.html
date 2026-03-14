@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+{% load static %}
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>GEOPORTAL Comparison Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#22c55e",
+                        "secondary": "#9d2bee",
+                        "background-light": "#f6f8f7",
+                        "background-dark": "#084c53",
+                        "glass": "rgba(255, 255, 255, 0.05)",
+                        "glass-border": "rgba(255, 255, 255, 0.1)",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen">
+    <div class="layout-container flex h-full grow flex-col p-6 max-w-7xl mx-auto space-y-6">
+        <header class="flex items-start justify-between">
+            <div class="flex flex-col gap-2">
+                <a href="{% url 'dashboard' %}"
+                    class="glass-panel hover:bg-white/10 transition-colors flex items-center justify-center rounded-full h-10 w-10 text-white cursor-pointer">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </a>
+                <div class="mt-4">
+                    <h1 class="text-white text-4xl font-bold leading-tight">Solishtirish</h1>
+                    <p class="text-white/70 text-sm font-normal mt-1">GEOPORTAL loyihalarini o'zaro tahlil qilish</p>
+                </div>
+            </div>
+            <nav class="flex gap-2 p-1 glass-panel rounded-full">
+                <a class="bg-primary text-black px-6 py-2.5 rounded-full text-sm font-semibold transition-all shadow-[0_0_15px_rgba(34,197,94,0.3)]"
+                    href="#">Solishtirish</a>
+                <a class="text-white hover:bg-white/10 px-6 py-2.5 rounded-full text-sm font-medium transition-all"
+                    href="#">Xarita</a>
+                <a class="text-white hover:bg-white/10 px-6 py-2.5 rounded-full text-sm font-medium transition-all"
+                    href="#">Ma'lumotlar</a>
+                <a class="text-white hover:bg-white/10 px-6 py-2.5 rounded-full text-sm font-medium transition-all"
+                    href="#">Grafik vositalar</a>
+            </nav>
+        </header>
+
+        <div class="flex gap-4 w-full">
+            <div class="relative w-full max-w-md">
+                <select name="variant_a"
+                    class="w-full appearance-none glass-panel rounded-full text-white h-12 px-6 pr-12 focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer">
+                    <option disabled="" selected="" value="">Variant A tanlang</option>
+                    {% for donor in donorlar_ro'yxati %}
+                    <option class="text-black" value="{{ donor.id }}">{{ donor.nomi }}</option>
+                    {% empty %}
+                    <option class="text-black" value="1">Loyiha 1</option>
+                    <option class="text-black" value="2">Loyiha 2</option>
+                    {% endfor %}
+                </select>
+                <span
+                    class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-white/70 pointer-events-none">expand_more</span>
+            </div>
+            <div class="relative w-full max-w-md">
+                <select name="variant_b"
+                    class="w-full appearance-none glass-panel rounded-full text-white h-12 px-6 pr-12 focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer">
+                    <option disabled="" selected="" value="">Variant B tanlang</option>
+                    {% for donor in donorlar_ro'yxati %}
+                    <option class="text-black" value="{{ donor.id }}">{{ donor.nomi }}</option>
+                    {% empty %}
+                    <option class="text-black" value="1">Loyiha 1</option>
+                    <option class="text-black" value="2">Loyiha 2</option>
+                    {% endfor %}
+                </select>
+                <span
+                    class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-white/70 pointer-events-none">expand_more</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="glass-panel rounded-[2rem] p-6 space-y-6">
+                <h2 class="text-xl font-semibold text-white/90 pb-2 border-b border-white/10">Variant A</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="glass-panel p-4 rounded-xl flex flex-col gap-1">
+                        <span class="text-white/70 text-sm">Sarflangan</span>
+                        <span class="text-2xl font-bold text-white">{{ variant_a.sarflangan|default:"$1.2M" }}</span>
+                    </div>
+                    <div class="glass-panel p-4 rounded-xl flex flex-col gap-1">
+                        <span class="text-white/70 text-sm">Ajratilgan</span>
+                        <span class="text-2xl font-bold text-white">{{ variant_a.ajratilgan|default:"$1.5M" }}</span>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-white/90 font-medium">O'zlashtirish</span>
+                        <span class="text-primary font-bold">{{ variant_a.foiz|default:"80" }}%</span>
+                    </div>
+                    <div class="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                        <div class="h-full bg-primary rounded-full shadow-[0_0_10px_rgba(34,197,94,0.5)]"
+                            style="width: {{ variant_a.foiz|default:'80' }}%"></div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-6 pt-4">
+                    <div
+                        class="glass-panel rounded-xl p-4 flex flex-col items-center justify-center min-h-[200px] relative">
+                        <span class="text-white/50 text-sm absolute top-4 left-4">Sektorlar</span>
+                        <div
+                            class="w-32 h-32 rounded-full border-[16px] border-white/5 border-t-primary border-r-secondary border-b-blue-400 border-l-yellow-400 shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+                        </div>
+                    </div>
+                    <div
+                        class="glass-panel rounded-xl p-4 flex flex-col items-end justify-end min-h-[200px] gap-2 relative">
+                        <span class="text-white/50 text-sm absolute top-4 left-4">Yillik trend</span>
+                        <div class="flex items-end gap-2 h-24 w-full px-2">
+                            <div class="w-full bg-primary/40 rounded-t-sm h-[40%]"></div>
+                            <div class="w-full bg-primary/60 rounded-t-sm h-[60%]"></div>
+                            <div class="w-full bg-primary/80 rounded-t-sm h-[80%]"></div>
+                            <div class="w-full bg-primary rounded-t-sm h-[100%] shadow-[0_0_10px_rgba(34,197,94,0.3)]">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-[2rem] p-6 space-y-6">
+                <h2 class="text-xl font-semibold text-white/90 pb-2 border-b border-white/10">Variant B</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="glass-panel p-4 rounded-xl flex flex-col gap-1">
+                        <span class="text-white/70 text-sm">Sarflangan</span>
+                        <span class="text-2xl font-bold text-white">{{ variant_b.sarflangan|default:"$2.1M" }}</span>
+                    </div>
+                    <div class="glass-panel p-4 rounded-xl flex flex-col gap-1">
+                        <span class="text-white/70 text-sm">Ajratilgan</span>
+                        <span class="text-2xl font-bold text-white">{{ variant_b.ajratilgan|default:"$3.0M" }}</span>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-white/90 font-medium">O'zlashtirish</span>
+                        <span class="text-secondary font-bold">{{ variant_b.foiz|default:"70" }}%</span>
+                    </div>
+                    <div class="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                        <div class="h-full bg-secondary rounded-full shadow-[0_0_10px_rgba(157,43,238,0.5)]"
+                            style="width: {{ variant_b.foiz|default:'70' }}%"></div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-6 pt-4">
+                    <div
+                        class="glass-panel rounded-xl p-4 flex flex-col items-center justify-center min-h-[200px] relative">
+                        <span class="text-white/50 text-sm absolute top-4 left-4">Sektorlar</span>
+                        <div
+                            class="w-32 h-32 rounded-full border-[16px] border-white/5 border-t-secondary border-r-primary border-b-blue-400 border-l-yellow-400 shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+                        </div>
+                    </div>
+                    <div
+                        class="glass-panel rounded-xl p-4 flex flex-col items-end justify-end min-h-[200px] gap-2 relative">
+                        <span class="text-white/50 text-sm absolute top-4 left-4">Yillik trend</span>
+                        <div class="flex items-end gap-2 h-24 w-full px-2">
+                            <div class="w-full bg-secondary/40 rounded-t-sm h-[30%]"></div>
+                            <div class="w-full bg-secondary/60 rounded-t-sm h-[50%]"></div>
+                            <div class="w-full bg-secondary/80 rounded-t-sm h-[90%]"></div>
+                            <div
+                                class="w-full bg-secondary rounded-t-sm h-[70%] shadow-[0_0_10px_rgba(157,43,238,0.3)]">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel rounded-[2rem] overflow-hidden mt-6">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-white/10 bg-white/5">
+                            <th class="p-4 text-white/70 font-medium text-sm">Loyiha nomi</th>
+                            <th class="p-4 text-white/70 font-medium text-sm">Sektor</th>
+                            <th class="p-4 text-white/70 font-medium text-sm">Donor</th>
+                            <th class="p-4 text-white/70 font-medium text-sm text-right">Sarflangan</th>
+                            <th class="p-4 text-white/70 font-medium text-sm text-right">Ajratilgan</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        {% for loyiha in solishtirish_jadvali %}
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="p-4 text-white font-medium">{{ loyiha.nomi }}</td>
+                            <td class="p-4 text-white/80">{{ loyiha.sektor }}</td>
+                            <td class="p-4 text-white/80">{{ loyiha.donor }}</td>
+                            <td class="p-4 text-white text-right font-medium">{{ loyiha.sarflangan }}</td>
+                            <td class="p-4 text-white/60 text-right">{{ loyiha.ajratilgan }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="p-4 text-white font-medium">Maktab qurilishi (Var A)</td>
+                            <td class="p-4 text-white/80">Ta'lim</td>
+                            <td class="p-4 text-white/80">WB</td>
+                            <td class="p-4 text-white text-right font-medium">$1.2M</td>
+                            <td class="p-4 text-white/60 text-right">$1.5M</td>
+                        </tr>
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="p-4 text-white font-medium">Kasalxona ta'miri (Var B)</td>
+                            <td class="p-4 text-white/80">Sog'liqni saqlash</td>
+                            <td class="p-4 text-white/80">ADB</td>
+                            <td class="p-4 text-white text-right font-medium">$2.1M</td>
+                            <td class="p-4 text-white/60 text-right">$3.0M</td>
+                        </tr>
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="p-4 text-white font-medium">Suv tarmog'i (Var A)</td>
+                            <td class="p-4 text-white/80">Suv</td>
+                            <td class="p-4 text-white/80">EBRD</td>
+                            <td class="p-4 text-white text-right font-medium">$0.8M</td>
+                            <td class="p-4 text-white/60 text-right">$1.0M</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
