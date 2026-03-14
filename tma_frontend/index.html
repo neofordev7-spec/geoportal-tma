@@ -9,22 +9,58 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
   <script>tailwind.config={theme:{extend:{colors:{primary:"#9d2bee"},fontFamily:{display:["Inter","sans-serif"]}}}}</script>
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-    body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#dcfce7 0%,#e0f2fe 50%,#f3e8ff 100%);min-height:100vh;color:#0f172a;}
+    body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#dcfce7 0%,#e0f2fe 50%,#f3e8ff 100%);min-height:100vh;color:#0f172a;margin:0;}
     .glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.7);}
     .glass-sm{background:rgba(255,255,255,0.4);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.6);}
     ::-webkit-scrollbar{display:none;}
-    .scroll-x{overflow-x:auto;scrollbar-width:none;}
     @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
     .fade-up{animation:fadeUp 0.3s ease-out forwards;}
     .card-btn{transition:all 0.15s;cursor:pointer;}.card-btn:active{transform:scale(0.98);}
-    .viloyat-g{cursor:pointer;transition:opacity 0.15s;}.viloyat-g:active{opacity:0.7;}
+
+    /* Leaflet xarita */
+    #mapContainer{width:100%;height:calc(100vh - 120px);border-radius:16px;overflow:hidden;position:relative;}
+    .leaflet-container{background:#e0f2fe !important;}
+
+    /* Viloyat/tuman nomlari */
+    .geo-label{
+      background:transparent !important;border:none !important;box-shadow:none !important;
+      font-family:'Inter',sans-serif;font-weight:700;font-size:11px;
+      color:#1e293b;text-shadow:0 0 4px #fff,0 0 4px #fff,0 0 4px #fff;
+      white-space:nowrap;text-align:center;
+    }
+    .geo-label-tuman{font-weight:600;font-size:10px;color:#334155;}
+    .geo-badge{
+      display:inline-block;margin-top:2px;padding:1px 6px;border-radius:999px;
+      color:#fff;font-size:9px;font-weight:700;
+    }
+
+    /* Layer switcher */
+    .layer-btn{padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.15s;border:none;outline:none;}
+    .layer-btn.active{background:#2563eb;color:#fff;}
+    .layer-btn:not(.active){background:transparent;color:#475569;}
+    .layer-btn:not(.active):hover{background:rgba(0,0,0,0.05);}
+
+    /* Popup stil */
+    .leaflet-popup-content-wrapper{border-radius:12px !important;box-shadow:0 4px 20px rgba(0,0,0,0.15) !important;}
+    .leaflet-popup-content{margin:12px 14px !important;font-family:'Inter',sans-serif !important;}
+    .leaflet-popup-tip{box-shadow:0 4px 12px rgba(0,0,0,0.1) !important;}
+
+    /* Maktab ro'yxat (tuman ichida) */
+    .maktab-list-wrap{max-height:calc(100vh - 200px);overflow-y:auto;}
+
+    /* Loading */
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .spinner{width:32px;height:32px;border:3px solid #e2e8f0;border-top-color:#2563eb;border-radius:50%;animation:spin 0.6s linear infinite;}
   </style>
 </head>
-<body class="pb-6">
+<body class="pb-0">
 
   <!-- ═══ Header ═══ -->
-  <div class="sticky top-0 z-50 px-3 pt-3 pb-1" style="background:linear-gradient(to bottom,rgba(220,252,231,0.95) 70%,transparent)">
+  <div class="sticky top-0 z-[1100] px-3 pt-3 pb-1" style="background:linear-gradient(to bottom,rgba(220,252,231,0.95) 70%,transparent)">
     <nav class="glass rounded-full px-4 py-2.5 flex items-center justify-between shadow-sm">
       <div class="flex items-center gap-2">
         <div class="w-7 h-7 rounded-full bg-blue-500 flex items-center justify-center">
@@ -41,71 +77,60 @@
     </nav>
   </div>
 
-  <!-- ═══ Breadcrumb (orqaga tugmasi) ═══ -->
-  <div id="breadcrumb" class="hidden px-3 py-2">
-    <button onclick="orqaga()" class="glass-sm rounded-full px-3 py-1.5 flex items-center gap-1 active:scale-95 transition-transform">
+  <!-- ═══ Map overlay controls ═══ -->
+
+  <!-- Breadcrumb -->
+  <div id="breadcrumb" class="hidden fixed top-[68px] left-3 z-[1050]">
+    <button onclick="orqaga()" class="glass rounded-full px-3 py-1.5 flex items-center gap-1 active:scale-95 transition-transform shadow-md cursor-pointer">
       <span class="material-symbols-outlined text-slate-600" style="font-size:16px">arrow_back</span>
       <span id="breadcrumbText" class="text-xs font-semibold text-slate-600">Orqaga</span>
     </button>
   </div>
 
-  <!-- ═══ MAIN CONTENT ═══ -->
-  <div id="mainContent" class="px-3">
+  <!-- Layer switcher -->
+  <div id="layerSwitcher" class="fixed top-[68px] right-3 z-[1050] glass rounded-xl shadow-md overflow-hidden flex">
+    <button class="layer-btn active" onclick="setLayer('map',this)">Xarita</button>
+    <button class="layer-btn" onclick="setLayer('satellite',this)">Sputnik</button>
+    <button class="layer-btn" onclick="setLayer('hybrid',this)">Gibrid</button>
+  </div>
 
-    <!-- ── STEP 1: O'zbekiston xaritasi ── -->
-    <div id="step-xarita" class="fade-up">
-      <!-- Yo'riqnoma banner -->
-      <div class="glass rounded-2xl p-3 shadow-sm mb-3">
-        <p class="text-sm font-black text-slate-800 text-center">Hududingizni tanlang va tekshiring</p>
-      </div>
-
-      <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Viloyatingizni tanlang</p>
-
-      <!-- SVG Xarita -->
-      <div class="glass rounded-2xl shadow-sm overflow-hidden mb-3">
-        <svg id="uzbekMap" viewBox="0 0 440 300" style="width:100%;height:280px;display:block;" preserveAspectRatio="xMidYMid meet">
-          <defs>
-            <linearGradient id="mapBg" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:#e0f2fe"/>
-              <stop offset="100%" style="stop-color:#dcfce7"/>
-            </linearGradient>
-          </defs>
-          <rect width="440" height="300" fill="url(#mapBg)" rx="0"/>
-          <!-- Viloyat doiralari — JS bilan to'ldiriladi -->
-        </svg>
-      </div>
-
-      <!-- Viloyatlar ro'yxati (xarita ostida) -->
-      <div id="viloyatlarList" class="space-y-1.5"></div>
+  <!-- Stats box -->
+  <div id="statsBox" class="fixed bottom-[72px] left-3 z-[1050] glass rounded-xl shadow-lg p-3 min-w-[160px]">
+    <h3 id="statsTitle" class="text-xs font-bold text-slate-900 mb-0.5">O'zbekiston</h3>
+    <div class="flex items-end gap-1.5">
+      <span id="statsCount" class="text-xl font-black text-blue-600">0</span>
+      <span id="statsLabel" class="text-xs text-slate-400 pb-0.5">ob'ekt</span>
     </div>
+  </div>
 
-    <!-- ── STEP 2: Tumanlar ro'yxati ── -->
-    <div id="step-tumanlar" class="hidden fade-up">
-      <div class="glass rounded-2xl p-3 shadow-sm mb-3">
-        <p class="text-sm font-black text-slate-900" id="viloyatSarlavha">—</p>
-        <p class="text-xs text-slate-500 mt-0.5" id="viloyatInfo">—</p>
-      </div>
-      <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Tumaningizni tanlang</p>
-      <div id="tumanlarList" class="space-y-1.5"></div>
+  <!-- GPS button -->
+  <button onclick="gpsLocate()" class="fixed bottom-[130px] right-3 z-[1050] w-10 h-10 glass rounded-xl shadow-lg flex items-center justify-center cursor-pointer active:scale-95 transition-transform" title="Joylashuvim">
+    <span class="material-symbols-outlined text-blue-600" style="font-size:20px">my_location</span>
+  </button>
+
+  <!-- Legend (faqat maktab darajasida) -->
+  <div id="legend" class="hidden fixed bottom-[72px] right-3 z-[1050] glass rounded-xl shadow-lg p-3">
+    <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Holat</h4>
+    <div class="space-y-1">
+      <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-green-500"></span><span class="text-[10px] text-slate-600">Yaxshi (70%+)</span></div>
+      <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span><span class="text-[10px] text-slate-600">E'tiborga muhtoj</span></div>
+      <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span><span class="text-[10px] text-slate-600">Nosoz (<40%)</span></div>
+      <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span><span class="text-[10px] text-slate-600">Tekshirilmagan</span></div>
     </div>
+  </div>
 
-    <!-- ── STEP 3: Maktablar ro'yxati ── -->
-    <div id="step-maktablar" class="hidden fade-up">
-      <div class="glass rounded-2xl p-3 shadow-sm mb-3">
-        <p class="text-sm font-black text-slate-900" id="tumanSarlavha">—</p>
-        <p class="text-xs text-slate-500 mt-0.5" id="tumanInfo">—</p>
-      </div>
-      <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Maktabni tanlang va real holatni tekshiring</p>
-      <p class="text-xs text-slate-400 mb-2">Tanlagan maktabingizda suv bormi? Internet ishlayaptimi? — tekshirib baho bering</p>
-      <div id="maktablarList" class="space-y-1.5"></div>
+  <!-- ═══ MAP ═══ -->
+  <div id="mapContainer">
+    <div id="mapLoading" class="absolute inset-0 z-[900] flex items-center justify-center" style="background:rgba(255,255,255,0.7)">
+      <div class="text-center"><div class="spinner mx-auto mb-2"></div><p class="text-xs text-slate-500">Xarita yuklanmoqda...</p></div>
     </div>
-
+    <div id="map" style="width:100%;height:100%;"></div>
   </div>
 
   <!-- ═══ Bottom tabs ═══ -->
-  <div class="fixed bottom-0 left-0 right-0 z-50" style="background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);border-top:1px solid rgba(0,0,0,0.06);">
+  <div class="fixed bottom-0 left-0 right-0 z-[1100]" style="background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);border-top:1px solid rgba(0,0,0,0.06);">
     <div class="flex justify-around py-2 px-2">
-      <button onclick="setTab('xarita')" id="btab-xarita" class="flex flex-col items-center gap-0.5 px-3 py-1">
+      <button onclick="resetMap()" class="flex flex-col items-center gap-0.5 px-3 py-1 cursor-pointer">
         <span class="material-symbols-outlined" style="font-size:22px;color:#22c55e">map</span>
         <span class="text-xs font-bold" style="color:#22c55e">Xarita</span>
       </button>
@@ -126,282 +151,511 @@
 
   <!-- ═══ JAVASCRIPT ═══ -->
   <script>
+    // ── Telegram WebApp ──
     const tg = window.Telegram.WebApp;
     tg.ready(); tg.expand();
-
     const user = tg.initDataUnsafe?.user;
     if (user) {
       document.getElementById('userChip').classList.remove('hidden');
       document.getElementById('userName').textContent = user.first_name || 'Foydalanuvchi';
     }
 
-    // ── API token ──
+    // ── Constants ──
     const API_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoid2ViX3VzZXIiLCJleHAiOjE3Nzk4Mzk0ODV9.WCy4ooIDvL0o8G5udEuba4POyJMMH2CnjM2FcgybG10';
     const API_BASE = 'https://duasr.uz/api4';
+    const UZ_CENTER = [41.3, 64.5];
+    const UZ_ZOOM = 6;
+    const UZ_BOUNDS = [[37.0, 55.9], [45.6, 73.2]];
 
-    // ── Holat ──
-    let allMaktablar = [];
-    let navStack = []; // [{step:'xarita'}, {step:'tumanlar', viloyat:'Andijon viloyati'}, ...]
+    const VILOYAT_COLORS = [
+      '#3b82f6','#22c55e','#f59e0b','#ef4444','#8b5cf6',
+      '#06b6d4','#ec4899','#14b8a6','#f97316','#6366f1',
+      '#84cc16','#e11d48','#0ea5e9','#a855f7'
+    ];
 
-    // Viloyat SVG koordinatalari
-    const VIL_COORDS = {
-      "Qoraqolpog'iston Respublikasi": {x:78,y:62,abbr:'QQR'},
-      "Xorazm viloyati": {x:108,y:135,abbr:'Xor'},
-      "Navoiy viloyati": {x:210,y:172,abbr:'Nav'},
-      "Buxoro viloyati": {x:187,y:200,abbr:'Bux'},
-      "Qashqadaryo viloyati": {x:230,y:232,abbr:'Qsh'},
-      "Surxondaryo viloyati": {x:270,y:260,abbr:'Sur'},
-      "Samarqand viloyati": {x:258,y:198,abbr:'Sam'},
-      "Jizzax viloyati": {x:280,y:176,abbr:'Jiz'},
-      "Sirdaryo viloyati": {x:296,y:162,abbr:'Sir'},
-      "Toshkent shahar": {x:312,y:140,abbr:'Tsh'},
-      "Toshkent viloyati": {x:336,y:158,abbr:'Tv'},
-      "Namangan viloyati": {x:362,y:145,abbr:'Nam'},
-      "Andijon viloyati": {x:390,y:162,abbr:'And'},
-      "Farg'ona viloyati": {x:374,y:178,abbr:'Far'},
+    const VILOYAT_NAME_TO_KOD = {
+      'Toshkent shahar':'toshkent_sh',
+      'Toshkent viloyati':'toshkent_v',
+      'Samarqand viloyati':'samarqand',
+      "Farg'ona viloyati":'fargona',
+      'Andijon viloyati':'andijon',
+      'Namangan viloyati':'namangan',
+      'Buxoro viloyati':'buxoro',
+      'Xorazm viloyati':'xorazm',
+      'Qashqadaryo viloyati':'qashqadaryo',
+      'Surxondaryo viloyati':'surxondaryo',
+      'Jizzax viloyati':'jizzax',
+      'Sirdaryo viloyati':'sirdaryo',
+      'Navoiy viloyati':'navoiy',
+      "Qoraqolpog'iston Respublikasi":'qoraqalpogiston',
     };
 
-    // ── API dan maktablarni yuklash ──
-    async function yuklaAPI() {
+    const TILE_LAYERS = {
+      map: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      hybrid: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    };
+
+    // ── State ──
+    let map, tileLayer, labelsLayer;
+    let viloyatlarGeo = null, tumanlarGeo = null;
+    let allMaktablar = [];
+    let currentLevel = 'country'; // 'country' | 'viloyat' | 'tuman'
+    let selectedViloyat = null;
+    let selectedTuman = null;
+    let geoLayer = null; // aktiv GeoJSON layer
+
+    // ── Map yaratish ──
+    map = L.map('map', {
+      center: UZ_CENTER,
+      zoom: UZ_ZOOM,
+      maxBounds: UZ_BOUNDS,
+      maxBoundsViscosity: 1.0,
+      minZoom: 5,
+      maxZoom: 18,
+      zoomControl: false,
+    });
+
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    tileLayer = L.tileLayer(TILE_LAYERS.map, {
+      attribution: '&copy; OpenStreetMap',
+    }).addTo(map);
+
+    // ── Data yuklash ──
+    async function loadAll() {
       try {
-        // maktab444 = to'liq dataset (11139 maktab), faqat kerakli ustunlar
+        const [vilRes, tumRes] = await Promise.all([
+          fetch('/static/uz-viloyatlar.geojson'),
+          fetch('/static/uz-tumanlar.geojson'),
+        ]);
+        viloyatlarGeo = await vilRes.json();
+        tumanlarGeo = await tumRes.json();
+      } catch(e) {
+        console.error('GeoJSON yuklash xatosi:', e);
+      }
+
+      // GEOASR dan maktablar
+      try {
         const res = await fetch(API_BASE + '/maktab444?select=_uid_,viloyat,tuman,obekt_nomi,internetga_ulanish_turi,umumiy_uquvchi,qurilish_yili,ichimlik_suvi_manbaa,sport_zal_holati,oshhona_holati&limit=12000', {
           headers: { 'Authorization': 'Bearer ' + API_TOKEN }
         });
         allMaktablar = await res.json();
       } catch(e) {
-        console.warn('API xato, lokal dataga o\'tmoqda', e);
-        // Lokal API fallback
+        console.warn('API xato, lokal fallback', e);
         try {
           const res2 = await fetch('/api/maktablar/');
           const d = await res2.json();
           allMaktablar = (d.maktablar || []).map(m => ({
-            viloyat: m.viloyat, tuman: m.tuman, obekt_nomi: m.nom, id: m.id,
+            viloyat: m.viloyat, tuman: m.tuman, obekt_nomi: m.nom,
+            id: m.id, lat: m.lat, lng: m.lng,
+            mamnuniyat_foizi: m.mamnuniyat_foizi,
+            jami_tekshiruv: m.jami_tekshiruv,
+            vaadalar_soni: m.vaadalar_soni,
+            holat: m.holat,
             _local: true
           }));
         } catch { allMaktablar = []; }
       }
-      renderXarita();
-      renderViloyatlarList();
+
+      document.getElementById('mapLoading').style.display = 'none';
+      renderCountryLevel();
     }
 
-    // ── Viloyatlar hisob ──
-    function viloyatlarHisob() {
+    // ── Viloyat hisob ──
+    function getViloyatCounts() {
       const h = {};
       allMaktablar.forEach(m => {
         const v = m.viloyat;
         if (!h[v]) h[v] = 0;
         h[v]++;
       });
-      return Object.entries(h).sort((a,b) => b[1]-a[1]);
+      return h;
     }
 
-    // ── SVG xaritani chizish ──
-    function renderXarita() {
-      const svg = document.getElementById('uzbekMap');
-      // Mavjud doiralarni olib tashlash
-      svg.querySelectorAll('.viloyat-g').forEach(el => el.remove());
+    // ── GeoJSON centroid ──
+    function getCentroid(feature) {
+      const coords = [];
+      function extract(arr) {
+        if (!Array.isArray(arr)) return;
+        if (typeof arr[0] === 'number') { coords.push(arr); return; }
+        arr.forEach(extract);
+      }
+      extract(feature.geometry.coordinates);
+      if (!coords.length) return [41.3, 64.5];
+      let sLat = 0, sLng = 0;
+      coords.forEach(([lng, lat]) => { sLat += lat; sLng += lng; });
+      return [sLat / coords.length, sLng / coords.length];
+    }
 
-      const viloyatlar = viloyatlarHisob();
-      const maxSon = Math.max(...viloyatlar.map(v=>v[1]), 1);
+    // ═══════════════════════════════════════════════════════════════
+    // LEVEL 1: VILOYATLAR
+    // ═══════════════════════════════════════════════════════════════
+    function renderCountryLevel() {
+      clearGeoLayer();
+      currentLevel = 'country';
+      selectedViloyat = null;
+      selectedTuman = null;
+      updateBreadcrumb();
 
-      viloyatlar.forEach(([nom, soni]) => {
-        const coords = VIL_COORDS[nom];
-        if (!coords) return;
-        const r = 14 + Math.round((soni / maxSon) * 12);
-        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        g.classList.add('viloyat-g');
-        g.setAttribute('onclick', `ochViloyat('${nom.replace(/'/g, "\\'")}')`);
-        g.innerHTML = `
-          <circle cx="${coords.x}" cy="${coords.y}" r="${r}" fill="rgba(34,197,94,0.85)" stroke="#16a34a" stroke-width="2" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.2))"/>
-          <text x="${coords.x}" y="${coords.y - 3}" text-anchor="middle" font-size="${r > 20 ? 11 : 9}" font-weight="800" fill="#fff">${soni}</text>
-          <text x="${coords.x}" y="${coords.y + 8}" text-anchor="middle" font-size="7" fill="#fff">${coords.abbr}</text>
-        `;
-        svg.appendChild(g);
+      if (!viloyatlarGeo) return;
+
+      const counts = getViloyatCounts();
+      const totalCount = allMaktablar.length;
+
+      geoLayer = L.layerGroup().addTo(map);
+
+      viloyatlarGeo.features.forEach((feature, idx) => {
+        const name = feature.properties.name;
+        const color = VILOYAT_COLORS[idx % VILOYAT_COLORS.length];
+        const count = counts[name] || 0;
+
+        // Polygon
+        const poly = L.geoJSON(feature, {
+          style: {
+            fillColor: color,
+            fillOpacity: 0.2,
+            color: color,
+            weight: 2,
+            opacity: 0.8,
+          },
+        });
+
+        poly.on('mouseover', function() {
+          this.setStyle({ fillOpacity: 0.45, weight: 3 });
+          this.bringToFront();
+        });
+        poly.on('mouseout', function() {
+          this.setStyle({ fillOpacity: 0.2, weight: 2 });
+        });
+        poly.on('click', function() {
+          openViloyat(name);
+        });
+
+        geoLayer.addLayer(poly);
+
+        // Label
+        const center = getCentroid(feature);
+        const shortName = name.replace(' viloyati','').replace(' shahar',' sh.').replace(' Respublikasi',' Resp.');
+        let labelHtml = `<div style="text-align:center;line-height:1.2">${shortName}`;
+        if (count > 0) {
+          labelHtml += `<br><span class="geo-badge" style="background:${color}">${count}</span>`;
+        }
+        labelHtml += '</div>';
+
+        const label = L.marker(center, {
+          icon: L.divIcon({
+            className: 'geo-label',
+            html: labelHtml,
+            iconSize: [80, 30],
+            iconAnchor: [40, 15],
+          }),
+          interactive: false,
+        });
+        geoLayer.addLayer(label);
       });
+
+      updateStats("O'zbekiston", totalCount, "ob'ekt");
+      document.getElementById('legend').classList.add('hidden');
+
+      map.flyTo(UZ_CENTER, UZ_ZOOM, { duration: 0.6 });
     }
 
-    // ── Viloyatlar ro'yxati ──
-    function renderViloyatlarList() {
-      const list = document.getElementById('viloyatlarList');
-      const viloyatlar = viloyatlarHisob();
-      list.innerHTML = viloyatlar.map(([nom, soni]) => `
-        <div class="card-btn glass rounded-xl p-3 flex items-center gap-3 shadow-sm" onclick="ochViloyat('${nom.replace(/'/g, "\\'")}')">
-          <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center" style="background:rgba(34,197,94,0.12)">
-            <span class="material-symbols-outlined" style="font-size:20px;color:#22c55e">location_city</span>
-          </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-bold text-slate-800">${nom}</p>
-          </div>
-          <div class="text-right">
-            <p class="text-sm font-black" style="color:#22c55e">${soni}</p>
-            <p class="text-xs text-slate-400">ob'ekt</p>
-          </div>
-          <span class="material-symbols-outlined text-slate-300" style="font-size:18px">chevron_right</span>
-        </div>
-      `).join('');
-    }
+    // ═══════════════════════════════════════════════════════════════
+    // LEVEL 2: TUMANLAR (viloyat ichida)
+    // ═══════════════════════════════════════════════════════════════
+    function openViloyat(viloyatName) {
+      clearGeoLayer();
+      currentLevel = 'viloyat';
+      selectedViloyat = viloyatName;
+      selectedTuman = null;
+      updateBreadcrumb();
 
-    // ── Viloyat ochish → tumanlar ──
-    function ochViloyat(viloyatNom) {
-      navStack = [{step:'xarita'}, {step:'tumanlar', viloyat: viloyatNom}];
-      updateNav();
+      if (!tumanlarGeo || !viloyatlarGeo) return;
 
-      const maktablar = allMaktablar.filter(m => m.viloyat === viloyatNom);
-      // Tumanlar hisob
-      const tumanH = {};
-      maktablar.forEach(m => {
-        if (!tumanH[m.tuman]) tumanH[m.tuman] = 0;
-        tumanH[m.tuman]++;
+      geoLayer = L.layerGroup().addTo(map);
+
+      // Viloyat chegarasi (dash line)
+      const vilFeature = viloyatlarGeo.features.find(f => f.properties.name === viloyatName);
+      if (vilFeature) {
+        const border = L.geoJSON(vilFeature, {
+          style: {
+            fillColor: 'transparent', fillOpacity: 0,
+            color: '#64748b', weight: 3, dashArray: '8 4', opacity: 0.5,
+          },
+        });
+        geoLayer.addLayer(border);
+
+        // Zoom
+        const bounds = L.geoJSON(vilFeature).getBounds();
+        map.flyToBounds(bounds, { padding: [20, 20], duration: 0.6 });
+      }
+
+      // Tuman hisob
+      const tumanCounts = {};
+      allMaktablar.filter(m => m.viloyat === viloyatName).forEach(m => {
+        if (!tumanCounts[m.tuman]) tumanCounts[m.tuman] = 0;
+        tumanCounts[m.tuman]++;
       });
-      const tumanlar = Object.entries(tumanH).sort((a,b) => b[1]-a[1]);
 
-      document.getElementById('viloyatSarlavha').textContent = viloyatNom;
-      document.getElementById('viloyatInfo').textContent = `${maktablar.length} ta ob'ekt, ${tumanlar.length} tuman`;
+      // Tumanlar polygonlar
+      const tumanlar = tumanlarGeo.features.filter(f => f.properties.viloyat === viloyatName);
+      tumanlar.forEach((feature, idx) => {
+        const name = feature.properties.name;
+        const color = VILOYAT_COLORS[idx % VILOYAT_COLORS.length];
+        const count = tumanCounts[name] || 0;
 
-      const list = document.getElementById('tumanlarList');
-      list.innerHTML = tumanlar.map(([nom, soni]) => `
-        <div class="card-btn glass rounded-xl p-3 flex items-center gap-3 shadow-sm" onclick="ochTuman('${viloyatNom.replace(/'/g, "\\'")}', '${nom.replace(/'/g, "\\'")}')">
-          <div class="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center" style="background:rgba(59,130,246,0.1)">
-            <span class="material-symbols-outlined" style="font-size:18px;color:#3b82f6">apartment</span>
-          </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold text-slate-800">${nom}</p>
-          </div>
-          <div class="text-right">
-            <p class="text-sm font-black text-blue-600">${soni}</p>
-            <p class="text-xs text-slate-400">maktab</p>
-          </div>
-          <span class="material-symbols-outlined text-slate-300" style="font-size:18px">chevron_right</span>
-        </div>
-      `).join('');
+        const poly = L.geoJSON(feature, {
+          style: {
+            fillColor: color, fillOpacity: 0.2,
+            color: color, weight: 1.5, opacity: 0.7,
+          },
+        });
 
-      showStep('tumanlar');
+        poly.on('mouseover', function() {
+          this.setStyle({ fillOpacity: 0.45, weight: 3 });
+          this.bringToFront();
+        });
+        poly.on('mouseout', function() {
+          this.setStyle({ fillOpacity: 0.2, weight: 1.5 });
+        });
+        poly.on('click', function() {
+          openTuman(viloyatName, name);
+        });
+
+        geoLayer.addLayer(poly);
+
+        // Label
+        const center = getCentroid(feature);
+        const shortName = name.replace(/ [Tt]umani$/,'').replace(/ shahri$/,'');
+        let labelHtml = `<div style="text-align:center;line-height:1.2">${shortName}`;
+        if (count > 0) {
+          labelHtml += `<br><span class="geo-badge" style="background:${color}">${count}</span>`;
+        }
+        labelHtml += '</div>';
+
+        const label = L.marker(center, {
+          icon: L.divIcon({
+            className: 'geo-label geo-label-tuman',
+            html: labelHtml,
+            iconSize: [70, 26],
+            iconAnchor: [35, 13],
+          }),
+          interactive: false,
+        });
+        geoLayer.addLayer(label);
+      });
+
+      const vilCount = allMaktablar.filter(m => m.viloyat === viloyatName).length;
+      updateStats(viloyatName, vilCount, "ob'ekt");
+      document.getElementById('legend').classList.add('hidden');
     }
 
-    // ── Tuman ochish → maktablar ──
-    function ochTuman(viloyatNom, tumanNom) {
-      navStack = [{step:'xarita'}, {step:'tumanlar', viloyat:viloyatNom}, {step:'maktablar', viloyat:viloyatNom, tuman:tumanNom}];
-      updateNav();
+    // ═══════════════════════════════════════════════════════════════
+    // LEVEL 3: MAKTABLAR (tuman ichida)
+    // ═══════════════════════════════════════════════════════════════
+    function openTuman(viloyatName, tumanName) {
+      clearGeoLayer();
+      currentLevel = 'tuman';
+      selectedViloyat = viloyatName;
+      selectedTuman = tumanName;
+      updateBreadcrumb();
 
-      const maktablar = allMaktablar.filter(m => m.viloyat === viloyatNom && m.tuman === tumanNom);
+      geoLayer = L.layerGroup().addTo(map);
 
-      document.getElementById('tumanSarlavha').textContent = tumanNom;
-      document.getElementById('tumanInfo').textContent = `${viloyatNom} — ${maktablar.length} ta maktab`;
+      // Tuman chegarasi
+      const tumFeature = tumanlarGeo.features.find(
+        f => f.properties.name === tumanName && f.properties.viloyat === viloyatName
+      );
+      if (tumFeature) {
+        const border = L.geoJSON(tumFeature, {
+          style: {
+            fillColor: '#e2e8f0', fillOpacity: 0.1,
+            color: '#475569', weight: 2.5, dashArray: '6 3',
+          },
+        });
+        geoLayer.addLayer(border);
+        const bounds = L.geoJSON(tumFeature).getBounds();
+        map.flyToBounds(bounds, { padding: [30, 30], duration: 0.6 });
+      }
 
-      const list = document.getElementById('maktablarList');
-      list.innerHTML = maktablar.map((m, i) => {
-        // Internet holati rang
-        let netRang = '#94a3b8', netText = '—';
-        if (m.internetga_ulanish_turi === 'internet_optika') { netRang = '#22c55e'; netText = 'Optik'; }
-        else if (m.internetga_ulanish_turi === 'internet_mobil') { netRang = '#f59e0b'; netText = 'Mobil'; }
-        else if (m.internetga_ulanish_turi === 'umuman_yuq') { netRang = '#ef4444'; netText = 'Yo\'q'; }
+      // Maktablar
+      const maktablar = allMaktablar.filter(m => m.viloyat === viloyatName && m.tuman === tumanName);
 
-        const idx = i; // closure uchun
-        return `
-        <div class="card-btn glass rounded-xl p-3 flex items-center gap-3 shadow-sm" style="border-left:3px solid ${netRang}" onclick="ochMaktab(${idx}, '${viloyatNom.replace(/'/g, "\\'")}', '${tumanNom.replace(/'/g, "\\'")}')">
-          <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center" style="background:${netRang}15">
-            <span class="material-symbols-outlined" style="font-size:20px;color:${netRang}">school</span>
-          </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-bold text-slate-800 leading-tight">${m.obekt_nomi || m.nom || 'Maktab'}</p>
-            <div class="flex items-center gap-2 mt-1 text-xs text-slate-400">
-              ${m.umumiy_uquvchi ? `<span>${m.umumiy_uquvchi} o'quvchi</span>` : ''}
-              ${m.qurilish_yili ? `<span>${m.qurilish_yili} y.</span>` : ''}
-              ${netText !== '—' ? `<span style="color:${netRang}">${netText}</span>` : ''}
+      maktablar.forEach((m, idx) => {
+        // Koordinata aniqlash
+        let lat = m.lat, lng = m.lng;
+        if (!lat || !lng) {
+          // GeoJSON tuman centroid + random offset
+          if (tumFeature) {
+            const c = getCentroid(tumFeature);
+            lat = c[0] + (Math.random() - 0.5) * 0.05;
+            lng = c[1] + (Math.random() - 0.5) * 0.05;
+          } else {
+            return; // skip
+          }
+        }
+
+        // Rang aniqlash
+        let color = '#94a3b8'; // tekshirilmagan
+        let statusText = 'Tekshirilmagan';
+        if (m._local && m.mamnuniyat_foizi != null) {
+          if (m.mamnuniyat_foizi >= 70) { color = '#22c55e'; statusText = 'Yaxshi'; }
+          else if (m.mamnuniyat_foizi >= 40) { color = '#f59e0b'; statusText = "E'tiborga muhtoj"; }
+          else { color = '#ef4444'; statusText = 'Nosoz'; }
+        } else if (!m._local) {
+          // GEOASR data — internet asosida rang
+          if (m.internetga_ulanish_turi === 'internet_optika') { color = '#22c55e'; statusText = 'Optik internet'; }
+          else if (m.internetga_ulanish_turi === 'internet_mobil') { color = '#f59e0b'; statusText = 'Mobil internet'; }
+          else if (m.internetga_ulanish_turi === 'umuman_yuq') { color = '#ef4444'; statusText = 'Internet yo\'q'; }
+        }
+
+        const marker = L.circleMarker([lat, lng], {
+          radius: 8,
+          fillColor: color,
+          fillOpacity: 0.9,
+          color: '#fff',
+          weight: 2,
+        });
+
+        // Popup
+        const nom = m.obekt_nomi || m.nom || 'Maktab';
+        let popupHtml = `
+          <div style="min-width:200px">
+            <div style="font-weight:700;font-size:13px;color:#0f172a;margin-bottom:6px">${nom}</div>
+            <div style="font-size:11px;color:#64748b;margin-bottom:8px">${tumanName}, ${viloyatName}</div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
+              <span style="color:#64748b">Holat:</span>
+              <span style="font-weight:600;color:${color}">${statusText}</span>
+            </div>`;
+
+        if (m._local) {
+          if (m.mamnuniyat_foizi != null) {
+            popupHtml += `
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
+              <span style="color:#64748b">Mamnuniyat:</span>
+              <span style="font-weight:600">${m.mamnuniyat_foizi}%</span>
             </div>
-          </div>
-          <span class="material-symbols-outlined text-slate-300" style="font-size:18px">chevron_right</span>
+            <div style="background:#e2e8f0;border-radius:4px;height:6px;margin:6px 0">
+              <div style="background:${color};height:6px;border-radius:4px;width:${m.mamnuniyat_foizi}%"></div>
+            </div>`;
+          }
+          if (m.vaadalar_soni) {
+            popupHtml += `<div style="font-size:11px;color:#64748b">Va'dalar: <b>${m.vaadalar_soni}</b> | Tekshiruvlar: <b>${m.jami_tekshiruv || 0}</b></div>`;
+          }
+        } else {
+          if (m.umumiy_uquvchi) popupHtml += `<div style="font-size:11px;color:#64748b">O'quvchilar: <b>${m.umumiy_uquvchi}</b></div>`;
+          if (m.qurilish_yili) popupHtml += `<div style="font-size:11px;color:#64748b">Qurilgan: <b>${m.qurilish_yili}</b></div>`;
+        }
+
+        popupHtml += `
+          <button onclick="ochMaktab('${nom.replace(/'/g,"\\'")}','${viloyatName.replace(/'/g,"\\'")}','${tumanName.replace(/'/g,"\\'")}', ${m._local ? m.id : 'null'})"
+            style="margin-top:8px;width:100%;padding:6px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer">
+            Batafsil ko'rish
+          </button>
         </div>`;
-      }).join('');
 
-      showStep('maktablar');
-    }
-
-    // ── Navigatsiya ──
-    function showStep(step) {
-      ['xarita','tumanlar','maktablar'].forEach(s => {
-        document.getElementById('step-'+s).classList.toggle('hidden', s !== step);
+        marker.bindPopup(popupHtml);
+        geoLayer.addLayer(marker);
       });
-      window.scrollTo({top:0, behavior:'smooth'});
+
+      updateStats(tumanName, maktablar.length, 'maktab');
+      document.getElementById('legend').classList.remove('hidden');
     }
 
-    function updateNav() {
-      const bc = document.getElementById('breadcrumb');
-      const bcText = document.getElementById('breadcrumbText');
-      if (navStack.length <= 1) {
-        bc.classList.add('hidden');
-      } else {
-        bc.classList.remove('hidden');
-        const prev = navStack[navStack.length - 2];
-        if (prev.step === 'xarita') bcText.textContent = 'O\'zbekiston';
-        else if (prev.step === 'tumanlar') bcText.textContent = prev.viloyat;
-        else bcText.textContent = 'Orqaga';
-      }
-    }
+    // ── Maktabni ochish (sync + navigate) ──
+    let syncing = false;
+    async function ochMaktab(nom, viloyat, tuman, localId) {
+      if (syncing) return;
+      syncing = true;
 
-    function orqaga() {
-      if (navStack.length <= 1) return;
-      navStack.pop();
-      const current = navStack[navStack.length - 1];
-      if (current.step === 'xarita') {
-        showStep('xarita');
-      } else if (current.step === 'tumanlar') {
-        ochViloyat(current.viloyat);
-        return; // ochViloyat o'zi navStack ni set qiladi
-      }
-      updateNav();
-    }
-
-    function setTab(tab) {
-      if (tab === 'xarita') {
-        navStack = [{step:'xarita'}];
-        showStep('xarita');
-        updateNav();
-      }
-    }
-
-    // ── Maktabni ochish (GEOASR → lokal sync → detail sahifa) ──
-    let syncingIdx = -1;
-    async function ochMaktab(idx, viloyatNom, tumanNom) {
-      if (syncingIdx === idx) return; // ikki marta bosilmasin
-      syncingIdx = idx;
-      const maktablar = allMaktablar.filter(m => m.viloyat === viloyatNom && m.tuman === tumanNom);
-      const m = maktablar[idx];
-      if (!m) return;
-
-      // Lokal maktab bo'lsa to'g'ridan-to'g'ri
-      if (m._local && m.id) {
-        window.location = `/tma/maktablar/${m.id}/`;
+      if (localId) {
+        window.location = '/tma/maktablar/' + localId + '/';
         return;
       }
 
-      // GEOASR maktabni lokal DB ga sinxronlash
       try {
         const res = await fetch('/api/maktab-sync/', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            obekt_nomi: m.obekt_nomi || m.nom,
-            viloyat: viloyatNom,
-            tuman: tumanNom,
-          })
+          body: JSON.stringify({ obekt_nomi: nom, viloyat: viloyat, tuman: tuman })
         });
         const d = await res.json();
         if (d.success && d.maktab_id) {
-          window.location = `/tma/maktablar/${d.maktab_id}/`;
+          window.location = '/tma/maktablar/' + d.maktab_id + '/';
         } else {
-          tg.showAlert("Xatolik: " + (d.error || "Sinxronlash xatosi"));
-          syncingIdx = -1;
+          tg.showAlert('Xatolik: ' + (d.error || 'Sinxronlash xatosi'));
+          syncing = false;
         }
       } catch(e) {
         tg.showAlert("Server bilan bog'lanib bo'lmadi");
-        syncingIdx = -1;
+        syncing = false;
       }
     }
 
-    // ── Boshlash ──
-    yuklaAPI();
+    // ── Helper functions ──
+    function clearGeoLayer() {
+      if (geoLayer) {
+        map.removeLayer(geoLayer);
+        geoLayer = null;
+      }
+    }
+
+    function updateBreadcrumb() {
+      const bc = document.getElementById('breadcrumb');
+      const bcText = document.getElementById('breadcrumbText');
+      if (currentLevel === 'country') {
+        bc.classList.add('hidden');
+      } else {
+        bc.classList.remove('hidden');
+        if (currentLevel === 'viloyat') {
+          bcText.textContent = "O'zbekiston";
+        } else if (currentLevel === 'tuman') {
+          bcText.textContent = selectedViloyat || 'Orqaga';
+        }
+      }
+    }
+
+    function orqaga() {
+      if (currentLevel === 'tuman' && selectedViloyat) {
+        openViloyat(selectedViloyat);
+      } else {
+        renderCountryLevel();
+      }
+    }
+
+    function resetMap() {
+      renderCountryLevel();
+    }
+
+    function updateStats(title, count, label) {
+      document.getElementById('statsTitle').textContent = title;
+      document.getElementById('statsCount').textContent = count.toLocaleString();
+      document.getElementById('statsLabel').textContent = label;
+    }
+
+    function setLayer(type, btn) {
+      document.querySelectorAll('.layer-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      map.removeLayer(tileLayer);
+      if (labelsLayer) { map.removeLayer(labelsLayer); labelsLayer = null; }
+
+      tileLayer = L.tileLayer(TILE_LAYERS[type]).addTo(map);
+
+      if (type === 'hybrid') {
+        labelsLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
+          opacity: 0.8,
+        }).addTo(map);
+      }
+    }
+
+    function gpsLocate() {
+      map.locate({ setView: true, maxZoom: 14 });
+    }
+
+    // ── Start ──
+    loadAll();
   </script>
 </body>
 </html>
