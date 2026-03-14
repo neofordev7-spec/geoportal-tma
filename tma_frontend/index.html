@@ -94,15 +94,20 @@
     .back-btn:active{transform:scale(0.96);}
     .back-btn .material-symbols-outlined{font-size:16px;color:#3b82f6;font-variation-settings:'FILL' 1;}
 
-    /* Guide pill */
+    /* Guide pill — subtle glass, auto-dim */
     .guide{
-      display:flex;align-items:center;gap:7px;
-      padding:8px 14px;border-radius:12px;
-      background:rgba(255,255,255,0.92);color:#0f172a;
-      box-shadow:0 3px 16px rgba(0,0,0,0.12);
+      display:flex;align-items:center;gap:6px;
+      padding:6px 12px;border-radius:20px;
+      background:rgba(15,23,42,0.65);color:#e2e8f0;
+      backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:0 2px 12px rgba(0,0,0,0.2);
       max-width:calc(100vw - 24px);
+      transition:opacity 0.5s ease;
     }
-    .guide .material-symbols-outlined{font-size:18px;color:#3b82f6;flex-shrink:0;font-variation-settings:'FILL' 1;}
+    .guide.dimmed{opacity:0.4;}
+    .guide:active,.guide.dimmed:hover{opacity:1;}
+    .guide .material-symbols-outlined{font-size:15px;color:#60a5fa;flex-shrink:0;font-variation-settings:'FILL' 1;}
 
     /* Stats count animation */
     @keyframes countPop{0%{transform:scale(0.8);opacity:0.5}50%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
@@ -168,8 +173,8 @@
   <div id="guideBanner" class="guide fade-up">
     <span class="material-symbols-outlined" id="guideIcon">touch_app</span>
     <div>
-      <div id="guideTitle" class="text-[11px] font-bold leading-tight">Viloyatingizni tanlang</div>
-      <div id="guideSubtitle" class="text-[9px] text-slate-400 leading-tight mt-0.5">Va'dalar bajarilganini tekshiring</div>
+      <div id="guideTitle" class="text-[10.5px] font-semibold leading-tight">Viloyatingizni tanlang</div>
+      <div id="guideSubtitle" class="text-[8.5px] text-slate-400 leading-tight mt-0.5">Va'dalar bajarilganini tekshiring</div>
     </div>
   </div>
 </div>
@@ -384,23 +389,10 @@
     setStats(vilNom.replace(' viloyati','').replace(' shahar',''),allData.filter(m=>m.viloyat===vilNom).length,"maktab");
   }
 
-  // Sintetik maktab nomlari generatsiya
-  const SYN_NAMES=['Umumta\'lim maktabi','O\'rta maktab','Ixtisoslashtirilgan maktab','Ta\'lim maskani','Akademik litsey filiali'];
-  function genSyntheticSchools(vilNom,tumNom,need,tumBounds){
-    const short=tumNom.replace(/ [Tt]umani$/,'').replace(/ [Ss]hahri$/,'');
-    const pts=distributeInBounds(tumBounds,need);
-    return pts.map((p,i)=>({
-      obekt_nomi:`${short} ${i+1}-sonli ${SYN_NAMES[i%SYN_NAMES.length]}`,
-      viloyat:vilNom, tuman:tumNom,
-      lat:p[0], lng:p[1],
-      _synthetic:true
-    }));
-  }
-
   // ═════════════════════════════════
   // LEVEL 3: MAKTABLAR
   // ═════════════════════════════════
-  const MIN_SCHOOLS=20, MAX_SCHOOLS=35;
+  const MAX_SCHOOLS=20;
 
   function showTuman(vilNom,tumNom){
     clear(); level='tuman'; selVil=vilNom; selTum=tumNom; updateUI();
@@ -416,14 +408,8 @@
 
     let maktablar=allData.filter(m=>m.viloyat===vilNom&&m.tuman===tumNom);
 
-    // Max chegarasi
+    // Max 20 ta maktab ko'rsatish
     if(maktablar.length>MAX_SCHOOLS) maktablar=maktablar.slice(0,MAX_SCHOOLS);
-
-    // Min chegarasi — sintetik data qo'shish
-    if(maktablar.length<MIN_SCHOOLS&&tumBounds){
-      const need=MIN_SCHOOLS-maktablar.length;
-      maktablar=maktablar.concat(genSyntheticSchools(vilNom,tumNom,need,tumBounds));
-    }
 
     // Koordinatasiz maktablar uchun tarqatish
     const noCoord=maktablar.filter(m=>!m.lat||!m.lng);
@@ -498,8 +484,7 @@
       geoLyr.addLayer(marker);
     });
 
-    const realCount=maktablar.filter(m=>!m._synthetic).length;
-    setStats(tumNom.replace(/ [Tt]umani$/,'').replace(/ [Ss]hahri$/,''),realCount,'maktab');
+    setStats(tumNom.replace(/ [Tt]umani$/,'').replace(/ [Ss]hahri$/,''),maktablar.length,'maktab');
   }
 
   // ── Maktab ochish ──
@@ -518,12 +503,19 @@
   function esc(s){return s.replace(/'/g,"\\'");}
 
   // ── UI ──
+  let guideDimTimer=null;
   function updateUI(){
     const bw=document.getElementById('backWrap');
     const bt=document.getElementById('backText');
     const gt=document.getElementById('guideTitle');
     const gs=document.getElementById('guideSubtitle');
     const gi=document.getElementById('guideIcon');
+    const gb=document.getElementById('guideBanner');
+
+    // Guide — yangi levelda yorqin ko'rinadi, 3s keyin xiralashadi
+    gb.classList.remove('dimmed');
+    if(guideDimTimer) clearTimeout(guideDimTimer);
+    guideDimTimer=setTimeout(()=>gb.classList.add('dimmed'),3500);
 
     if(level==='country'){
       bw.style.display='none';
@@ -539,8 +531,8 @@
     } else {
       bw.style.display='flex';
       bt.textContent=selVil.replace(' viloyati','').replace(' shahar','');
-      gt.textContent='Maktabingiz raqamini toping';
-      gs.textContent="Raqamni bosing va va'dalarni tekshiring";
+      gt.textContent='Maktabingizni toping';
+      gs.textContent="Raqamni bosib va'dalarni tekshiring";
       gi.textContent='pin_drop';
     }
   }
