@@ -226,8 +226,8 @@
     async function loadAll() {
       try {
         const [vilRes, tumRes] = await Promise.all([
-          fetch('/static/uz-viloyatlar.geojson'),
-          fetch('/static/uz-tumanlar.geojson'),
+          fetch('/geojson/uz-viloyatlar.geojson'),
+          fetch('/geojson/uz-tumanlar.geojson'),
         ]);
         viloyatlarGeo = await vilRes.json();
         tumanlarGeo = await tumRes.json();
