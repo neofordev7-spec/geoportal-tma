@@ -283,7 +283,7 @@ class Command(BaseCommand):
                 'telegram_full_name': 'Dilshod Rahmatov',
                 'is_anonim': False,
                 'holat': 'kutilmoqda',
-                'media': ['/static/lenta/qarshi_yakkaboq.mp4'],
+                'media': ['/media/lenta/qarshi_yakkaboq.mp4'],
                 'likes': 47,
                 'comments': [
                     ('Jasur Toshev', "Bu yo'ldan har kuni o'taman, juda xavfli holatda!"),
@@ -301,7 +301,7 @@ class Command(BaseCommand):
                 'telegram_full_name': 'Malika Yusupova',
                 'is_anonim': False,
                 'holat': 'hal_qilindi',
-                'media': ['/static/lenta/asfalt.mp4'],
+                'media': ['/media/lenta/asfalt.mp4'],
                 'likes': 124,
                 'comments': [
                     ('Bobur R.', "Bizning mahallaga ham shunaqa qilishsa!"),
@@ -320,7 +320,7 @@ class Command(BaseCommand):
                 'telegram_full_name': 'Anonim fuqaro',
                 'is_anonim': True,
                 'holat': 'kutilmoqda',
-                'media': ['/static/lenta/kocha.jpg', '/static/lenta/kocha3.jpg', '/static/lenta/kochaq.jpg'],
+                'media': ['/media/lenta/kocha.jpg', '/media/lenta/kocha3.jpg', '/media/lenta/kochaq.jpg'],
                 'likes': 89,
                 'comments': [
                     ('Zarina Y.', "Bizning mahallada ham xuddi shunday ahvol"),
