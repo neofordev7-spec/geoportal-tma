@@ -43,10 +43,10 @@ MAKTAB_HOLAT = [
 
 class Murojaat(models.Model):
     rasm = models.ImageField(upload_to='murojaatlar/', blank=True, null=True)
-    viloyat = models.CharField(max_length=100, choices=VILOYATLAR)
-    tuman = models.CharField(max_length=100)
-    infratuzilma = models.CharField(max_length=50, choices=INFRATUZILMA_TURLARI)
-    sektor = models.CharField(max_length=50)
+    viloyat = models.CharField(max_length=100, choices=VILOYATLAR, blank=True)
+    tuman = models.CharField(max_length=100, blank=True)
+    infratuzilma = models.CharField(max_length=50, choices=INFRATUZILMA_TURLARI, blank=True)
+    sektor = models.CharField(max_length=50, blank=True)
     izoh = models.TextField(blank=True)
     telegram_user_id = models.BigIntegerField()
     telegram_username = models.CharField(max_length=150, blank=True)
