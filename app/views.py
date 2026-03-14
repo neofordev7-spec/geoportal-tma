@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.db.models import Count
 from rest_framework.decorators import api_view, parser_classes
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -424,6 +424,7 @@ def viloyatlar_api(request):
 
 
 @api_view(['POST'])
+@parser_classes([JSONParser, FormParser])
 def maktab_sync(request):
     """GEOASR dan kelgan maktabni lokal DB ga sinxronlash.
     Maktab yo'q bo'lsa yaratadi + standart va'dalar qo'shadi.
