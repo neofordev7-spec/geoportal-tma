@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.db.models import Count
+from django.db.models import Count, Subquery, OuterRef
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
@@ -642,14 +642,22 @@ HOLAT_LABELS = {
 @api_view(['GET'])
 def feed_api(request):
     """Ommaviy feed — barcha murojaatlar, pagination + like/comment soni"""
+    import traceback
+    try:
+        return _feed_api_inner(request)
+    except Exception as e:
+        traceback.print_exc()
+        return Response({'error': str(e), 'results': [], 'jami': 0, 'has_more': False}, status=200)
+
+def _feed_api_inner(request):
     limit = min(int(request.query_params.get('limit', 10)), 50)
     offset = int(request.query_params.get('offset', 0))
     user_id = request.query_params.get('user_id', '')
     infratuzilma = request.query_params.get('infratuzilma', '')
 
     qs = Murojaat.objects.annotate(
-        likes_soni=Count('likes'),
-        comments_soni=Count('comments'),
+        likes_soni=Count('likes', distinct=True),
+        comments_soni=Count('comments', distinct=True),
     ).order_by('-yuborilgan_vaqt')
 
     if infratuzilma:
@@ -674,9 +682,13 @@ def feed_api(request):
         rasmlar = list(m.rasmlar.values_list('rasm', flat=True))
         rasm_urls = []
         for r in rasmlar:
-            rasm_urls.append(r if r.startswith('/') else f'/media/{r}')
+            r_str = str(r)
+            rasm_urls.append(r_str if r_str.startswith('/') else f'/media/{r_str}')
         if not rasm_urls and m.rasm:
-            rasm_urls = [m.rasm.url]
+            try:
+                rasm_urls = [m.rasm.url]
+            except ValueError:
+                pass
 
         # User nomi
         if m.is_anonim:
