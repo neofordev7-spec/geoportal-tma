@@ -6,8 +6,11 @@ Ishga tushirish:
     python manage.py seed_data
 """
 import random
+import shutil
+from pathlib import Path
 from django.core.management.base import BaseCommand
-from app.models import Maktab, Vaada, Tekshiruv, Statistika
+from django.conf import settings
+from app.models import Maktab, Vaada, Tekshiruv, Statistika, Murojaat, MurojaatRasm, Like, Comment
 
 
 MAKTABLAR = [
@@ -270,3 +273,121 @@ class Command(BaseCommand):
 
         jami_t = Tekshiruv.objects.count()
         self.stdout.write(self.style.SUCCESS(f"Jami tekshiruvlar: {jami_t} ta"))
+
+        # ── Lenta postlari ──────────────────────────────────────
+        self.stdout.write("\nLenta postlari yuklanmoqda...")
+        LENTA_POSTS = [
+            {
+                'izoh': "Qarshi–Shahrisabz magistral yo'li ta'miri nega to'xtab qoldi?\n\nQarshi–Shahrisabz magistral avtomobil yo'lining Yakkabog' tumanidan o'tgan qismida olib borilayotgan ta'mirlash ishlari o'tgan yil dekabr oyidan beri to'xtab qolgan.",
+                'viloyat': 'qashqadaryo',
+                'tuman': 'Yakkabog\'',
+                'infratuzilma': 'yol',
+                'telegram_user_id': 2000001,
+                'telegram_full_name': 'Dilshod Rahmatov',
+                'is_anonim': False,
+                'holat': 'kutilmoqda',
+                'media': ['lenta/qarshi_yakkaboq.mp4'],
+                'likes': 47,
+                'comments': [
+                    ('Jasur Toshev', "Bu yo'ldan har kuni o'taman, juda xavfli holatda!"),
+                    ('Nilufar K.', "O'tgan yili ham shunday edi, va'da berishdi lekin hech narsa qilishmadi"),
+                    ('Sardor M.', "Hokimlikka murojaatlar yubordik, javob yo'q"),
+                    ('Zulfiya A.', "Yomg'ir yog'sa loy bo'lib ketadi, mashinalar buziladi"),
+                ],
+            },
+            {
+                'izoh': "Asfalt yo'limiz qurib berildi, juda xursandmiz! Rahmat hukumatga!",
+                'viloyat': 'qashqadaryo',
+                'tuman': 'Qarshi shahri',
+                'infratuzilma': 'yol',
+                'telegram_user_id': 2000002,
+                'telegram_full_name': 'Malika Yusupova',
+                'is_anonim': False,
+                'holat': 'hal_qilindi',
+                'media': ['lenta/asfalt.mp4'],
+                'likes': 124,
+                'comments': [
+                    ('Bobur R.', "Bizning mahallaga ham shunaqa qilishsa!"),
+                    ('Aziza T.', "Zo'r! Axir bajarildi!"),
+                    ('Otabek N.', "Qancha vaqt davom etdi ta'mir?"),
+                    ('Shahlo I.', "Hammaga nasib qilsin!"),
+                    ('Kamol D.', "Qo'shnilarimiz ham xursand"),
+                ],
+            },
+            {
+                'izoh': "Va'dalar beriladi, muammo esa echilmaydi: Guliston mahallasining chang va loy ko'chasi qachondir ta'mirlanadimi?\n\nQashqadaryo viloyati Qarshi tumanidagi Guliston mahallasi aholisi tuman hokimligi tomonidan yillar davomida berilayotgan va'dalar bajarilmayotgani yuzasidan murojaat yo'lladi.",
+                'viloyat': 'qashqadaryo',
+                'tuman': 'Qarshi tumani',
+                'infratuzilma': 'yol',
+                'telegram_user_id': 2000003,
+                'telegram_full_name': 'Anonim fuqaro',
+                'is_anonim': True,
+                'holat': 'kutilmoqda',
+                'media': ['lenta/kocha.jpg', 'lenta/kocha3.jpg', 'lenta/kochaq.jpg'],
+                'likes': 89,
+                'comments': [
+                    ('Zarina Y.', "Bizning mahallada ham xuddi shunday ahvol"),
+                    ('Alisher K.', "5 yildan beri va'da berishyapti!"),
+                    ('Dilnoza E.', "Bolalar maktabga loy ichida borishyapti, uyat!"),
+                    ('Sherzod M.', "Buni televideniyega chiqarish kerak"),
+                    ('Nodira H.', "Hokimga yozing, telegram kanalga ham tashlang"),
+                    ('Jasur U.', "Hammamiz birgalikda ovoz ko'tarishimiz kerak"),
+                ],
+            },
+        ]
+
+        if Murojaat.objects.filter(telegram_user_id__gte=2000001, telegram_user_id__lte=2000003).exists():
+            self.stdout.write(self.style.WARNING("Lenta postlari allaqachon mavjud."))
+        else:
+            # Media fayllarni nusxalash
+            src_dir = settings.BASE_DIR / 'video_rasmlar'
+            dst_dir = settings.MEDIA_ROOT / 'lenta'
+            dst_dir.mkdir(parents=True, exist_ok=True)
+
+            media_map = {
+                'lenta/qarshi_yakkaboq.mp4': src_dir / 'qarshi_yakkaboq.mp4',
+                'lenta/asfalt.mp4': src_dir / 'asfalt.mp4',
+                'lenta/kocha.jpg': src_dir / 'problem_image' / 'kocha.jpg',
+                'lenta/kocha3.jpg': src_dir / 'problem_image' / 'kocha 3.jpg',
+                'lenta/kochaq.jpg': src_dir / 'problem_image' / 'kochaq.jpg',
+            }
+            for dst_name, src_path in media_map.items():
+                dst_path = settings.MEDIA_ROOT / dst_name
+                if src_path.exists() and not dst_path.exists():
+                    shutil.copy2(src_path, dst_path)
+
+            for post_data in LENTA_POSTS:
+                murojaat = Murojaat.objects.create(
+                    izoh=post_data['izoh'],
+                    viloyat=post_data['viloyat'],
+                    tuman=post_data['tuman'],
+                    infratuzilma=post_data['infratuzilma'],
+                    sektor='',
+                    telegram_user_id=post_data['telegram_user_id'],
+                    telegram_full_name=post_data['telegram_full_name'],
+                    is_anonim=post_data['is_anonim'],
+                    holat=post_data['holat'],
+                )
+                # Media fayllar
+                for media_path in post_data['media']:
+                    MurojaatRasm.objects.create(murojaat=murojaat, rasm=media_path)
+
+                # Likelar
+                for i in range(post_data['likes']):
+                    Like.objects.create(
+                        murojaat=murojaat,
+                        telegram_user_id=3000000 + i,
+                    )
+
+                # Izohlar
+                for full_name, matn in post_data['comments']:
+                    Comment.objects.create(
+                        murojaat=murojaat,
+                        telegram_user_id=4000000 + random.randint(1, 99999),
+                        telegram_full_name=full_name,
+                        matn=matn,
+                    )
+
+                self.stdout.write(f"  ✓ Lenta: {post_data['izoh'][:50]}...")
+
+            self.stdout.write(self.style.SUCCESS(f"3 ta lenta posti yaratildi!"))

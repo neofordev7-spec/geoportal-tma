@@ -58,9 +58,10 @@ static_root/
 *.pdf
 *.xlsx
 *.pptx
-*.jpg
-*.jpeg
-*.png
+
+# Seed media — deploy uchun kerak
+!video_rasmlar/
+!video_rasmlar/**
 
 # Node
 node_modules/
