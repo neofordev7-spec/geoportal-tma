@@ -6,10 +6,7 @@ Ishga tushirish:
     python manage.py seed_data
 """
 import random
-import shutil
-from pathlib import Path
 from django.core.management.base import BaseCommand
-from django.conf import settings
 from app.models import Maktab, Vaada, Tekshiruv, Statistika, Murojaat, MurojaatRasm, Like, Comment
 
 
@@ -286,7 +283,7 @@ class Command(BaseCommand):
                 'telegram_full_name': 'Dilshod Rahmatov',
                 'is_anonim': False,
                 'holat': 'kutilmoqda',
-                'media': ['lenta/qarshi_yakkaboq.mp4'],
+                'media': ['/static/lenta/qarshi_yakkaboq.mp4'],
                 'likes': 47,
                 'comments': [
                     ('Jasur Toshev', "Bu yo'ldan har kuni o'taman, juda xavfli holatda!"),
@@ -304,7 +301,7 @@ class Command(BaseCommand):
                 'telegram_full_name': 'Malika Yusupova',
                 'is_anonim': False,
                 'holat': 'hal_qilindi',
-                'media': ['lenta/asfalt.mp4'],
+                'media': ['/static/lenta/asfalt.mp4'],
                 'likes': 124,
                 'comments': [
                     ('Bobur R.', "Bizning mahallaga ham shunaqa qilishsa!"),
@@ -323,7 +320,7 @@ class Command(BaseCommand):
                 'telegram_full_name': 'Anonim fuqaro',
                 'is_anonim': True,
                 'holat': 'kutilmoqda',
-                'media': ['lenta/kocha.jpg', 'lenta/kocha3.jpg', 'lenta/kochaq.jpg'],
+                'media': ['/static/lenta/kocha.jpg', '/static/lenta/kocha3.jpg', '/static/lenta/kochaq.jpg'],
                 'likes': 89,
                 'comments': [
                     ('Zarina Y.', "Bizning mahallada ham xuddi shunday ahvol"),
@@ -339,23 +336,6 @@ class Command(BaseCommand):
         if Murojaat.objects.filter(telegram_user_id__gte=2000001, telegram_user_id__lte=2000003).exists():
             self.stdout.write(self.style.WARNING("Lenta postlari allaqachon mavjud."))
         else:
-            # Media fayllarni nusxalash
-            src_dir = settings.BASE_DIR / 'video_rasmlar'
-            dst_dir = settings.MEDIA_ROOT / 'lenta'
-            dst_dir.mkdir(parents=True, exist_ok=True)
-
-            media_map = {
-                'lenta/qarshi_yakkaboq.mp4': src_dir / 'qarshi_yakkaboq.mp4',
-                'lenta/asfalt.mp4': src_dir / 'asfalt.mp4',
-                'lenta/kocha.jpg': src_dir / 'problem_image' / 'kocha.jpg',
-                'lenta/kocha3.jpg': src_dir / 'problem_image' / 'kocha 3.jpg',
-                'lenta/kochaq.jpg': src_dir / 'problem_image' / 'kochaq.jpg',
-            }
-            for dst_name, src_path in media_map.items():
-                dst_path = settings.MEDIA_ROOT / dst_name
-                if src_path.exists() and not dst_path.exists():
-                    shutil.copy2(src_path, dst_path)
-
             for post_data in LENTA_POSTS:
                 murojaat = Murojaat.objects.create(
                     izoh=post_data['izoh'],

@@ -672,7 +672,9 @@ def feed_api(request):
     for m in items:
         # Rasmlar
         rasmlar = list(m.rasmlar.values_list('rasm', flat=True))
-        rasm_urls = [f'/media/{r}' for r in rasmlar]
+        rasm_urls = []
+        for r in rasmlar:
+            rasm_urls.append(r if r.startswith('/') else f'/media/{r}')
         if not rasm_urls and m.rasm:
             rasm_urls = [m.rasm.url]
 
