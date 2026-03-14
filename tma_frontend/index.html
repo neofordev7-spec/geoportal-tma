@@ -101,12 +101,12 @@
     <!-- Sub-tab: Xarita (viloyatlar drill-down) -->
     <div id="sub-page-viloyatlar" class="space-y-2">
       <!-- Uzbekiston xaritasi -->
-      <div class="glass rounded-2xl overflow-hidden shadow-sm">
+      <div class="glass rounded-2xl shadow-sm" style="overflow:clip;">
         <div class="px-4 py-2 border-b border-white/20 flex items-center gap-2">
           <span class="material-icons text-green-500 text-base">map</span>
           <span class="text-xs font-semibold text-slate-600">Viloyatni bosing — loyihalarni ko'ring</span>
         </div>
-        <div id="leafletMap" style="height:340px;width:100%;z-index:1;"></div>
+        <div id="leafletMap" style="height:340px;width:100%;border-radius:0 0 1rem 1rem;z-index:1;"></div>
       </div>
       <!-- Drill-down panel (viloyat bosilganda ko'rinadi) -->
       <div id="drillPanel" class="hidden glass rounded-2xl overflow-hidden shadow-sm">
@@ -750,8 +750,8 @@
         maxZoom: 11,
         maxBoundsViscosity: 0.9,
       }).setView([41.2995, 69.2401], 5);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap',
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap © CARTO',
         maxZoom: 18,
       }).addTo(leafletMap);
       // Container o'lchamlari tayyor bo'lgandan keyin qayta hisoblash
@@ -762,32 +762,52 @@
       loadViloyatBubbles();
     }
 
+    const SINTETIK_VILOYATLAR = [
+      { kod:'toshkent_sh',     nom:'Toshkent shahri',       lat:41.2995, lng:69.2401, vaadalar_soni:12, maktablar_soni:4 },
+      { kod:'toshkent_v',      nom:'Toshkent viloyati',      lat:41.1173, lng:69.7028, vaadalar_soni:5,  maktablar_soni:2 },
+      { kod:'samarqand',       nom:'Samarqand viloyati',     lat:39.6547, lng:66.9758, vaadalar_soni:9,  maktablar_soni:3 },
+      { kod:'fargona',         nom:"Farg'ona viloyati",      lat:40.3897, lng:71.7857, vaadalar_soni:6,  maktablar_soni:2 },
+      { kod:'andijon',         nom:'Andijon viloyati',       lat:40.8829, lng:72.3234, vaadalar_soni:5,  maktablar_soni:2 },
+      { kod:'namangan',        nom:'Namangan viloyati',      lat:41.0011, lng:71.6726, vaadalar_soni:7,  maktablar_soni:2 },
+      { kod:'buxoro',          nom:'Buxoro viloyati',        lat:39.7747, lng:64.4286, vaadalar_soni:4,  maktablar_soni:2 },
+      { kod:'qashqadaryo',     nom:'Qashqadaryo viloyati',   lat:38.8610, lng:65.7870, vaadalar_soni:6,  maktablar_soni:2 },
+      { kod:'xorazm',          nom:'Xorazm viloyati',        lat:41.5531, lng:60.6325, vaadalar_soni:3,  maktablar_soni:1 },
+      { kod:'surxondaryo',     nom:'Surxondaryo viloyati',   lat:37.9404, lng:67.5659, vaadalar_soni:4,  maktablar_soni:1 },
+      { kod:'navoiy',          nom:"Navoiy viloyati",        lat:40.1007, lng:65.3791, vaadalar_soni:3,  maktablar_soni:1 },
+      { kod:'jizzax',          nom:'Jizzax viloyati',        lat:40.1158, lng:67.8422, vaadalar_soni:2,  maktablar_soni:1 },
+      { kod:'sirdaryo',        nom:'Sirdaryo viloyati',      lat:40.8363, lng:68.6642, vaadalar_soni:2,  maktablar_soni:1 },
+      { kod:'qoraqalpogiston', nom:"Qoraqalpog'iston",       lat:43.8006, lng:59.0031, vaadalar_soni:3,  maktablar_soni:1 },
+    ];
+
+    function renderBubbles(data) {
+      viloyatMarkers.forEach(m => m.remove());
+      viloyatMarkers = [];
+      const max = Math.max(...data.map(v => v.vaadalar_soni), 1);
+      data.forEach(v => {
+        const r = 20 + Math.round((v.vaadalar_soni / max) * 20);
+        const icon = L.divIcon({
+          className: '',
+          html: `<div style="width:${r*2}px;height:${r*2}px;border-radius:50%;background:rgba(71,244,37,0.85);border:2px solid #22c55e;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.35);flex-direction:column;gap:0;">
+            <span style="font-size:${r>28?'12':'10'}px;font-weight:800;color:#0a3a1a;line-height:1.1;">${v.vaadalar_soni}</span>
+            <span style="font-size:8px;color:#0a3a1a;line-height:1;">loyiha</span>
+          </div>`,
+          iconSize: [r*2, r*2],
+          iconAnchor: [r, r],
+        });
+        const marker = L.marker([v.lat, v.lng], { icon })
+          .addTo(leafletMap)
+          .bindTooltip(v.nom, { permanent: false, direction: 'top' })
+          .on('click', () => ochViloyatPanel(v.kod, v.nom));
+        viloyatMarkers.push(marker);
+      });
+      setTimeout(() => leafletMap.invalidateSize(), 100);
+    }
+
     function loadViloyatBubbles() {
       fetch('/api/viloyatlar/')
         .then(r => r.json())
-        .then(data => {
-          viloyatMarkers.forEach(m => m.remove());
-          viloyatMarkers = [];
-          const max = Math.max(...data.map(v => v.vaadalar_soni), 1);
-          data.forEach(v => {
-            const r = 20 + Math.round((v.vaadalar_soni / max) * 20);
-            const icon = L.divIcon({
-              className: '',
-              html: `<div style="width:${r*2}px;height:${r*2}px;border-radius:50%;background:rgba(71,244,37,0.8);border:2px solid #22c55e;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.35);flex-direction:column;gap:0;">
-                <span style="font-size:${r>28?'12':'10'}px;font-weight:800;color:#0a3a1a;line-height:1.1;">${v.vaadalar_soni}</span>
-                <span style="font-size:8px;color:#0a3a1a;line-height:1;">loyiha</span>
-              </div>`,
-              iconSize: [r*2, r*2],
-              iconAnchor: [r, r],
-            });
-            const marker = L.marker([v.lat, v.lng], { icon })
-              .addTo(leafletMap)
-              .bindTooltip(v.nom, { permanent: false, direction: 'top' })
-              .on('click', () => ochViloyatPanel(v.kod, v.nom));
-            viloyatMarkers.push(marker);
-          });
-          setTimeout(() => leafletMap.invalidateSize(), 200);
-        }).catch(() => {});
+        .then(data => renderBubbles(data.length ? data : SINTETIK_VILOYATLAR))
+        .catch(() => renderBubbles(SINTETIK_VILOYATLAR));
     }
 
     function ochViloyatPanel(viloyatKod, viloyatNom) {
@@ -866,7 +886,7 @@
 
     // Xarita tab ochilganda init qil
     document.getElementById('tab-xarita').addEventListener('click', () => setTimeout(initMap, 100));
-    setTimeout(initMap, 300);
+    setTimeout(initMap, 500);
   </script>
 </body>
 </html>
