@@ -3,322 +3,303 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Lenta | GEOPORTAL</title>
+  <title>Lenta | Real Holat</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,100..700,0..1&display=swap" rel="stylesheet"/>
-  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
-  <script>tailwind.config={theme:{extend:{colors:{primary:"#9d2bee"},fontFamily:{display:["Inter","sans-serif"]}}}}</script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{sans:["Inter","sans-serif"]}}}}</script>
   <style>
-    body{font-family:'Inter',sans-serif;background:#000;min-height:100vh;color:#fff;}
+    body{font-family:'Inter',sans-serif;background:#000;color:#fff;-webkit-tap-highlight-color:transparent;}
     ::-webkit-scrollbar{display:none;}
-    @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .spinner{animation:spin 0.7s linear infinite;border:2.5px solid rgba(255,255,255,0.15);border-top-color:#fff;border-radius:50%;width:24px;height:24px;}
-    @keyframes likePop{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
-    .like-pop{animation:likePop 0.3s ease-out;}
-    @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-    .slide-up{animation:slideUp 0.25s ease-out;}
-    @keyframes sigPulse{0%{transform:scale(1);opacity:0.5}100%{transform:scale(1.6);opacity:0}}
 
-    /* Post card */
-    .post-card{background:#111;border-radius:0;margin-bottom:8px;}
+    /* ── Post ── */
+    .post{background:#000;border-bottom:0.5px solid rgba(255,255,255,0.08);padding-bottom:4px;margin-bottom:4px;}
 
-    /* Video */
-    .post-card video{width:100%;max-height:70vh;object-fit:cover;background:#000;display:block;}
+    /* ── Video ── */
+    .vid-wrap{position:relative;background:#000;width:100%;overflow:hidden;}
+    .vid-wrap video{width:100%;display:block;max-height:75vh;object-fit:contain;}
+    .play-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;pointer-events:none;}
+    .play-icon.show{opacity:1;}
+    .play-icon div{width:56px;height:56px;border-radius:50%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);}
 
-    /* Image carousel */
-    .carousel{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;}
-    .carousel>div{scroll-snap-align:start;flex:0 0 100%;min-width:100%;}
-    .carousel img{width:100%;max-height:70vh;object-fit:cover;display:block;background:#111;}
-    .dots{display:flex;gap:5px;justify-content:center;padding:8px 0;}
-    .dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.25);transition:all 0.2s;}
+    /* ── Carousel ── */
+    .car{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;}
+    .car>div{scroll-snap-align:start;flex:0 0 100%;min-width:100%;}
+    .car img{width:100%;display:block;max-height:75vh;object-fit:cover;background:#111;}
+    .ind{position:absolute;top:12px;right:12px;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);}
+    .dots{display:flex;gap:4px;justify-content:center;padding:8px 0;}
+    .dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.2);transition:all 0.25s;}
     .dot.on{background:#fff;width:18px;border-radius:3px;}
 
-    /* Action buttons — YouTube Shorts style */
-    .act-btn{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;}
-    .act-btn span.material-symbols-outlined{font-size:26px;}
-    .act-btn .cnt{font-size:11px;font-weight:700;}
+    /* ── Actions ── */
+    .actions{display:flex;align-items:center;padding:10px 14px;gap:16px;}
+    .abtn{display:flex;align-items:center;gap:5px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+    .abtn .mi{font-size:24px;transition:transform 0.15s;}
+    .abtn:active .mi{transform:scale(0.85);}
+    .abtn .num{font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);}
+    @keyframes heartBeat{0%{transform:scale(1)}15%{transform:scale(1.3)}30%{transform:scale(1)}45%{transform:scale(1.15)}60%{transform:scale(1)}}
+    .heart-beat{animation:heartBeat 0.5s ease-out;}
 
-    /* Bottom tabs */
-    .signal-fab{
-      width:48px;height:48px;border-radius:50%;margin-top:-18px;
-      background:linear-gradient(135deg,#9d2bee,#7c3aed);
-      display:flex;align-items:center;justify-content:center;
-      box-shadow:0 4px 18px rgba(157,43,238,0.4);position:relative;
-    }
-    .signal-fab::before{content:'';position:absolute;inset:-3px;border-radius:50%;border:1.5px solid rgba(157,43,238,0.3);animation:sigPulse 2s ease-out infinite;}
+    /* ── Text ── */
+    .desc{padding:0 14px 8px;font-size:13px;line-height:1.5;color:rgba(255,255,255,0.85);}
+    .desc .name{font-weight:800;color:#fff;}
+    .desc .more{color:rgba(255,255,255,0.35);font-weight:600;cursor:pointer;}
+
+    /* ── Comment sheet ── */
+    .sheet-bg{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,0.5);display:none;}
+    .sheet-bg.open{display:block;}
+    .sheet{position:fixed;bottom:0;left:0;right:0;z-index:61;background:#262626;border-radius:16px 16px 0 0;max-height:70vh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform 0.3s ease-out;}
+    .sheet.open{transform:translateY(0);}
+    .c-item{display:flex;gap:10px;padding:10px 0;}
+    .c-av{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .c-av span{font-size:11px;font-weight:800;color:rgba(255,255,255,0.5);}
+    .c-name{font-size:12px;font-weight:700;color:#fff;}
+    .c-time{font-size:11px;color:rgba(255,255,255,0.25);margin-left:6px;}
+    .c-text{font-size:13px;color:rgba(255,255,255,0.7);margin-top:2px;line-height:1.4;}
+
+    /* ── Bottom nav ── */
+    @keyframes sigPulse{0%{transform:scale(1);opacity:0.4}100%{transform:scale(1.6);opacity:0}}
+    .fab{width:48px;height:48px;border-radius:50%;margin-top:-20px;background:linear-gradient(135deg,#9333ea,#7c3aed);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(147,51,234,0.4);position:relative;}
+    .fab::before{content:'';position:absolute;inset:-3px;border-radius:50%;border:1.5px solid rgba(147,51,234,0.3);animation:sigPulse 2s ease-out infinite;}
+
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .spinner{animation:spin 0.7s linear infinite;border:2.5px solid rgba(255,255,255,0.1);border-top-color:#fff;border-radius:50%;width:24px;height:24px;}
   </style>
 </head>
-<body class="pb-16">
+<body class="pb-[60px]">
 
-<!-- ═══ HEADER ═══ -->
-<div class="sticky top-0 z-40" style="background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);">
-  <div class="px-4 py-2.5 flex items-center justify-between">
-    <h1 class="text-base font-black">Lenta</h1>
-    <a href="/tma/profil/" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-      <span class="material-symbols-outlined text-white/70" style="font-size:18px;font-variation-settings:'FILL' 1">person</span>
+<!-- Header -->
+<div class="sticky top-0 z-40" style="background:rgba(0,0,0,0.88);backdrop-filter:blur(20px) saturate(180%);">
+  <div class="flex items-center justify-between px-4 h-11">
+    <span class="text-[15px] font-extrabold tracking-tight">Real Holat</span>
+    <a href="/tma/profil/" class="w-7 h-7 rounded-full bg-white/8 flex items-center justify-center">
+      <span class="material-symbols-outlined text-white/60" style="font-size:16px;font-variation-settings:'FILL' 1">person</span>
     </a>
   </div>
 </div>
 
-<!-- ═══ FEED ═══ -->
+<!-- Feed -->
 <div id="feed"></div>
-
-<!-- Empty -->
-<div id="empty" class="hidden py-20 text-center px-4">
-  <span class="material-symbols-outlined text-white/20" style="font-size:56px">dynamic_feed</span>
-  <p class="text-sm font-bold text-white/40 mt-3">Hali postlar yo'q</p>
-  <a href="/tma/murojaat/" class="inline-flex items-center gap-1.5 mt-4 px-5 py-2.5 rounded-full bg-primary text-white text-xs font-bold">
-    <span class="material-symbols-outlined" style="font-size:16px">add</span> Signal yuborish
-  </a>
+<div id="empty" class="hidden flex flex-col items-center justify-center py-24 px-6">
+  <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+    <span class="material-symbols-outlined text-white/15" style="font-size:32px">dynamic_feed</span>
+  </div>
+  <p class="text-sm font-bold text-white/30">Hali postlar yo'q</p>
+  <p class="text-xs text-white/15 mt-1">Birinchi bo'lib signal yuboring!</p>
 </div>
-
-<!-- Loader -->
 <div id="loader" class="py-8 flex justify-center"><div class="spinner"></div></div>
 
-<!-- ═══ COMMENT SHEET ═══ -->
-<div id="cSheet" class="hidden fixed inset-0 z-50">
-  <div class="absolute inset-0 bg-black/60" onclick="closeC()"></div>
-  <div class="absolute bottom-0 left-0 right-0 slide-up rounded-t-2xl" style="background:#1a1a1a;max-height:65vh;">
-    <div class="p-4 pb-2">
-      <div class="w-10 h-1 bg-white/15 rounded-full mx-auto mb-3"></div>
-      <h3 class="text-sm font-bold mb-3">Izohlar</h3>
-      <div id="cList" class="space-y-3 overflow-y-auto" style="max-height:calc(65vh - 130px)"></div>
-      <div id="cEmpty" class="hidden py-6 text-center text-xs text-white/30">Hali izohlar yo'q</div>
-    </div>
-    <div class="sticky bottom-0 p-3 flex gap-2" style="background:#1a1a1a;border-top:1px solid rgba(255,255,255,0.06);">
-      <input id="cInput" class="flex-1 bg-white/8 rounded-full px-4 py-2.5 text-sm placeholder-white/30 focus:outline-none" style="color:#fff" placeholder="Izoh yozing..."/>
-      <button onclick="sendC()" class="w-9 h-9 rounded-full bg-primary flex items-center justify-center shrink-0 active:scale-90 transition-transform">
-        <span class="material-symbols-outlined text-white" style="font-size:16px">send</span>
+<!-- Comment Sheet -->
+<div id="sheetBg" class="sheet-bg" onclick="closeC()"></div>
+<div id="sheet" class="sheet">
+  <div class="px-4 pt-3 pb-1">
+    <div class="w-9 h-1 bg-white/15 rounded-full mx-auto mb-3"></div>
+    <div class="flex items-center justify-between mb-1">
+      <h3 class="text-[13px] font-bold">Izohlar</h3>
+      <button onclick="closeC()" class="text-white/30 active:scale-90 transition-transform">
+        <span class="material-symbols-outlined" style="font-size:20px">close</span>
       </button>
     </div>
   </div>
+  <div id="cList" class="flex-1 overflow-y-auto px-4 pb-2" style="min-height:100px;max-height:calc(70vh - 110px)"></div>
+  <div id="cEmpty" class="hidden px-4 py-8 text-center text-xs text-white/20">Birinchi izohni yozing!</div>
+  <div class="px-3 py-2.5 flex gap-2" style="border-top:1px solid rgba(255,255,255,0.06);background:#262626;">
+    <input id="cInput" class="flex-1 bg-white/6 rounded-full px-4 py-2 text-[13px] text-white placeholder-white/25 focus:outline-none focus:ring-1 focus:ring-purple-500/30" placeholder="Izoh qo'shing..."/>
+    <button onclick="sendC()" class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center shrink-0 active:scale-90 transition-transform">
+      <span class="material-symbols-outlined text-white" style="font-size:15px">arrow_upward</span>
+    </button>
+  </div>
 </div>
 
-<!-- ═══ BOTTOM TABS ═══ -->
-<div class="fixed bottom-0 left-0 right-0 z-50" style="background:rgba(0,0,0,0.92);backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,0.06);">
-  <div class="flex items-end justify-around py-1.5 px-4">
-    <a href="/tma/feed/" class="flex flex-col items-center gap-0.5 py-1"><span class="material-symbols-outlined" style="font-size:22px;color:#fff;font-variation-settings:'FILL' 1">dynamic_feed</span><span class="text-[9px] font-bold text-white">Lenta</span></a>
-    <a href="/tma/murojaat/" class="flex flex-col items-center">
-      <div class="signal-fab"><span class="material-symbols-outlined text-white" style="font-size:24px;font-variation-settings:'FILL' 1">campaign</span></div>
-      <span class="text-[9px] font-bold mt-0.5" style="color:#9d2bee">Signal</span>
+<!-- Bottom Nav -->
+<div class="fixed bottom-0 left-0 right-0 z-50" style="background:rgba(0,0,0,0.94);backdrop-filter:blur(20px);border-top:0.5px solid rgba(255,255,255,0.06);">
+  <div class="flex items-end justify-around py-1.5 px-6">
+    <a href="/tma/feed/" class="flex flex-col items-center gap-0.5 py-1">
+      <span class="material-symbols-outlined text-white" style="font-size:24px;font-variation-settings:'FILL' 1">dynamic_feed</span>
+      <span class="text-[9px] font-bold">Lenta</span>
     </a>
-    <a href="/tma/tahlil/" class="flex flex-col items-center gap-0.5 py-1"><span class="material-symbols-outlined text-white/40" style="font-size:22px;font-variation-settings:'FILL' 1">bar_chart</span><span class="text-[9px] font-semibold text-white/40">Tahlil</span></a>
+    <a href="/tma/murojaat/" class="flex flex-col items-center">
+      <div class="fab"><span class="material-symbols-outlined text-white" style="font-size:26px;font-variation-settings:'FILL' 1">campaign</span></div>
+      <span class="text-[9px] font-bold mt-1" style="color:#a855f7">Signal</span>
+    </a>
+    <a href="/tma/tahlil/" class="flex flex-col items-center gap-0.5 py-1">
+      <span class="material-symbols-outlined text-white/35" style="font-size:24px;font-variation-settings:'FILL' 1">bar_chart</span>
+      <span class="text-[9px] font-semibold text-white/35">Tahlil</span>
+    </a>
   </div>
 </div>
 
 <script>
-const tg=window.Telegram.WebApp; tg.ready(); tg.expand();
-const U=tg.initDataUnsafe?.user||{};
-const UID=U.id||'';
-const UNAME=`${U.first_name||''} ${U.last_name||''}`.trim();
+const tg=window.Telegram.WebApp;tg.ready();tg.expand();
+const U=tg.initDataUnsafe?.user||{},UID=U.id||'',UNAME=`${U.first_name||''} ${U.last_name||''}`.trim();
 let offset=0,loading=false,hasMore=true,activePost=null;
+const isVid=u=>/\.(mp4|mov|webm)/i.test(u);
+const fmt=n=>{if(!n)return'0';if(n>=1000)return(n/1000).toFixed(1)+'K';return''+n;};
 
 function card(p){
-  // Avatar
   const av=p.is_anonim
-    ?`<div class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-white/40" style="font-size:18px">person_off</span></div>`
-    :`<div class="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center shrink-0"><span class="text-sm font-black text-primary">${(p.user[0]||'?').toUpperCase()}</span></div>`;
+    ?`<div class="w-8 h-8 rounded-full bg-white/8 flex items-center justify-center"><span class="material-symbols-outlined text-white/30" style="font-size:16px">person</span></div>`
+    :`<div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center"><span class="text-[11px] font-black text-white">${(p.user[0]||'').toUpperCase()}</span></div>`;
 
   // Media
   let media='';
-  if(p.rasmlar&&p.rasmlar.length){
-    const isVideo=url=>/\.(mp4|mov|webm|avi)/i.test(url);
-
+  if(p.rasmlar?.length){
     if(p.rasmlar.length===1){
-      const url=p.rasmlar[0];
-      media=isVideo(url)
-        ?`<video src="${url}" controls playsinline preload="metadata" poster="" style="width:100%;max-height:70vh;object-fit:contain;background:#000;display:block;"></video>`
-        :`<img src="${url}" loading="lazy" style="width:100%;max-height:70vh;object-fit:cover;background:#111;display:block;" onerror="this.style.display='none'"/>`;
-    } else {
-      // Carousel
-      const slides=p.rasmlar.map(url=>
-        isVideo(url)
-          ?`<div><video src="${url}" controls playsinline preload="metadata" style="width:100%;max-height:70vh;object-fit:contain;background:#000"></video></div>`
-          :`<div><img src="${url}" loading="lazy" style="width:100%;max-height:70vh;object-fit:cover;background:#111"/></div>`
+      const u=p.rasmlar[0];
+      media=isVid(u)
+        ?`<div class="vid-wrap" onclick="togglePlay(this)">
+            <video src="${u}" playsinline preload="metadata" loop muted></video>
+            <div class="play-icon show" id="pi-${p.id}"><div><span class="material-symbols-outlined text-white" style="font-size:28px;font-variation-settings:'FILL' 1">play_arrow</span></div></div>
+          </div>`
+        :`<img src="${u}" loading="lazy" style="width:100%;max-height:75vh;object-fit:cover;background:#111;display:block;" onerror="this.style.display='none'"/>`;
+    }else{
+      const slides=p.rasmlar.map(u=>
+        isVid(u)?`<div><div class="vid-wrap" onclick="togglePlay(this)"><video src="${u}" playsinline preload="metadata" loop muted></video><div class="play-icon show"><div><span class="material-symbols-outlined text-white" style="font-size:28px;font-variation-settings:'FILL' 1">play_arrow</span></div></div></div></div>`
+        :`<div><img src="${u}" loading="lazy" style="width:100%;max-height:75vh;object-fit:cover;background:#111;"/></div>`
       ).join('');
-      const dots=`<div class="dots" id="dots-${p.id}">${p.rasmlar.map((_,i)=>`<div class="dot${i===0?' on':''}"></div>`).join('')}</div>`;
       media=`<div class="relative">
-        <div class="carousel" id="car-${p.id}" onscroll="onScroll(${p.id},${p.rasmlar.length})">${slides}</div>
-        <div class="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[11px] font-bold" style="background:rgba(0,0,0,0.6)"><span id="cnt-${p.id}">1</span>/${p.rasmlar.length}</div>
-      </div>${dots}`;
+        <div class="car" id="car-${p.id}" onscroll="onScr(${p.id},${p.rasmlar.length})">${slides}</div>
+        <div class="ind"><span id="ci-${p.id}">1</span>/${p.rasmlar.length}</div>
+      </div>
+      <div class="dots" id="dots-${p.id}">${p.rasmlar.map((_,i)=>`<div class="dot${i?'':' on'}"></div>`).join('')}</div>`;
     }
   }
 
-  // Text — YouTube style
-  const txt=p.izoh||'';
-  const isLong=txt.length>100;
-  const textHtml=txt?`<div class="px-4 mt-2">
-    <p class="text-[13px] text-white/90 leading-relaxed" id="txt-${p.id}" style="${isLong?'display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden':''}">
-      ${txt}
-    </p>
-    ${isLong?`<button onclick="expand(${p.id})" class="text-[12px] text-white/40 mt-1" id="more-${p.id}">...ko'proq</button>`:''}
+  // Text
+  const t=p.izoh||'';
+  const long=t.length>100;
+  const desc=t?`<div class="desc">
+    <span class="name">${p.user}</span> <span id="dt-${p.id}" style="${long?'display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden':''}">${t}</span>
+    ${long?`<span class="more" onclick="xpand(${p.id})"> ...yana</span>`:''}
   </div>`:'';
 
-  // Location badge
-  const loc=p.infratuzilma?`<span class="px-2 py-0.5 rounded text-[10px] font-semibold" style="background:rgba(157,43,238,0.15);color:#c084fc">${p.infratuzilma}</span>`:'';
-  const area=(p.viloyat||p.tuman)?`<span class="text-[11px] text-white/30">${[p.viloyat,p.tuman].filter(Boolean).join(' · ')}</span>`:'';
+  const lk=p.is_liked;
 
-  const liked=p.is_liked;
-
-  return`<div class="post-card" id="post-${p.id}">
-    <!-- Header -->
-    <div class="px-4 py-3 flex items-center gap-3">
+  return`<div class="post" id="post-${p.id}">
+    <div class="flex items-center gap-2.5 px-3.5 py-2.5">
       ${av}
       <div class="flex-1 min-w-0">
-        <p class="text-[13px] font-bold truncate">${p.user}</p>
-        <div class="flex items-center gap-2 mt-0.5">${loc}${area}</div>
+        <span class="text-[13px] font-bold">${p.user}</span>
+        ${p.infratuzilma?`<span class="text-[11px] text-white/25 ml-1.5">· ${p.infratuzilma}</span>`:''}
       </div>
-      <span class="text-[11px] text-white/25">${p.vaqt}</span>
+      <span class="text-[11px] text-white/20">${p.vaqt}</span>
     </div>
-    <!-- Media -->
     ${media}
-    <!-- Actions — YouTube style -->
-    <div class="px-4 py-3 flex items-center gap-5">
-      <button onclick="like(${p.id})" class="act-btn active:scale-90 transition-transform">
-        <span class="material-symbols-outlined ${liked?'text-red-500':'text-white/70'}" style="${liked?'font-variation-settings:\"FILL\" 1':''}" id="lk-${p.id}">favorite</span>
-        <span class="cnt text-white/50" id="lkn-${p.id}">${fmtNum(p.likes_soni)}</span>
-      </button>
-      <button onclick="openC(${p.id})" class="act-btn active:scale-90 transition-transform">
-        <span class="material-symbols-outlined text-white/70">chat_bubble_outline</span>
-        <span class="cnt text-white/50" id="cn-${p.id}">${fmtNum(p.comments_soni)}</span>
-      </button>
-      <button onclick="share(${p.id})" class="act-btn active:scale-90 transition-transform ml-auto">
-        <span class="material-symbols-outlined text-white/70" style="font-size:22px">share</span>
-      </button>
+    <div class="actions">
+      <div class="abtn" onclick="doLike(${p.id})">
+        <span class="material-symbols-outlined mi ${lk?'text-red-500':'text-white'}" style="${lk?'font-variation-settings:\"FILL\" 1':''}" id="lk-${p.id}">favorite</span>
+        <span class="num" id="ln-${p.id}">${fmt(p.likes_soni)}</span>
+      </div>
+      <div class="abtn" onclick="openC(${p.id})">
+        <span class="material-symbols-outlined mi text-white">chat_bubble_outline</span>
+        <span class="num" id="cn-${p.id}">${fmt(p.comments_soni)}</span>
+      </div>
+      <div class="abtn" onclick="doShare(${p.id})">
+        <span class="material-symbols-outlined mi text-white" style="font-size:22px">send</span>
+      </div>
     </div>
-    <!-- Text -->
-    ${textHtml}
-    <!-- Comments preview -->
-    ${p.comments_soni?`<button onclick="openC(${p.id})" class="px-4 pb-3 text-[12px] text-white/30">${p.comments_soni} ta izohni ko'rish</button>`:'<div class="h-2"></div>'}
+    ${desc}
+    ${p.comments_soni>0?`<div class="px-3.5 pb-2.5"><span class="text-[12px] text-white/25 cursor-pointer" onclick="openC(${p.id})">${p.comments_soni} ta izohni ko'rish</span></div>`:''}
   </div>`;
 }
 
-function fmtNum(n){if(!n)return'';if(n>=1000)return(n/1000).toFixed(1)+'K';return n;}
-
-function onScroll(id,total){
-  const car=document.getElementById('car-'+id);
-  if(!car)return;
-  const idx=Math.round(car.scrollLeft/car.offsetWidth);
-  const dots=document.getElementById('dots-'+id);
-  if(dots) dots.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===idx));
-  const cnt=document.getElementById('cnt-'+id);
-  if(cnt) cnt.textContent=idx+1;
+// ── Video play/pause ──
+function togglePlay(wrap){
+  const v=wrap.querySelector('video');
+  const pi=wrap.querySelector('.play-icon');
+  if(!v)return;
+  if(v.paused){
+    v.muted=false;v.play();
+    if(pi){pi.classList.remove('show');pi.querySelector('.material-symbols-outlined').textContent='play_arrow';}
+  }else{
+    v.pause();
+    if(pi){pi.classList.add('show');pi.querySelector('.material-symbols-outlined').textContent='pause';}
+  }
 }
 
-function expand(id){
-  const el=document.getElementById('txt-'+id);
-  if(el){el.style.display='block';el.style.webkitLineClamp='unset';}
-  const btn=document.getElementById('more-'+id);
-  if(btn) btn.remove();
+// ── Carousel ──
+function onScr(id,total){
+  const c=document.getElementById('car-'+id);if(!c)return;
+  const i=Math.round(c.scrollLeft/c.offsetWidth);
+  const d=document.getElementById('dots-'+id);
+  if(d)d.querySelectorAll('.dot').forEach((x,j)=>x.classList.toggle('on',j===i));
+  const ci=document.getElementById('ci-'+id);
+  if(ci)ci.textContent=i+1;
 }
 
-// ── Load ─────────────────────────────────────
+function xpand(id){
+  const el=document.getElementById('dt-'+id);
+  if(el){el.style.display='inline';el.style.webkitLineClamp='unset';}
+  const p=el?.parentElement;
+  const m=p?.querySelector('.more');if(m)m.remove();
+}
+
+// ── Feed load ──
 async function load(reset){
   if(loading||(!hasMore&&!reset))return;
   if(reset){offset=0;hasMore=true;}
   loading=true;
   document.getElementById('loader').classList.remove('hidden');
   try{
-    const url=`/api/feed/?limit=10&offset=${offset}&user_id=${UID}`;
-    const res=await fetch(url);
-    const d=await res.json();
+    const d=await(await fetch(`/api/feed/?limit=10&offset=${offset}&user_id=${UID}`)).json();
     const el=document.getElementById('feed');
-    if(reset) el.innerHTML='';
-    if(d.error){console.error('API error:',d.error);}
-    if((!d.results||!d.results.length)&&!offset){document.getElementById('empty').classList.remove('hidden');}
-    else if(d.results){
-      document.getElementById('empty').classList.add('hidden');
-      d.results.forEach(p=>el.insertAdjacentHTML('beforeend',card(p)));
-    }
-    offset+=(d.results||[]).length;
-    hasMore=d.has_more||false;
-  }catch(e){
-    console.error(e);
-    hasMore=false;
-    if(!offset) document.getElementById('empty').classList.remove('hidden');
-  }
+    if(reset)el.innerHTML='';
+    if((!d.results||!d.results.length)&&!offset)document.getElementById('empty').classList.remove('hidden');
+    else if(d.results){document.getElementById('empty').classList.add('hidden');d.results.forEach(p=>el.insertAdjacentHTML('beforeend',card(p)));}
+    offset+=(d.results||[]).length;hasMore=d.has_more||false;
+  }catch(e){console.error(e);hasMore=false;if(!offset)document.getElementById('empty').classList.remove('hidden');}
   loading=false;
-  if(!hasMore) document.getElementById('loader').classList.add('hidden');
+  if(!hasMore)document.getElementById('loader').classList.add('hidden');
 }
+new IntersectionObserver(e=>{if(e[0].isIntersecting&&hasMore)load();},{rootMargin:'400px'}).observe(document.getElementById('loader'));
 
-new IntersectionObserver(e=>{if(e[0].isIntersecting&&hasMore)load();},{rootMargin:'300px'}).observe(document.getElementById('loader'));
-
-// ── Like ─────────────────────────────────────
-async function like(id){
-  if(!UID){tg.showAlert('Telegram orqali kiring');return;}
-  const ic=document.getElementById('lk-'+id);
-  const cn=document.getElementById('lkn-'+id);
-  const isLiked=ic.classList.contains('text-red-500');
+// ── Like ──
+function doLike(id){
+  if(!UID)return;
+  const ic=document.getElementById('lk-'+id),cn=document.getElementById('ln-'+id);
+  const liked=ic.classList.contains('text-red-500');
   const cur=parseInt(cn.textContent)||0;
-  if(isLiked){
-    ic.classList.remove('text-red-500');ic.classList.add('text-white/70');
-    ic.style.fontVariationSettings='';
-    cn.textContent=fmtNum(Math.max(0,cur-1));
-  }else{
-    ic.classList.remove('text-white/70');ic.classList.add('text-red-500');
-    ic.style.fontVariationSettings='"FILL" 1';
-    ic.classList.add('like-pop');
-    cn.textContent=fmtNum(cur+1);
-    setTimeout(()=>ic.classList.remove('like-pop'),300);
-  }
-  try{await fetch('/api/feed/like/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({murojaat_id:id,telegram_user_id:UID})})}catch{}
+  if(liked){ic.className='material-symbols-outlined mi text-white';ic.style.fontVariationSettings='';cn.textContent=fmt(Math.max(0,cur-1));}
+  else{ic.className='material-symbols-outlined mi text-red-500';ic.style.fontVariationSettings='"FILL" 1';ic.classList.add('heart-beat');cn.textContent=fmt(cur+1);setTimeout(()=>ic.classList.remove('heart-beat'),500);}
+  fetch('/api/feed/like/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({murojaat_id:id,telegram_user_id:UID})}).catch(()=>{});
 }
 
-// ── Comments ─────────────────────────────────
+// ── Comments ──
 function openC(id){
   activePost=id;
-  document.getElementById('cSheet').classList.remove('hidden');
+  document.getElementById('sheetBg').classList.add('open');
+  document.getElementById('sheet').classList.add('open');
   loadC(id);
 }
-function closeC(){document.getElementById('cSheet').classList.add('hidden');activePost=null;}
-
+function closeC(){
+  document.getElementById('sheet').classList.remove('open');
+  setTimeout(()=>document.getElementById('sheetBg').classList.remove('open'),300);
+  activePost=null;
+}
 async function loadC(id){
-  const list=document.getElementById('cList');
-  const emp=document.getElementById('cEmpty');
-  list.innerHTML='<div class="flex justify-center py-4"><div class="spinner"></div></div>';
+  const list=document.getElementById('cList'),emp=document.getElementById('cEmpty');
+  list.innerHTML='<div class="flex justify-center py-6"><div class="spinner"></div></div>';
   emp.classList.add('hidden');
   try{
     const d=await(await fetch(`/api/feed/${id}/comments/`)).json();
-    if(!d.comments.length){list.innerHTML='';emp.classList.remove('hidden');}
-    else{
-      list.innerHTML=d.comments.map(c=>`
-        <div class="flex gap-2.5">
-          <div class="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
-            <span class="text-[10px] font-black text-primary">${(c.user[0]||'?').toUpperCase()}</span>
-          </div>
-          <div class="flex-1">
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-bold">${c.user}</span>
-              <span class="text-[10px] text-white/25">${c.vaqt}</span>
-            </div>
-            <p class="text-[13px] text-white/70 mt-0.5">${c.matn}</p>
-          </div>
-        </div>`).join('');
-    }
-  }catch{list.innerHTML='<p class="text-xs text-red-400 text-center py-4">Xatolik</p>';}
+    if(!d.comments?.length){list.innerHTML='';emp.classList.remove('hidden');}
+    else list.innerHTML=d.comments.map(c=>`<div class="c-item">
+      <div class="c-av"><span>${(c.user[0]||'?').toUpperCase()}</span></div>
+      <div class="flex-1"><div><span class="c-name">${c.user}</span><span class="c-time">${c.vaqt}</span></div><p class="c-text">${c.matn}</p></div>
+    </div>`).join('');
+  }catch{list.innerHTML='<p class="text-center text-xs text-red-400 py-4">Xatolik</p>';}
 }
-
 async function sendC(){
   if(!activePost||!UID)return;
-  const inp=document.getElementById('cInput');
-  const m=inp.value.trim();if(!m)return;inp.value='';
+  const inp=document.getElementById('cInput'),m=inp.value.trim();if(!m)return;inp.value='';
   try{
     const d=await(await fetch('/api/feed/comment/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({murojaat_id:activePost,telegram_user_id:UID,telegram_full_name:UNAME,matn:m})})).json();
-    if(d.success){
-      const cn=document.getElementById('cn-'+activePost);
-      if(cn) cn.textContent=fmtNum(d.comments_soni);
-      loadC(activePost);
-    }
+    if(d.success){const cn=document.getElementById('cn-'+activePost);if(cn)cn.textContent=fmt(d.comments_soni);loadC(activePost);}
   }catch{}
 }
 document.getElementById('cInput').addEventListener('keypress',e=>{if(e.key==='Enter')sendC();});
-
-function share(id){
-  const url=location.origin+'/tma/feed/#post-'+id;
-  if(navigator.share) navigator.share({title:'Real Holat',url});
-}
+function doShare(id){if(navigator.share)navigator.share({title:'Real Holat',url:location.origin+'/tma/feed/#post-'+id});}
 
 load(true);
 </script>
