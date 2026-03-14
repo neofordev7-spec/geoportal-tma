@@ -423,6 +423,68 @@ def viloyatlar_api(request):
     return Response(result)
 
 
+@api_view(['POST'])
+def maktab_sync(request):
+    """GEOASR dan kelgan maktabni lokal DB ga sinxronlash.
+    Maktab yo'q bo'lsa yaratadi + standart va'dalar qo'shadi.
+    Mavjud bo'lsa ID qaytaradi."""
+    data = request.data
+    obekt_nomi = data.get('obekt_nomi', '').strip()
+    viloyat_nomi = data.get('viloyat', '').strip()
+    tuman_nomi = data.get('tuman', '').strip()
+
+    if not all([obekt_nomi, viloyat_nomi, tuman_nomi]):
+        return Response({'error': 'obekt_nomi, viloyat, tuman majburiy'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # GEOASR viloyat nomini lokal kodga aylantirish
+    VILOYAT_NOM_TO_KOD = {
+        "Qoraqolpog'iston Respublikasi": 'qoraqalpogiston',
+        'Xorazm viloyati': 'xorazm',
+        'Navoiy viloyati': 'navoiy',
+        'Buxoro viloyati': 'buxoro',
+        'Qashqadaryo viloyati': 'qashqadaryo',
+        'Surxondaryo viloyati': 'surxondaryo',
+        'Samarqand viloyati': 'samarqand',
+        'Jizzax viloyati': 'jizzax',
+        'Sirdaryo viloyati': 'sirdaryo',
+        'Toshkent shahri': 'toshkent_sh',
+        'Toshkent viloyati': 'toshkent_v',
+        'Namangan viloyati': 'namangan',
+        'Andijon viloyati': 'andijon',
+        "Farg'ona viloyati": 'fargona',
+    }
+    viloyat_kod = VILOYAT_NOM_TO_KOD.get(viloyat_nomi, 'toshkent_sh')
+
+    # Maktab mavjudligini tekshirish (nom + tuman bo'yicha)
+    maktab = Maktab.objects.filter(nom=obekt_nomi, tuman=tuman_nomi).first()
+
+    if not maktab:
+        maktab = Maktab.objects.create(
+            nom=obekt_nomi,
+            viloyat=viloyat_kod,
+            tuman=tuman_nomi,
+            manzil=f"{tuman_nomi}, {viloyat_nomi}",
+            rasm_url='',
+        )
+        # Standart va'dalar yaratish (GEOASR ma'lumotlariga asoslanib)
+        standart_vaadalar = [
+            {'nom': 'Ichimlik suvi', 'tavsif': "Maktabda toza ichimlik suvi ta'minoti", 'icon': 'water_drop', 'tartib': 1},
+            {'nom': "Internet ta'minoti", 'tavsif': "Maktabda internet ulanishi holati", 'icon': 'wifi', 'tartib': 2},
+            {'nom': 'Sport zal holati', 'tavsif': "Sport zal va sport jihozlari holati", 'icon': 'fitness_center', 'tartib': 3},
+            {'nom': 'Oshxona holati', 'tavsif': "Maktab oshxonasi va ovqatlanish sifati", 'icon': 'restaurant', 'tartib': 4},
+            {'nom': 'Hojatxona holati', 'tavsif': "Hojatxona tozaligi va ta'mirlanganligi", 'icon': 'wc', 'tartib': 5},
+            {'nom': "Sovun ta'minoti", 'tavsif': "Hojatxonada sovun va gigiena vositalari", 'icon': 'soap', 'tartib': 6},
+        ]
+        for v in standart_vaadalar:
+            Vaada.objects.create(maktab=maktab, **v)
+
+    return Response({
+        'success': True,
+        'maktab_id': maktab.id,
+        'nom': maktab.nom,
+    })
+
+
 @api_view(['GET'])
 def tumanlari_api(request):
     """Berilgan viloyatdagi tumanlar va har birida nechta maktab/va'da bor"""

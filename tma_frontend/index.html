@@ -1,66 +1,30 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>GEOPORTAL</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>GEOPORTAL | Real Holat</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: "#9d2bee",
-            green: { 500: "#22c55e" }
-          },
-          fontFamily: { display: ["Inter", "sans-serif"] },
-          borderRadius: { DEFAULT: "1rem", full: "9999px" }
-        }
-      }
-    }
-  </script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:"#9d2bee"},fontFamily:{display:["Inter","sans-serif"]}}}}</script>
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #dcfce7 0%, #e0f2fe 50%, #f3e8ff 100%);
-      min-height: 100vh;
-      color: #0f172a;
-    }
-    .glass {
-      background: rgba(255, 255, 255, 0.55);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.7);
-    }
-    .glass-dark {
-      background: rgba(0, 0, 0, 0.06);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.4);
-    }
-    .tab-pill { transition: all 0.2s ease; }
-    .tab-pill.active { background: #22c55e; color: white; }
-    .tab-pill.active-purple { background: #9d2bee; color: white; }
-    .tab-pill:not(.active):not(.active-purple) {
-      background: rgba(255,255,255,0.6);
-      color: #374151;
-    }
-    .stat-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
-    .stat-card:active { transform: scale(0.97); }
-    ::-webkit-scrollbar { display: none; }
-    .scroll-x { overflow-x: auto; scrollbar-width: none; }
-    @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
-    .fade-up { animation: fadeUp 0.3s ease-out forwards; }
-    .neon-green { box-shadow: 0 0 20px rgba(34, 197, 94, 0.35); }
-    .neon-purple { box-shadow: 0 0 20px rgba(157, 43, 238, 0.35); }
+    body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#dcfce7 0%,#e0f2fe 50%,#f3e8ff 100%);min-height:100vh;color:#0f172a;}
+    .glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.7);}
+    .glass-sm{background:rgba(255,255,255,0.4);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.6);}
+    ::-webkit-scrollbar{display:none;}
+    .scroll-x{overflow-x:auto;scrollbar-width:none;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp 0.3s ease-out forwards;}
+    .card-btn{transition:all 0.15s;cursor:pointer;}.card-btn:active{transform:scale(0.98);}
+    .viloyat-g{cursor:pointer;transition:opacity 0.15s;}.viloyat-g:active{opacity:0.7;}
   </style>
 </head>
-<body class="pb-28">
+<body class="pb-6">
 
-  <!-- Top Navigation Bar -->
-  <div class="sticky top-0 z-50 px-3 pt-3 pb-1" style="background: linear-gradient(to bottom, rgba(220,252,231,0.95) 70%, transparent);">
+  <!-- ═══ Header ═══ -->
+  <div class="sticky top-0 z-50 px-3 pt-3 pb-1" style="background:linear-gradient(to bottom,rgba(220,252,231,0.95) 70%,transparent)">
     <nav class="glass rounded-full px-4 py-2.5 flex items-center justify-between shadow-sm">
       <div class="flex items-center gap-2">
         <div class="w-7 h-7 rounded-full bg-blue-500 flex items-center justify-center">
@@ -68,7 +32,7 @@
         </div>
         <span class="font-black text-base tracking-tight text-slate-900">GEOPORTAL</span>
       </div>
-      <div id="userChip" class="hidden glass-dark rounded-full px-3 py-1 flex items-center gap-1.5">
+      <div id="userChip" class="hidden glass-sm rounded-full px-3 py-1 flex items-center gap-1.5">
         <div class="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
           <span class="material-symbols-outlined text-white" style="font-size:12px">person</span>
         </div>
@@ -77,877 +41,371 @@
     </nav>
   </div>
 
-  <!-- Main Tabs -->
-  <div class="scroll-x px-3 py-3 flex gap-2">
-    <button onclick="setTab('xarita')" id="tab-xarita" class="tab-pill active flex-shrink-0 px-4 py-2 rounded-full text-sm font-bold shadow-sm">Xarita</button>
-    <button onclick="setTab('malumotlar')" id="tab-malumotlar" class="tab-pill flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold shadow-sm">Ma'lumotlar</button>
-    <button onclick="setTab('grafik')" id="tab-grafik" class="tab-pill flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold shadow-sm">Grafik vositalar</button>
-    <button onclick="setTab('solishtirish')" id="tab-solishtirish" class="tab-pill flex-shrink-0 px-4 py-2 rounded-full text-sm font-semibold shadow-sm">Solishtirish</button>
+  <!-- ═══ Breadcrumb (orqaga tugmasi) ═══ -->
+  <div id="breadcrumb" class="hidden px-3 py-2">
+    <button onclick="orqaga()" class="glass-sm rounded-full px-3 py-1.5 flex items-center gap-1 active:scale-95 transition-transform">
+      <span class="material-symbols-outlined text-slate-600" style="font-size:16px">arrow_back</span>
+      <span id="breadcrumbText" class="text-xs font-semibold text-slate-600">Orqaga</span>
+    </button>
   </div>
 
-  <!-- ═══ TAB: XARITA ═══ -->
-  <div id="page-xarita" class="px-3 fade-up">
+  <!-- ═══ MAIN CONTENT ═══ -->
+  <div id="mainContent" class="px-3">
 
-    <!-- Sub-tabs -->
-    <div class="scroll-x flex gap-2 pb-3">
-      <button onclick="setSubTab('donorlar')" id="sub-donorlar" class="tab-pill flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">Top donorlar</button>
-      <button onclick="setSubTab('viloyatlar')" id="sub-viloyatlar" class="tab-pill active flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">Top viloyatlar</button>
-      <button onclick="setSubTab('yonalishlar')" id="sub-yonalishlar" class="tab-pill flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">Yo'nalishlar</button>
-      <button onclick="setSubTab('loyihalar')" id="sub-loyihalar" class="tab-pill flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">Eng yirik loyihalar</button>
-    </div>
-
-    <!-- Sub-tab: Xarita (viloyatlar drill-down) -->
-    <div id="sub-page-viloyatlar" class="space-y-2">
-      <!-- Uzbekiston SVG xaritasi -->
-      <div class="glass rounded-2xl shadow-sm overflow-hidden">
-        <div class="px-4 py-2 border-b border-white/20 flex items-center gap-2">
-          <span class="material-icons text-green-500 text-base">map</span>
-          <span class="text-xs font-semibold text-slate-600">Viloyatni bosing — loyihalarni ko'ring</span>
+    <!-- ── STEP 1: O'zbekiston xaritasi ── -->
+    <div id="step-xarita" class="fade-up">
+      <!-- Umumiy statistika -->
+      <div class="glass rounded-2xl p-3 shadow-sm mb-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Jami ob'ektlar</p>
+            <p class="text-xl font-black text-slate-900" id="jamiObektlar">—</p>
+          </div>
+          <div class="text-right">
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Viloyatlar</p>
+            <p class="text-xl font-black" style="color:#22c55e">14</p>
+          </div>
         </div>
-        <svg id="uzbekMap" viewBox="0 0 400 280" style="width:100%;height:300px;display:block;" preserveAspectRatio="xMidYMid meet">
-          <!-- Fon -->
+      </div>
+
+      <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Viloyatni tanlang</p>
+
+      <!-- SVG Xarita -->
+      <div class="glass rounded-2xl shadow-sm overflow-hidden mb-3">
+        <svg id="uzbekMap" viewBox="0 0 420 300" style="width:100%;height:280px;display:block;" preserveAspectRatio="xMidYMid meet">
           <defs>
             <linearGradient id="mapBg" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:#bfdbfe"/>
-              <stop offset="100%" style="stop-color:#bbf7d0"/>
+              <stop offset="0%" style="stop-color:#e0f2fe"/>
+              <stop offset="100%" style="stop-color:#dcfce7"/>
             </linearGradient>
           </defs>
-          <rect width="400" height="280" fill="url(#mapBg)"/>
-          <!-- Shimoliy chegara (Qozog'iston) -->
-          <rect x="0" y="0" width="400" height="28" fill="#dbeafe" opacity="0.6"/>
-          <!-- G'arb (Qoraqalpog'iston, Xorazm) -->
-          <rect x="0" y="28" width="155" height="220" fill="#dcfce7" opacity="0.5"/>
-          <!-- Markaziy cho'l (Navoiy, Buxoro) -->
-          <rect x="155" y="100" width="120" height="160" fill="#fef9c3" opacity="0.4"/>
-          <!-- Sharq (Farg'ona vodiysi) -->
-          <rect x="320" y="100" width="80" height="160" fill="#d1fae5" opacity="0.5"/>
-          <!-- Janub (Surxondaryo, Qashqadaryo) -->
-          <rect x="140" y="200" width="200" height="80" fill="#e5e7eb" opacity="0.4"/>
-
-          <!-- ═══ Viloyat doiralari — bosing! ═══ -->
-
-          <!-- Qoraqalpog'iston -->
-          <g onclick="ochViloyatPanel('qoraqalpogiston',&quot;Qoraqalpog'iston&quot;)" style="cursor:pointer">
-            <circle cx="78" cy="62" r="18" fill="rgba(71,244,37,0.85)" stroke="#16a34a" stroke-width="2" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.2))"/>
-            <text x="78" y="59" text-anchor="middle" font-size="11" font-weight="800" fill="#14532d">3</text>
-            <text x="78" y="70" text-anchor="middle" font-size="7" fill="#14532d">loy</text>
-            <text x="78" y="85" text-anchor="middle" font-size="7" fill="#374151">QQR</text>
-          </g>
-
-          <!-- Xorazm -->
-          <g onclick="ochViloyatPanel('xorazm','Xorazm viloyati')" style="cursor:pointer">
-            <circle cx="108" cy="135" r="16" fill="rgba(71,244,37,0.85)" stroke="#16a34a" stroke-width="2" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.2))"/>
-            <text x="108" y="132" text-anchor="middle" font-size="11" font-weight="800" fill="#14532d">3</text>
-            <text x="108" y="143" text-anchor="middle" font-size="7" fill="#14532d">loy</text>
-            <text x="108" y="157" text-anchor="middle" font-size="7" fill="#374151">Xorazm</text>
-          </g>
-
-          <!-- Navoiy -->
-          <g onclick="ochViloyatPanel('navoiy','Navoiy viloyati')" style="cursor:pointer">
-            <circle cx="210" cy="172" r="15" fill="rgba(71,244,37,0.85)" stroke="#16a34a" stroke-width="2" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.2))"/>
-            <text x="210" y="169" text-anchor="middle" font-size="11" font-weight="800" fill="#14532d">3</text>
-            <text x="210" y="180" text-anchor="middle" font-size="7" fill="#14532d">loy</text>
-            <text x="210" y="194" text-anchor="middle" font-size="7" fill="#374151">Navoiy</text>
-          </g>
-
-          <!-- Buxoro -->
-          <g onclick="ochViloyatPanel('buxoro','Buxoro viloyati')" style="cursor:pointer">
-            <circle cx="187" cy="200" r="17" fill="rgba(71,244,37,0.85)" stroke="#16a34a" stroke-width="2" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.2))"/>
-            <text x="187" y="197" text-anchor="middle" font-size="11" font-weight="800" fill="#14532d">4</text>
-            <text x="187" y="208" text-anchor="middle" font-size="7" fill="#14532d">loy</text>
-            <text x="187" y="224" text-anchor="middle" font-size="7" fill="#374151">Buxoro</text>
-          </g>
-
-          <!-- Qashqadaryo -->
-          <g onclick="ochViloyatPanel('qashqadaryo','Qashqadaryo viloyati')" style="cursor:pointer">
-            <circle cx="226" cy="228" r="20" fill="rgba(71,244,37,0.85)" stroke="#16a34a" stroke-width="2" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.2))"/>
-            <text x="226" y="225" text-anchor="middle" font-size="12" font-weight="800" fill="#14532d">6</text>
-            <text x="226" y="236" text-anchor="middle" font-size="7" fill="#14532d">loy</text>
-            <text x="226" y="254" text-anchor="middle" font-size="7" fill="#374151">Qsh</text>
-          </g>
-
-          <!-- Surxondaryo -->
-          <g onclick="ochViloyatPanel('surxondaryo','Surxondaryo viloyati')" style="cursor:pointer">
-            <circle cx="266" cy="258" r="17" fill="rgba(71,244,37,0.85)" stroke="#16a34a" stroke-width="2" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.2))"/>
-            <text x="266" y="255" text-anchor="middle" font-size="11" font-weight="800" fill="#14532d">4</text>
-            <text x="266" y="266" text-anchor="middle" font-size="7" fill="#14532d">loy</text>
-          </g>
-
-          <!-- Samarqand (katta) -->
-          <g onclick="ochViloyatPanel('samarqand','Samarqand viloyati')" style="cursor:pointer">
-            <circle cx="254" cy="200" r="23" fill="rgba(71,244,37,0.9)" stroke="#16a34a" stroke-width="2.5" filter="drop-shadow(0 2px 6px rgba(0,0,0,0.25))"/>
-            <text x="254" y="197" text-anchor="middle" font-size="13" font-weight="800" fill="#14532d">9</text>
-            <text x="254" y="209" text-anchor="middle" font-size="7" fill="#14532d">loyiha</text>
-            <text x="254" y="228" text-anchor="middle" font-size="7" fill="#374151">Samarqand</text>
-          </g>
-
-          <!-- Jizzax -->
-          <g onclick="ochViloyatPanel('jizzax','Jizzax viloyati')" style="cursor:pointer">
-            <circle cx="276" cy="176" r="13" fill="rgba(71,244,37,0.85)" stroke="#16a34a" stroke-width="2" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.2))"/>
-            <text x="276" y="173" text-anchor="middle" font-size="10" font-weight="800" fill="#14532d">2</text>
-            <text x="276" y="183" text-anchor="middle" font-size="7" fill="#14532d">loy</text>
-          </g>
-
-          <!-- Sirdaryo -->
-          <g onclick="ochViloyatPanel('sirdaryo','Sirdaryo viloyati')" style="cursor:pointer">
-            <circle cx="292" cy="162" r="13" fill="rgba(71,244,37,0.85)" stroke="#16a34a" stroke-width="2" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.2))"/>
-            <text x="292" y="159" text-anchor="middle" font-size="10" font-weight="800" fill="#14532d">2</text>
-            <text x="292" y="169" text-anchor="middle" font-size="7" fill="#14532d">loy</text>
-          </g>
-
-          <!-- Toshkent shahri (eng katta) -->
-          <g onclick="ochViloyatPanel('toshkent_sh','Toshkent shahri')" style="cursor:pointer">
-            <circle cx="308" cy="142" r="25" fill="rgba(71,244,37,0.95)" stroke="#15803d" stroke-width="3" filter="drop-shadow(0 3px 8px rgba(0,0,0,0.3))"/>
-            <text x="308" y="138" text-anchor="middle" font-size="14" font-weight="900" fill="#14532d">12</text>
-            <text x="308" y="151" text-anchor="middle" font-size="8" fill="#14532d">loyiha</text>
-            <text x="308" y="173" text-anchor="middle" font-size="7" font-weight="700" fill="#1e3a5f">Toshkent</text>
-          </g>
-
-          <!-- Toshkent viloyati -->
-          <g onclick="ochViloyatPanel('toshkent_v','Toshkent viloyati')" style="cursor:pointer">
-            <circle cx="332" cy="160" r="15" fill="rgba(71,244,37,0.85)" stroke="#16a34a" stroke-width="2" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.2))"/>
-            <text x="332" y="157" text-anchor="middle" font-size="11" font-weight="800" fill="#14532d">5</text>
-            <text x="332" y="167" text-anchor="middle" font-size="7" fill="#14532d">loy</text>
-          </g>
-
-          <!-- Namangan -->
-          <g onclick="ochViloyatPanel('namangan','Namangan viloyati')" style="cursor:pointer">
-            <circle cx="358" cy="145" r="20" fill="rgba(71,244,37,0.9)" stroke="#16a34a" stroke-width="2" filter="drop-shadow(0 2px 6px rgba(0,0,0,0.25))"/>
-            <text x="358" y="142" text-anchor="middle" font-size="12" font-weight="800" fill="#14532d">7</text>
-            <text x="358" y="153" text-anchor="middle" font-size="7" fill="#14532d">loyiha</text>
-            <text x="358" y="170" text-anchor="middle" font-size="7" fill="#374151">Namangan</text>
-          </g>
-
-          <!-- Andijon -->
-          <g onclick="ochViloyatPanel('andijon','Andijon viloyati')" style="cursor:pointer">
-            <circle cx="385" cy="162" r="15" fill="rgba(71,244,37,0.85)" stroke="#16a34a" stroke-width="2" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.2))"/>
-            <text x="385" y="159" text-anchor="middle" font-size="11" font-weight="800" fill="#14532d">5</text>
-            <text x="385" y="169" text-anchor="middle" font-size="7" fill="#14532d">loy</text>
-            <text x="385" y="183" text-anchor="middle" font-size="7" fill="#374151">And</text>
-          </g>
-
-          <!-- Farg'ona -->
-          <g onclick="ochViloyatPanel('fargona',&quot;Farg'ona viloyati&quot;)" style="cursor:pointer">
-            <circle cx="370" cy="180" r="17" fill="rgba(71,244,37,0.85)" stroke="#16a34a" stroke-width="2" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.2))"/>
-            <text x="370" y="177" text-anchor="middle" font-size="11" font-weight="800" fill="#14532d">6</text>
-            <text x="370" y="188" text-anchor="middle" font-size="7" fill="#14532d">loy</text>
-            <text x="370" y="203" text-anchor="middle" font-size="7" fill="#374151">Farg'ona</text>
-          </g>
+          <rect width="420" height="300" fill="url(#mapBg)" rx="0"/>
+          <!-- Viloyat doiralari — JS bilan to'ldiriladi -->
         </svg>
       </div>
-      <!-- Drill-down panel (viloyat bosilganda ko'rinadi) -->
-      <div id="drillPanel" class="hidden glass rounded-2xl overflow-hidden shadow-sm">
-        <div class="flex items-center gap-2 px-4 py-3 border-b border-white/20">
-          <button onclick="drillBack()" class="flex items-center gap-1 text-slate-600">
-            <span class="material-icons text-base">arrow_back_ios</span>
-            <span id="drillBackLabel" class="text-xs font-medium">Orqaga</span>
-          </button>
-          <span class="text-sm font-bold text-slate-700 flex-1 text-center pr-6" id="drillTitle"></span>
-        </div>
-        <div id="drillContent" class="divide-y divide-white/30 max-h-64 overflow-y-auto">
-        </div>
-      </div>
+
+      <!-- Viloyatlar ro'yxati (xarita ostida) -->
+      <div id="viloyatlarList" class="space-y-1.5"></div>
     </div>
 
-    <!-- Sub-tab: Top donorlar -->
-    <div id="sub-page-donorlar" class="hidden space-y-2">
-      <div class="glass rounded-2xl overflow-hidden shadow-sm">
-        <div class="divide-y divide-white/40">
-          <div class="flex items-center justify-between px-4 py-3">
-            <span class="text-sm font-semibold text-slate-700">O'zR Davlat byudjeti</span>
-            <span class="text-xs font-bold text-slate-500">225,006,327,253,921.22</span>
-          </div>
-          <div class="flex items-center justify-between px-4 py-3">
-            <span class="text-sm font-semibold text-slate-700">Jahon Banki</span>
-            <span class="text-xs font-bold text-slate-500">145,320,000,000.00</span>
-          </div>
-          <div class="flex items-center justify-between px-4 py-3">
-            <span class="text-sm font-semibold text-slate-700">ADB</span>
-            <span class="text-xs font-bold text-slate-500">102,480,000,000.00</span>
-          </div>
-          <div class="flex items-center justify-between px-4 py-3">
-            <span class="text-sm font-semibold text-slate-700">EBRD</span>
-            <span class="text-xs font-bold text-slate-500">78,900,000,000.00</span>
-          </div>
-          <div class="flex items-center justify-between px-4 py-3">
-            <span class="text-sm font-semibold text-slate-700">IsDB</span>
-            <span class="text-xs font-bold text-slate-500">35,600,000,000.00</span>
-          </div>
-        </div>
+    <!-- ── STEP 2: Tumanlar ro'yxati ── -->
+    <div id="step-tumanlar" class="hidden fade-up">
+      <div class="glass rounded-2xl p-3 shadow-sm mb-3">
+        <p class="text-sm font-black text-slate-900" id="viloyatSarlavha">—</p>
+        <p class="text-xs text-slate-500 mt-0.5" id="viloyatInfo">—</p>
       </div>
+      <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Tumanni tanlang</p>
+      <div id="tumanlarList" class="space-y-1.5"></div>
     </div>
 
-    <!-- Sub-tab: Yo'nalishlar -->
-    <div id="sub-page-yonalishlar" class="hidden space-y-2">
-      <div class="glass rounded-2xl overflow-hidden shadow-sm">
-        <div class="divide-y divide-white/40">
-          <div class="flex items-center justify-between px-4 py-3">
-            <span class="text-sm font-semibold text-slate-700">Yo'l</span>
-            <span class="text-xs font-bold text-slate-500">225,006,327,253,921.22</span>
-          </div>
-          <div class="flex items-center justify-between px-4 py-3">
-            <span class="text-sm font-semibold text-slate-700">Suv</span>
-            <span class="text-xs font-bold text-slate-500">225,006,327,253,921.22</span>
-          </div>
-          <div class="flex items-center justify-between px-4 py-3">
-            <span class="text-sm font-semibold text-slate-700">Sog'liq</span>
-            <span class="text-xs font-bold text-slate-500">225,006,327,253,921.22</span>
-          </div>
-          <div class="flex items-center justify-between px-4 py-3">
-            <span class="text-sm font-semibold text-slate-700">Ta'lim</span>
-            <span class="text-xs font-bold text-slate-500">225,006,327,253,921.22</span>
-          </div>
-        </div>
+    <!-- ── STEP 3: Maktablar ro'yxati ── -->
+    <div id="step-maktablar" class="hidden fade-up">
+      <div class="glass rounded-2xl p-3 shadow-sm mb-3">
+        <p class="text-sm font-black text-slate-900" id="tumanSarlavha">—</p>
+        <p class="text-xs text-slate-500 mt-0.5" id="tumanInfo">—</p>
       </div>
-    </div>
-
-    <!-- Sub-tab: Eng yirik loyihalar -->
-    <div id="sub-page-loyihalar" class="hidden space-y-2">
-      <div class="glass rounded-2xl overflow-hidden shadow-sm">
-        <div class="px-4 py-2 bg-white/30">
-          <div class="grid grid-cols-3 text-xs font-semibold text-slate-400 py-1">
-            <span>Loyiha nomi</span>
-            <span class="text-center">Sektor</span>
-            <span class="text-right">Sarflangan</span>
-          </div>
-        </div>
-        <div class="divide-y divide-white/40">
-          <div class="grid grid-cols-3 px-4 py-3 items-center">
-            <span class="text-xs font-semibold text-slate-700">15778</span>
-            <span class="text-xs text-center text-slate-500">Yo'l</span>
-            <span class="text-xs text-right font-bold text-slate-700">35,998.89</span>
-          </div>
-          <div class="grid grid-cols-3 px-4 py-3 items-center">
-            <span class="text-xs font-semibold text-slate-700">15778</span>
-            <span class="text-xs text-center text-slate-500">Yo'l</span>
-            <span class="text-xs text-right font-bold text-slate-700">35,998.89</span>
-          </div>
-          <div class="grid grid-cols-3 px-4 py-3 items-center">
-            <span class="text-xs font-semibold text-slate-700">15778</span>
-            <span class="text-xs text-center text-slate-500">Yo'l</span>
-            <span class="text-xs text-right font-bold text-slate-700">35,998.89</span>
-          </div>
-        </div>
-      </div>
+      <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Maktabni tanlang va tekshiring</p>
+      <div id="maktablarList" class="space-y-1.5"></div>
     </div>
 
   </div>
 
-  <!-- ═══ TAB: MA'LUMOTLAR ═══ -->
-  <div id="page-malumotlar" class="hidden px-3 fade-up">
-    <!-- Stats 4 cards -->
-    <div class="grid grid-cols-2 gap-2.5 mb-3">
-      <div class="glass stat-card rounded-2xl p-4 border-l-4 border-green-400 shadow-sm">
-        <div class="flex justify-between items-start mb-2">
-          <div class="p-2 bg-green-100 text-green-600 rounded-xl">
-            <span class="material-symbols-outlined" style="font-size:20px">menu_book</span>
-          </div>
-          <span class="material-symbols-outlined text-slate-300" style="font-size:16px">north_east</span>
-        </div>
-        <p class="text-xl font-black text-slate-900" id="stat-maktab">11 139</p>
-        <p class="text-xs text-slate-500 font-semibold mt-0.5">Maktablar</p>
-        <p class="text-xs text-green-500 mt-1 flex items-center gap-0.5">
-          <span class="material-symbols-outlined" style="font-size:11px">trending_up</span>+12 yangi
-        </p>
-      </div>
-      <div class="glass stat-card rounded-2xl p-4 border-l-4 border-purple-400 shadow-sm">
-        <div class="flex justify-between items-start mb-2">
-          <div class="p-2 bg-purple-100 text-purple-600 rounded-xl">
-            <span class="material-symbols-outlined" style="font-size:20px">school</span>
-          </div>
-          <span class="material-symbols-outlined text-slate-300" style="font-size:16px">north_east</span>
-        </div>
-        <p class="text-xl font-black text-slate-900" id="stat-bogcha">6 935</p>
-        <p class="text-xs text-slate-500 font-semibold mt-0.5">Bog'chalar</p>
-        <p class="text-xs text-purple-500 mt-1 flex items-center gap-0.5">
-          <span class="material-symbols-outlined" style="font-size:11px">trending_up</span>+8 yangi
-        </p>
-      </div>
-      <div class="glass stat-card rounded-2xl p-4 border-l-4 border-rose-400 shadow-sm">
-        <div class="flex justify-between items-start mb-2">
-          <div class="p-2 bg-rose-100 text-rose-600 rounded-xl">
-            <span class="material-symbols-outlined" style="font-size:20px">health_and_safety</span>
-          </div>
-          <span class="material-symbols-outlined text-slate-300" style="font-size:16px">north_east</span>
-        </div>
-        <p class="text-xl font-black text-slate-900" id="stat-tibbiyot">3 034</p>
-        <p class="text-xs text-slate-500 font-semibold mt-0.5">Tibbiyot</p>
-        <p class="text-xs text-rose-500 mt-1 flex items-center gap-0.5">
-          <span class="material-symbols-outlined" style="font-size:11px">trending_up</span>+4 yangi
-        </p>
-      </div>
-      <div class="glass stat-card rounded-2xl p-4 border-l-4 border-amber-400 shadow-sm">
-        <div class="flex justify-between items-start mb-2">
-          <div class="p-2 bg-amber-100 text-amber-600 rounded-xl">
-            <span class="material-symbols-outlined" style="font-size:20px">sports_basketball</span>
-          </div>
-          <span class="material-symbols-outlined text-slate-300" style="font-size:16px">north_east</span>
-        </div>
-        <p class="text-xl font-black text-slate-900" id="stat-sport">356</p>
-        <p class="text-xs text-slate-500 font-semibold mt-0.5">Sport</p>
-        <p class="text-xs text-amber-500 mt-1 flex items-center gap-0.5">
-          <span class="material-symbols-outlined" style="font-size:11px">trending_up</span>+2 yangi
-        </p>
-      </div>
-    </div>
-
-    <!-- Budget section -->
-    <div class="glass rounded-2xl p-4 shadow-sm" style="background: rgba(255,237,213,0.4);">
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Sarflangan</p>
-          <p class="text-lg font-black text-slate-900 mt-0.5">169,899.82 <span class="text-xs font-normal text-slate-500">mlrd</span></p>
-        </div>
-        <div>
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ajratilgan</p>
-          <p class="text-lg font-black text-slate-900 mt-0.5">500,236.92 <span class="text-xs font-normal text-slate-500">mlrd</span></p>
-        </div>
-        <div>
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Loyihalar</p>
-          <p class="text-lg font-black text-slate-900 mt-0.5">30,749</p>
-        </div>
-        <div>
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">O'zlashtirish</p>
-          <div class="flex items-center gap-2 mt-0.5">
-            <p class="text-lg font-black text-slate-900">34%</p>
-            <div class="flex-1 h-2.5 bg-slate-200 rounded-full overflow-hidden">
-              <div class="h-full bg-primary rounded-full" style="width:34%"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Murojaatlar counter -->
-    <div class="glass rounded-2xl p-4 mt-2.5 flex justify-between items-center shadow-sm">
-      <div>
-        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Fuqaro murojaatlari</p>
-        <p class="text-2xl font-black text-slate-900 mt-0.5" id="stat-murojaatlar">—</p>
-        <p class="text-xs text-slate-400">jami yuborilgan</p>
-      </div>
-      <div class="text-right">
-        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Hal qilingan</p>
-        <p class="text-2xl font-black mt-0.5" style="color:#22c55e" id="stat-hal">—</p>
-        <p class="text-xs text-slate-400">murojaat</p>
-      </div>
-    </div>
-
-    <!-- Mening murojaatlarim -->
-    <div class="mt-3">
-      <div class="flex justify-between items-center mb-2">
-        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Mening murojaatlarim</p>
-        <button onclick="murojaatlarYukla()" class="text-xs font-bold" style="color:#9d2bee">Yangilash</button>
-      </div>
-      <div id="murojaatList" class="space-y-2">
-        <div class="glass rounded-xl p-3 text-center text-slate-400 text-xs">Yuklanmoqda...</div>
-      </div>
+  <!-- ═══ Bottom tabs ═══ -->
+  <div class="fixed bottom-0 left-0 right-0 z-50" style="background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);border-top:1px solid rgba(0,0,0,0.06);">
+    <div class="flex justify-around py-2 px-2">
+      <button onclick="setTab('xarita')" id="btab-xarita" class="flex flex-col items-center gap-0.5 px-3 py-1">
+        <span class="material-symbols-outlined" style="font-size:22px;color:#22c55e">map</span>
+        <span class="text-xs font-bold" style="color:#22c55e">Xarita</span>
+      </button>
+      <button onclick="window.location='/tma/murojaat/'" class="flex flex-col items-center gap-0.5 px-3 py-1">
+        <span class="material-symbols-outlined text-slate-400" style="font-size:22px">campaign</span>
+        <span class="text-xs font-semibold text-slate-400">Signal</span>
+      </button>
+      <button onclick="window.location='/tma/tahlil/'" class="flex flex-col items-center gap-0.5 px-3 py-1">
+        <span class="material-symbols-outlined text-slate-400" style="font-size:22px">bar_chart</span>
+        <span class="text-xs font-semibold text-slate-400">Tahlil</span>
+      </button>
     </div>
   </div>
 
-  <!-- ═══ TAB: GRAFIK VOSITALAR ═══ -->
-  <div id="page-grafik" class="hidden px-3 fade-up">
-    <!-- Sub-tabs -->
-    <div class="scroll-x flex gap-2 pb-3">
-      <button onclick="setGrafikTab('internet')" id="gtab-internet" class="tab-pill active flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">Internet</button>
-      <button onclick="setGrafikTab('suv')" id="gtab-suv" class="tab-pill flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">Ichimlik suvi</button>
-      <button onclick="setGrafikTab('yonalish')" id="gtab-yonalish" class="tab-pill flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">Yo'nalishlar</button>
-      <button onclick="setGrafikTab('donor')" id="gtab-donor" class="tab-pill flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm">Donorlar</button>
-    </div>
-
-    <!-- Internet tab -->
-    <div id="gtab-page-internet">
-      <div class="glass rounded-2xl p-4 shadow-sm mb-2.5">
-        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Internet turi bo'yicha</p>
-        <div class="flex gap-3 mb-4 flex-wrap">
-          <span class="flex items-center gap-1.5 text-xs font-bold text-slate-600"><span class="w-3 h-3 rounded-sm inline-block" style="background:#1d4ed8"></span>Optik <b>10,071</b></span>
-          <span class="flex items-center gap-1.5 text-xs font-bold text-slate-600"><span class="w-3 h-3 rounded-sm inline-block" style="background:#f59e0b"></span>Internet yo'q <b>478</b></span>
-          <span class="flex items-center gap-1.5 text-xs font-bold text-slate-600"><span class="w-3 h-3 rounded-sm inline-block" style="background:#22d3ee"></span>Mobil <b>590</b></span>
-        </div>
-        <div class="space-y-1.5" id="internetBars">
-          <!-- JS renders -->
-        </div>
-      </div>
-    </div>
-
-    <!-- Ichimlik suvi tab -->
-    <div id="gtab-page-suv" class="hidden">
-      <div class="glass rounded-2xl p-4 shadow-sm mb-2.5">
-        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Ichimlik suvi ta'minoti</p>
-        <div class="flex items-center gap-5">
-          <svg width="120" height="120" viewBox="0 0 120 120">
-            <circle cx="60" cy="60" r="44" fill="none" stroke="#e2e8f0" stroke-width="20"/>
-            <circle cx="60" cy="60" r="44" fill="none" stroke="#7c3aed" stroke-width="20"
-              stroke-dasharray="144 133" stroke-dashoffset="0" stroke-linecap="butt"/>
-            <circle cx="60" cy="60" r="44" fill="none" stroke="#3b82f6" stroke-width="20"
-              stroke-dasharray="79 198" stroke-dashoffset="-144" stroke-linecap="butt"/>
-            <circle cx="60" cy="60" r="44" fill="none" stroke="#f97316" stroke-width="20"
-              stroke-dasharray="30 247" stroke-dashoffset="-223" stroke-linecap="butt"/>
-            <circle cx="60" cy="60" r="44" fill="none" stroke="#fbbf24" stroke-width="20"
-              stroke-dasharray="24 253" stroke-dashoffset="-253" stroke-linecap="butt"/>
-            <text x="60" y="55" text-anchor="middle" class="text-xs" style="font-size:10px;fill:#475569;font-weight:700">Jami</text>
-            <text x="60" y="70" text-anchor="middle" style="font-size:12px;fill:#0f172a;font-weight:900">11,139</text>
-          </svg>
-          <div class="space-y-2 text-xs flex-1">
-            <div class="flex justify-between items-center">
-              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm inline-block" style="background:#7c3aed"></span>Markaziy</span>
-              <span class="font-black text-slate-700">5,816 <span class="text-slate-400 font-normal">52%</span></span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm inline-block" style="background:#3b82f6"></span>Mahalliy</span>
-              <span class="font-black text-slate-700">3,165 <span class="text-slate-400 font-normal">28%</span></span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm inline-block" style="background:#f97316"></span>Yetkazib</span>
-              <span class="font-black text-slate-700">1,188 <span class="text-slate-400 font-normal">11%</span></span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm inline-block" style="background:#fbbf24"></span>Suv yo'q</span>
-              <span class="font-black text-slate-700">970 <span class="text-slate-400 font-normal">9%</span></span>
-            </div>
-          </div>
-        </div>
-        <!-- Viloyat breakdown -->
-        <div class="mt-4 space-y-1.5">
-          <p class="text-xs font-bold text-slate-500 mb-2">Viloyatlar kesimida (suvsizlik %)</p>
-          <div class="flex items-center gap-2"><span class="text-xs text-slate-500 w-24">Sirdaryo</span><div class="flex-1 h-4 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full" style="background:#ef4444;width:18%"></div></div><span class="text-xs font-bold text-red-500">18%</span></div>
-          <div class="flex items-center gap-2"><span class="text-xs text-slate-500 w-24">Qashqadaryo</span><div class="flex-1 h-4 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full" style="background:#f59e0b;width:14%"></div></div><span class="text-xs font-bold text-amber-500">14%</span></div>
-          <div class="flex items-center gap-2"><span class="text-xs text-slate-500 w-24">Surxondaryo</span><div class="flex-1 h-4 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full" style="background:#f59e0b;width:12%"></div></div><span class="text-xs font-bold text-amber-500">12%</span></div>
-          <div class="flex items-center gap-2"><span class="text-xs text-slate-500 w-24">Navoiy</span><div class="flex-1 h-4 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full" style="background:#f59e0b;width:10%"></div></div><span class="text-xs font-bold text-amber-500">10%</span></div>
-          <div class="flex items-center gap-2"><span class="text-xs text-slate-500 w-24">Toshkent sh.</span><div class="flex-1 h-4 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full" style="background:#22c55e;width:2%"></div></div><span class="text-xs font-bold text-green-500">2%</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Yo'nalishlar tab -->
-    <div id="gtab-page-yonalish" class="hidden">
-      <div class="glass rounded-2xl p-5 shadow-sm mb-2.5">
-        <p class="text-sm font-bold text-slate-700 mb-4">Yo'nalishlar bo'yicha taqsimot</p>
-        <div class="flex items-center gap-5">
-          <svg width="110" height="110" viewBox="0 0 110 110">
-            <circle cx="55" cy="55" r="40" fill="none" stroke="#e2e8f0" stroke-width="18"/>
-            <circle cx="55" cy="55" r="40" fill="none" stroke="#22c55e" stroke-width="18" stroke-dasharray="101 151" stroke-dashoffset="0" stroke-linecap="round"/>
-            <circle cx="55" cy="55" r="40" fill="none" stroke="#38bdf8" stroke-width="18" stroke-dasharray="59 193" stroke-dashoffset="-101" stroke-linecap="round"/>
-            <circle cx="55" cy="55" r="40" fill="none" stroke="#a855f7" stroke-width="18" stroke-dasharray="50 202" stroke-dashoffset="-160" stroke-linecap="round"/>
-            <circle cx="55" cy="55" r="40" fill="none" stroke="#f472b6" stroke-width="18" stroke-dasharray="40 212" stroke-dashoffset="-210" stroke-linecap="round"/>
-          </svg>
-          <div class="space-y-1.5 text-xs">
-            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"></span><span class="text-slate-600">Yo'l — 40.3%</span></div>
-            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-sky-400 inline-block"></span><span class="text-slate-600">Suv — 23.6%</span></div>
-            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span><span class="text-slate-600">Sog'liq — 20%</span></div>
-            <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-pink-400 inline-block"></span><span class="text-slate-600">Ta'lim — 16.1%</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Donorlar tab -->
-    <div id="gtab-page-donor" class="hidden">
-      <div class="glass rounded-2xl p-5 shadow-sm">
-        <p class="text-sm font-bold text-slate-700 mb-4">Donorlar bo'yicha (mlrd so'm)</p>
-        <div class="space-y-2">
-          <div class="flex items-center gap-2"><span class="text-xs text-slate-500 w-20 text-right">O'zR Byudjet</span><div class="flex-1 h-5 rounded-full overflow-hidden bg-slate-100"><div class="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500" style="width:100%"></div></div><span class="text-xs font-bold text-slate-600">200T</span></div>
-          <div class="flex items-center gap-2"><span class="text-xs text-slate-500 w-20 text-right">Jahon Banki</span><div class="flex-1 h-5 rounded-full overflow-hidden bg-slate-100"><div class="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500" style="width:73%"></div></div><span class="text-xs font-bold text-slate-600">146T</span></div>
-          <div class="flex items-center gap-2"><span class="text-xs text-slate-500 w-20 text-right">ADB</span><div class="flex-1 h-5 rounded-full overflow-hidden bg-slate-100"><div class="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500" style="width:51%"></div></div><span class="text-xs font-bold text-slate-600">102T</span></div>
-          <div class="flex items-center gap-2"><span class="text-xs text-slate-500 w-20 text-right">EBRD</span><div class="flex-1 h-5 rounded-full overflow-hidden bg-slate-100"><div class="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500" style="width:40%"></div></div><span class="text-xs font-bold text-slate-600">80T</span></div>
-          <div class="flex items-center gap-2"><span class="text-xs text-slate-500 w-20 text-right">IsDB</span><div class="flex-1 h-5 rounded-full overflow-hidden bg-slate-100"><div class="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500" style="width:18%"></div></div><span class="text-xs font-bold text-slate-600">36T</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ TAB: SOLISHTIRISH ═══ -->
-  <div id="page-solishtirish" class="hidden px-3 fade-up">
-    <div class="glass rounded-2xl p-4 mb-2.5 shadow-sm">
-      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Solishtiruv turi</p>
-      <select class="w-full h-11 px-4 rounded-full text-sm font-semibold text-slate-700 border border-white/60 bg-white/70 focus:outline-none focus:ring-2 focus:ring-green-400">
-        <option>O'zR Davlat byudjeti</option>
-        <option>Xalqaro donorlar</option>
-      </select>
-    </div>
-    <div class="grid grid-cols-2 gap-2.5 mb-2.5">
-      <div>
-        <p class="text-xs font-bold text-slate-400 mb-1.5 px-1">Variant A</p>
-        <select class="w-full h-11 px-3 rounded-full text-xs font-semibold text-slate-700 border border-white/60 bg-white/70 focus:outline-none">
-          <option>O'zR Davlat byudjeti (konkurs)</option>
-        </select>
-      </div>
-      <div>
-        <p class="text-xs font-bold text-slate-400 mb-1.5 px-1">Variant B</p>
-        <select class="w-full h-11 px-3 rounded-full text-xs font-semibold text-slate-700 border border-white/60 bg-white/70 focus:outline-none">
-          <option>O'zR Davlat byudjeti (konkurs)</option>
-        </select>
-      </div>
-    </div>
-    <div class="grid grid-cols-2 gap-2.5">
-      <!-- A panel -->
-      <div class="glass rounded-2xl p-3 shadow-sm">
-        <p class="text-xs font-bold text-slate-500 mb-2">Variant A</p>
-        <div class="space-y-1.5">
-          <div><p class="text-xs text-slate-400">Sarflangan</p><p class="text-sm font-black text-slate-900">169,899.32</p></div>
-          <div><p class="text-xs text-slate-400">Ajratilgan</p><p class="text-sm font-black text-slate-900">500,235.33</p></div>
-          <div><p class="text-xs text-slate-400">O'zlashtirish</p>
-            <div class="flex items-center gap-1 mt-0.5">
-              <p class="text-sm font-black text-slate-900">34%</p>
-              <div class="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                <div class="h-full bg-green-500 rounded-full" style="width:34%"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- B panel -->
-      <div class="glass rounded-2xl p-3 shadow-sm">
-        <p class="text-xs font-bold text-slate-500 mb-2">Variant B</p>
-        <div class="space-y-1.5">
-          <div><p class="text-xs text-slate-400">Sarflangan</p><p class="text-sm font-black text-slate-900">169,899.32</p></div>
-          <div><p class="text-xs text-slate-400">Ajratilgan</p><p class="text-sm font-black text-slate-900">500,235.33</p></div>
-          <div><p class="text-xs text-slate-400">O'zlashtirish</p>
-            <div class="flex items-center gap-1 mt-0.5">
-              <p class="text-sm font-black text-slate-900">34%</p>
-              <div class="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                <div class="h-full bg-primary rounded-full" style="width:34%"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ Tezkor havolalar ═══ -->
-  <div class="px-3 mt-4 grid grid-cols-3 gap-2">
-    <button onclick="window.location.href='/tma/maktablar/'"
-      class="glass rounded-2xl p-3 flex flex-col items-center gap-1.5 active:scale-95 transition-transform shadow-sm">
-      <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(34,197,94,0.12)">
-        <span class="material-symbols-outlined" style="font-size:18px;color:#22c55e">school</span>
-      </div>
-      <p class="text-xs font-bold text-slate-700 text-center leading-tight">Maktablar</p>
-    </button>
-    <button onclick="window.location.href='/tma/murojaat/'"
-      class="glass rounded-2xl p-3 flex flex-col items-center gap-1.5 active:scale-95 transition-transform shadow-sm">
-      <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(157,43,238,0.12)">
-        <span class="material-symbols-outlined" style="font-size:18px;color:#9d2bee">add_a_photo</span>
-      </div>
-      <p class="text-xs font-bold text-slate-700 text-center leading-tight">Murojaat</p>
-    </button>
-    <button onclick="window.location.href='/tma/tahlil/'"
-      class="glass rounded-2xl p-3 flex flex-col items-center gap-1.5 active:scale-95 transition-transform shadow-sm">
-      <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(59,130,246,0.12)">
-        <span class="material-symbols-outlined" style="font-size:18px;color:#3b82f6">analytics</span>
-      </div>
-      <p class="text-xs font-bold text-slate-700 text-center leading-tight">Tahlil</p>
-    </button>
-  </div>
-
-  <!-- ═══ Maktablar holati (mini) ═══ -->
-  <div class="px-3 mt-4 mb-4">
-    <div class="flex items-center justify-between mb-2">
-      <h2 class="text-xs font-black text-slate-500 uppercase tracking-widest">Maktablar holati</h2>
-      <button onclick="window.location.href='/tma/maktablar/'" class="text-xs font-bold" style="color:#9d2bee">Barchasi →</button>
-    </div>
-    <div id="maktablarMini" class="space-y-2">
-      <div class="glass rounded-xl p-3 text-center text-slate-400 text-xs">Yuklanmoqda...</div>
-    </div>
-  </div>
-
-  <!-- ═══ BOTTOM ACTION BUTTON ═══ -->
-  <div class="fixed bottom-0 left-0 right-0 px-3 pb-4 pt-2 z-50" style="background: linear-gradient(to top, rgba(220,252,231,0.98) 60%, transparent);">
-    <button onclick="window.location.href='/tma/murojaat/'"
-      class="neon-green w-full py-4 rounded-full font-black text-base tracking-wide flex items-center justify-center gap-2 active:scale-95 transition-transform bg-green-500 text-white shadow-lg">
-      <span class="material-symbols-outlined" style="font-size:20px">add_circle</span>
-      Ma'lumot qoldirish
-    </button>
-  </div>
-
+  <!-- ═══ JAVASCRIPT ═══ -->
   <script>
-    // ── Telegram SDK ──────────────────────────────────────────────────────
     const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
+    tg.ready(); tg.expand();
 
     const user = tg.initDataUnsafe?.user;
     if (user) {
-      const chip = document.getElementById('userChip');
-      document.getElementById('userName').textContent = user.first_name || user.username || 'Fuqaro';
-      chip.classList.remove('hidden');
+      document.getElementById('userChip').classList.remove('hidden');
+      document.getElementById('userName').textContent = user.first_name || 'Foydalanuvchi';
     }
 
-    // ── Tab navigation ────────────────────────────────────────────────────
-    const tabs = ['xarita','malumotlar','grafik','solishtirish'];
-    function setTab(name) {
-      tabs.forEach(t => {
-        document.getElementById('page-'+t).classList.add('hidden');
-        const btn = document.getElementById('tab-'+t);
-        btn.classList.remove('active');
-        btn.classList.remove('active-purple');
+    // ── API token ──
+    const API_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoid2ViX3VzZXIiLCJleHAiOjE3Nzk4Mzk0ODV9.WCy4ooIDvL0o8G5udEuba4POyJMMH2CnjM2FcgybG10';
+    const API_BASE = 'https://duasr.uz/api4';
+
+    // ── Holat ──
+    let allMaktablar = [];
+    let navStack = []; // [{step:'xarita'}, {step:'tumanlar', viloyat:'Andijon viloyati'}, ...]
+
+    // Viloyat SVG koordinatalari
+    const VIL_COORDS = {
+      "Qoraqolpog'iston Respublikasi": {x:78,y:62,abbr:'QQR'},
+      "Xorazm viloyati": {x:108,y:135,abbr:'Xor'},
+      "Navoiy viloyati": {x:210,y:172,abbr:'Nav'},
+      "Buxoro viloyati": {x:187,y:200,abbr:'Bux'},
+      "Qashqadaryo viloyati": {x:230,y:232,abbr:'Qsh'},
+      "Surxondaryo viloyati": {x:270,y:260,abbr:'Sur'},
+      "Samarqand viloyati": {x:258,y:198,abbr:'Sam'},
+      "Jizzax viloyati": {x:280,y:176,abbr:'Jiz'},
+      "Sirdaryo viloyati": {x:296,y:162,abbr:'Sir'},
+      "Toshkent shahar": {x:312,y:140,abbr:'Tsh'},
+      "Toshkent viloyati": {x:336,y:158,abbr:'Tv'},
+      "Namangan viloyati": {x:362,y:145,abbr:'Nam'},
+      "Andijon viloyati": {x:390,y:162,abbr:'And'},
+      "Farg'ona viloyati": {x:374,y:178,abbr:'Far'},
+    };
+
+    // ── API dan maktablarni yuklash ──
+    async function yuklaAPI() {
+      try {
+        const res = await fetch(API_BASE + '/maktab44', {
+          headers: { 'Authorization': 'Bearer ' + API_TOKEN }
+        });
+        allMaktablar = await res.json();
+      } catch(e) {
+        console.warn('API xato, lokal dataga o\'tmoqda', e);
+        // Lokal API fallback
+        try {
+          const res2 = await fetch('/api/maktablar/');
+          const d = await res2.json();
+          allMaktablar = (d.maktablar || []).map(m => ({
+            viloyat: m.viloyat, tuman: m.tuman, obekt_nomi: m.nom, id: m.id,
+            _local: true
+          }));
+        } catch { allMaktablar = []; }
+      }
+      document.getElementById('jamiObektlar').textContent = allMaktablar.length.toLocaleString();
+      renderXarita();
+      renderViloyatlarList();
+    }
+
+    // ── Viloyatlar hisob ──
+    function viloyatlarHisob() {
+      const h = {};
+      allMaktablar.forEach(m => {
+        const v = m.viloyat;
+        if (!h[v]) h[v] = 0;
+        h[v]++;
       });
-      document.getElementById('page-'+name).classList.remove('hidden');
-      document.getElementById('page-'+name).classList.add('fade-up');
-      document.getElementById('tab-'+name).classList.add('active');
-      if (name === 'malumotlar') { statistikaYukla(); murojaatlarYukla(); }
+      return Object.entries(h).sort((a,b) => b[1]-a[1]);
     }
 
-    // ── Sub-tab navigation ────────────────────────────────────────────────
-    const subTabs = ['donorlar','viloyatlar','yonalishlar','loyihalar'];
-    function setSubTab(name) {
-      subTabs.forEach(t => {
-        document.getElementById('sub-page-'+t).classList.add('hidden');
-        document.getElementById('sub-'+t).classList.remove('active');
+    // ── SVG xaritani chizish ──
+    function renderXarita() {
+      const svg = document.getElementById('uzbekMap');
+      // Mavjud doiralarni olib tashlash
+      svg.querySelectorAll('.viloyat-g').forEach(el => el.remove());
+
+      const viloyatlar = viloyatlarHisob();
+      const maxSon = Math.max(...viloyatlar.map(v=>v[1]), 1);
+
+      viloyatlar.forEach(([nom, soni]) => {
+        const coords = VIL_COORDS[nom];
+        if (!coords) return;
+        const r = 14 + Math.round((soni / maxSon) * 12);
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.classList.add('viloyat-g');
+        g.setAttribute('onclick', `ochViloyat('${nom.replace(/'/g, "\\'")}')`);
+        g.innerHTML = `
+          <circle cx="${coords.x}" cy="${coords.y}" r="${r}" fill="rgba(34,197,94,0.85)" stroke="#16a34a" stroke-width="2" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.2))"/>
+          <text x="${coords.x}" y="${coords.y - 3}" text-anchor="middle" font-size="${r > 20 ? 11 : 9}" font-weight="800" fill="#fff">${soni}</text>
+          <text x="${coords.x}" y="${coords.y + 8}" text-anchor="middle" font-size="7" fill="#fff">${coords.abbr}</text>
+        `;
+        svg.appendChild(g);
       });
-      document.getElementById('sub-page-'+name).classList.remove('hidden');
-      document.getElementById('sub-'+name).classList.add('active');
     }
 
-    // ── API: statistika ───────────────────────────────────────────────────
-    const VILOYATLAR_DATA = [
-      { nomi: 'Toshkent shahri', loyiha: '1,245', miqdor: '225,006,327,253,921.22', rang: '#22c55e' },
-      { nomi: "Farg'ona viloyati", loyiha: '956', miqdor: '225,006,327,253,921.22', rang: '#9d2bee' },
-      { nomi: "Qoraqalpog'iston", loyiha: '872', miqdor: '225,006,327,253,921.22', rang: '#38bdf8' },
-      { nomi: 'Qashqadaryo', loyiha: '756', miqdor: '225,006,327,253,921.22', rang: '#f59e0b' },
-      { nomi: 'Samarqand', loyiha: '645', miqdor: '225,006,327,253,921.22', rang: '#f472b6' },
-      { nomi: 'Surxondaryo', loyiha: '534', miqdor: '225,006,327,253,921.22', rang: '#34d399' },
-    ];
-
-    function renderViloyatlar() {
-      const container = document.getElementById('viloyatlarList');
-      container.innerHTML = VILOYATLAR_DATA.map(v => `
-        <div class="flex items-center justify-between px-4 py-3">
-          <div class="flex items-center gap-3">
-            <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${v.rang}"></span>
-            <span class="text-sm font-semibold text-slate-700">${v.nomi}</span>
+    // ── Viloyatlar ro'yxati ──
+    function renderViloyatlarList() {
+      const list = document.getElementById('viloyatlarList');
+      const viloyatlar = viloyatlarHisob();
+      list.innerHTML = viloyatlar.map(([nom, soni]) => `
+        <div class="card-btn glass rounded-xl p-3 flex items-center gap-3 shadow-sm" onclick="ochViloyat('${nom.replace(/'/g, "\\'")}')">
+          <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center" style="background:rgba(34,197,94,0.12)">
+            <span class="material-symbols-outlined" style="font-size:20px;color:#22c55e">location_city</span>
           </div>
-          <span class="text-xs font-bold text-slate-400">${v.miqdor}</span>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-bold text-slate-800">${nom}</p>
+          </div>
+          <div class="text-right">
+            <p class="text-sm font-black" style="color:#22c55e">${soni}</p>
+            <p class="text-xs text-slate-400">ob'ekt</p>
+          </div>
+          <span class="material-symbols-outlined text-slate-300" style="font-size:18px">chevron_right</span>
         </div>
       `).join('');
     }
 
-    async function statistikaYukla() {
-      try {
-        const res = await fetch('/api/statistika/');
-        const d = await res.json();
-        document.getElementById('stat-maktab').textContent = d.maktablar_soni?.toLocaleString('uz') || '11 139';
-        document.getElementById('stat-bogcha').textContent = d.bogchalar_soni?.toLocaleString('uz') || '6 935';
-        document.getElementById('stat-tibbiyot').textContent = d.tibbiyot_soni?.toLocaleString('uz') || '3 034';
-        document.getElementById('stat-sport').textContent = d.sport_soni?.toLocaleString('uz') || '356';
-        document.getElementById('stat-murojaatlar').textContent = d.murojaatlar_soni ?? '0';
-        document.getElementById('stat-hal').textContent = d.hal_qilingan ?? '0';
-      } catch {}
-    }
+    // ── Viloyat ochish → tumanlar ──
+    function ochViloyat(viloyatNom) {
+      navStack = [{step:'xarita'}, {step:'tumanlar', viloyat: viloyatNom}];
+      updateNav();
 
-    async function murojaatlarYukla() {
-      const list = document.getElementById('murojaatList');
-      if (!user) {
-        list.innerHTML = '<div class="glass rounded-xl p-3 text-center text-slate-400 text-xs">Telegram orqali kiring</div>';
-        return;
-      }
-      try {
-        const res = await fetch(`/api/murojaatlar/?user_id=${user.id}`);
-        const d = await res.json();
-        if (!d.murojaatlar?.length) {
-          list.innerHTML = '<div class="glass rounded-xl p-3 text-center text-slate-400 text-xs">Hali murojaatlar yo\'q</div>';
-          return;
-        }
-        const holatRang = { 'Kutilmoqda': '#f59e0b', "Ko'rib chiqilmoqda": '#9d2bee', 'Hal qilindi': '#22c55e' };
-        list.innerHTML = d.murojaatlar.map(m => `
-          <div class="glass rounded-xl p-3 flex items-start gap-3 shadow-sm">
-            ${m.rasm
-              ? `<img src="${m.rasm}" class="w-11 h-11 rounded-xl object-cover flex-shrink-0" />`
-              : `<div class="w-11 h-11 rounded-xl flex-shrink-0 bg-slate-100 flex items-center justify-center"><span class="material-symbols-outlined text-slate-300" style="font-size:18px">image_not_supported</span></div>`}
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center justify-between gap-2">
-                <p class="text-sm font-bold text-slate-800 truncate">${m.infratuzilma}</p>
-                <span class="text-xs px-2 py-0.5 rounded-full flex-shrink-0 font-semibold" style="background:${holatRang[m.holat] || '#888'}20;color:${holatRang[m.holat] || '#888'}">${m.holat}</span>
-              </div>
-              <p class="text-xs text-slate-500 truncate mt-0.5">${m.viloyat}, ${m.tuman}</p>
-              <p class="text-xs text-slate-400 mt-0.5">${m.yuborilgan_vaqt}</p>
-            </div>
-          </div>
-        `).join('');
-      } catch {
-        list.innerHTML = '<div class="glass rounded-xl p-3 text-center text-slate-400 text-xs">Xatolik yuz berdi</div>';
-      }
-    }
-
-    renderViloyatlar();
-
-    const SINTETIK_MAKTABLAR = [
-      { id:1, nom:"45-sonli maktab", tuman:"Yunusobod tumani", mamnuniyat_foizi:85 },
-      { id:2, nom:"78-sonli maktab", tuman:"Chilonzor tumani", mamnuniyat_foizi:62 },
-      { id:3, nom:"12-sonli maktab", tuman:"Samarqand tumani", mamnuniyat_foizi:34 },
-      { id:4, nom:"33-sonli maktab", tuman:"Farg'ona tumani",  mamnuniyat_foizi:null },
-    ];
-
-    function renderMaktablarMini(list) {
-      const container = document.getElementById('maktablarMini');
-      container.innerHTML = list.map(m => {
-        const foiz = m.mamnuniyat_foizi;
-        const rang = foiz === null ? '#94a3b8' : foiz >= 70 ? '#22c55e' : foiz >= 40 ? '#f59e0b' : '#ef4444';
-        const holat = foiz === null ? 'Tekshirilmagan' : foiz >= 70 ? 'Yaxshi' : foiz >= 40 ? "E'tiborga muhtoj" : 'Nosoz';
-        return `<div class="glass rounded-xl p-3 flex items-center gap-3 cursor-pointer active:scale-98 transition-transform"
-            onclick="window.location.href='/tma/maktablar/${m.id}/'">
-            <div class="w-9 h-9 rounded-xl flex-shrink-0 bg-slate-100 flex items-center justify-center">
-              <span class="material-symbols-outlined text-slate-400" style="font-size:16px">school</span>
-            </div>
-            <div class="flex-1 min-w-0">
-              <p class="text-xs font-bold text-slate-800 truncate">${m.nom}</p>
-              <p class="text-xs text-slate-400 truncate">${m.tuman}</p>
-            </div>
-            <div class="text-right flex-shrink-0">
-              <p class="text-xs font-black" style="color:${rang}">${foiz !== null ? foiz+'%' : '—'}</p>
-              <p class="text-xs font-semibold" style="color:${rang};font-size:10px">${holat}</p>
-            </div>
-          </div>`;
-      }).join('');
-    }
-
-    async function maktablarMiniYukla() {
-      try {
-        const res = await fetch('/api/maktablar/');
-        const d = await res.json();
-        const list = (d.maktablar || d || []).slice(0, 4);
-        renderMaktablarMini(list.length ? list : SINTETIK_MAKTABLAR);
-      } catch {
-        renderMaktablarMini(SINTETIK_MAKTABLAR);
-      }
-    }
-    maktablarMiniYukla();
-
-    // ── Grafik sub-tabs ───────────────────────────────────────────────────
-    const grafikTabs = ['internet','suv','yonalish','donor'];
-    function setGrafikTab(name) {
-      grafikTabs.forEach(t => {
-        document.getElementById('gtab-page-'+t).classList.add('hidden');
-        document.getElementById('gtab-'+t).classList.remove('active');
+      const maktablar = allMaktablar.filter(m => m.viloyat === viloyatNom);
+      // Tumanlar hisob
+      const tumanH = {};
+      maktablar.forEach(m => {
+        if (!tumanH[m.tuman]) tumanH[m.tuman] = 0;
+        tumanH[m.tuman]++;
       });
-      document.getElementById('gtab-page-'+name).classList.remove('hidden');
-      document.getElementById('gtab-'+name).classList.add('active');
-      if (name === 'internet') renderInternetBars();
+      const tumanlar = Object.entries(tumanH).sort((a,b) => b[1]-a[1]);
+
+      document.getElementById('viloyatSarlavha').textContent = viloyatNom;
+      document.getElementById('viloyatInfo').textContent = `${maktablar.length} ta ob'ekt, ${tumanlar.length} tuman`;
+
+      const list = document.getElementById('tumanlarList');
+      list.innerHTML = tumanlar.map(([nom, soni]) => `
+        <div class="card-btn glass rounded-xl p-3 flex items-center gap-3 shadow-sm" onclick="ochTuman('${viloyatNom.replace(/'/g, "\\'")}', '${nom.replace(/'/g, "\\'")}')">
+          <div class="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center" style="background:rgba(59,130,246,0.1)">
+            <span class="material-symbols-outlined" style="font-size:18px;color:#3b82f6">apartment</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-slate-800">${nom}</p>
+          </div>
+          <div class="text-right">
+            <p class="text-sm font-black text-blue-600">${soni}</p>
+            <p class="text-xs text-slate-400">maktab</p>
+          </div>
+          <span class="material-symbols-outlined text-slate-300" style="font-size:18px">chevron_right</span>
+        </div>
+      `).join('');
+
+      showStep('tumanlar');
     }
 
-    // ── Internet bars data (geoasr.uz dan) ───────────────────────────────
-    const INTERNET_DATA = [
-      { nom: 'Samarqand',       optik: 1380, yoq: 40,  mobil: 30  },
-      { nom: 'Qashqadaryo',     optik: 1050, yoq: 180, mobil: 200 },
-      { nom: 'Surxondaryo',     optik: 985,  yoq: 40,  mobil: 25  },
-      { nom: "Farg'ona",        optik: 950,  yoq: 45,  mobil: 35  },
-      { nom: 'Toshkent v.',     optik: 960,  yoq: 50,  mobil: 40  },
-      { nom: 'Andijon',         optik: 790,  yoq: 30,  mobil: 30  },
-      { nom: 'Namangan',        optik: 650,  yoq: 30,  mobil: 20  },
-      { nom: "Qoraqalpog'iston",optik: 570,  yoq: 80,  mobil: 50  },
-      { nom: 'Jizzax',          optik: 545,  yoq: 35,  mobil: 20  },
-      { nom: 'Xorazm',          optik: 530,  yoq: 30,  mobil: 20  },
-      { nom: 'Buxoro',          optik: 510,  yoq: 25,  mobil: 15  },
-      { nom: 'Navoiy',          optik: 355,  yoq: 20,  mobil: 15  },
-      { nom: 'Sirdaryo',        optik: 275,  yoq: 15,  mobil: 10  },
-      { nom: 'Toshkent sh.',    optik: 280,  yoq: 5,   mobil: 5   },
-    ];
+    // ── Tuman ochish → maktablar ──
+    function ochTuman(viloyatNom, tumanNom) {
+      navStack = [{step:'xarita'}, {step:'tumanlar', viloyat:viloyatNom}, {step:'maktablar', viloyat:viloyatNom, tuman:tumanNom}];
+      updateNav();
 
-    function renderInternetBars() {
-      const maxVal = Math.max(...INTERNET_DATA.map(d => d.optik + d.yoq + d.mobil));
-      document.getElementById('internetBars').innerHTML = INTERNET_DATA.map(d => {
-        const jami = d.optik + d.yoq + d.mobil;
-        const pOptik = (d.optik/maxVal*100).toFixed(1);
-        const pYoq  = (d.yoq/maxVal*100).toFixed(1);
-        const pMobil= (d.mobil/maxVal*100).toFixed(1);
-        return `<div class="flex items-center gap-2">
-          <span class="text-xs text-slate-500 flex-shrink-0" style="width:80px;font-size:10px">${d.nom}</span>
-          <div class="flex-1 h-4 rounded-full overflow-hidden bg-slate-100 flex">
-            <div style="width:${pOptik}%;background:#1d4ed8"></div>
-            <div style="width:${pYoq}%;background:#f59e0b"></div>
-            <div style="width:${pMobil}%;background:#22d3ee"></div>
+      const maktablar = allMaktablar.filter(m => m.viloyat === viloyatNom && m.tuman === tumanNom);
+
+      document.getElementById('tumanSarlavha').textContent = tumanNom;
+      document.getElementById('tumanInfo').textContent = `${viloyatNom} — ${maktablar.length} ta maktab`;
+
+      const list = document.getElementById('maktablarList');
+      list.innerHTML = maktablar.map((m, i) => {
+        // Internet holati rang
+        let netRang = '#94a3b8', netText = '—';
+        if (m.internetga_ulanish_turi === 'internet_optika') { netRang = '#22c55e'; netText = 'Optik'; }
+        else if (m.internetga_ulanish_turi === 'internet_mobil') { netRang = '#f59e0b'; netText = 'Mobil'; }
+        else if (m.internetga_ulanish_turi === 'umuman_yuq') { netRang = '#ef4444'; netText = 'Yo\'q'; }
+
+        const idx = i; // closure uchun
+        return `
+        <div class="card-btn glass rounded-xl p-3 flex items-center gap-3 shadow-sm" style="border-left:3px solid ${netRang}" onclick="ochMaktab(${idx}, '${viloyatNom.replace(/'/g, "\\'")}', '${tumanNom.replace(/'/g, "\\'")}')">
+          <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center" style="background:${netRang}15">
+            <span class="material-symbols-outlined" style="font-size:20px;color:${netRang}">school</span>
           </div>
-          <span class="text-xs font-bold text-slate-500 flex-shrink-0" style="min-width:32px;text-align:right">${jami}</span>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-bold text-slate-800 leading-tight">${m.obekt_nomi || m.nom || 'Maktab'}</p>
+            <div class="flex items-center gap-2 mt-1 text-xs text-slate-400">
+              ${m.umumiy_uquvchi ? `<span>${m.umumiy_uquvchi} o'quvchi</span>` : ''}
+              ${m.qurilish_yili ? `<span>${m.qurilish_yili} y.</span>` : ''}
+              ${netText !== '—' ? `<span style="color:${netRang}">${netText}</span>` : ''}
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-slate-300" style="font-size:18px">chevron_right</span>
         </div>`;
       }).join('');
-    }
-    renderInternetBars();
 
-    // ── SVG Xarita — Viloyatlar Drill-down ───────────────────────────────────
-    let drillStack = [];
-
-    function ochViloyatPanel(viloyatKod, viloyatNom) {
-      drillStack = [{ level: 'viloyat', kod: viloyatKod, nom: viloyatNom }];
-      document.getElementById('drillTitle').textContent = viloyatNom;
-      document.getElementById('drillBackLabel').textContent = 'Orqaga';
-      document.getElementById('drillPanel').classList.remove('hidden');
-      document.getElementById('drillContent').innerHTML =
-        '<div class="px-4 py-3 text-sm text-slate-500">Yuklanmoqda...</div>';
-
-      fetch(`/api/tumanlari/?viloyat=${viloyatKod}`)
-        .then(r => r.json())
-        .then(data => {
-          document.getElementById('drillContent').innerHTML = data.map(t => `
-            <div class="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-white/10"
-                 onclick="ochTumanPanel('${viloyatKod}', '${t.nom.replace(/'/g,"\\'")}', '${viloyatNom.replace(/'/g,"\\'")}')">
-              <div>
-                <p class="text-sm font-semibold text-slate-700">${t.nom}</p>
-                <p class="text-xs text-slate-500">${t.maktablar_soni} ta ob'ekt</p>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-bold text-green-600">${t.vaadalar_soni} loyiha</span>
-                <span class="material-icons text-slate-400 text-base">chevron_right</span>
-              </div>
-            </div>`).join('') ||
-            '<div class="px-4 py-3 text-sm text-slate-500">Ma\'lumot topilmadi</div>';
-        }).catch(() => {
-          // API ishlamasa maktablar sahifasiga yo'naltir
-          document.getElementById('drillContent').innerHTML = `
-            <div class="px-4 py-3 cursor-pointer hover:bg-white/10" onclick="window.location='/tma/maktablar/'">
-              <p class="text-sm font-semibold text-slate-700">${viloyatNom} maktablari</p>
-              <p class="text-xs text-green-600 mt-0.5">Ko'rish →</p>
-            </div>`;
-        });
+      showStep('maktablar');
     }
 
-    function ochTumanPanel(viloyatKod, tumanNom, viloyatNom) {
-      drillStack.push({ level: 'tuman', kod: viloyatKod, nom: tumanNom, parentNom: viloyatNom });
-      document.getElementById('drillTitle').textContent = tumanNom;
-      document.getElementById('drillBackLabel').textContent = viloyatNom;
-      document.getElementById('drillContent').innerHTML =
-        '<div class="px-4 py-3 text-sm text-slate-500">Yuklanmoqda...</div>';
-
-      fetch(`/api/maktablar/?viloyat=${viloyatKod}&tuman=${encodeURIComponent(tumanNom)}`)
-        .then(r => r.json())
-        .then(data => {
-          const list = Array.isArray(data) ? data : (data.maktablar || []);
-          document.getElementById('drillContent').innerHTML = list.map(m => {
-            const rang = m.mamnuniyat_foizi === null ? '#94a3b8'
-              : m.mamnuniyat_foizi >= 70 ? '#22c55e'
-              : m.mamnuniyat_foizi >= 40 ? '#f59e0b' : '#ef4444';
-            const foizText = m.mamnuniyat_foizi !== null ? `${m.mamnuniyat_foizi}%` : 'Tekshirilmagan';
-            return `
-              <div class="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-white/10"
-                   onclick="window.location='/tma/maktablar/${m.id}/'">
-                <div class="flex items-center gap-2">
-                  <span class="material-icons text-slate-400 text-base">school</span>
-                  <div>
-                    <p class="text-sm font-semibold text-slate-700">${m.nom}</p>
-                    <p class="text-xs text-slate-500">${m.vaadalar_soni || 0} ta va'da</p>
-                  </div>
-                </div>
-                <div class="flex items-center gap-1">
-                  <span class="w-2.5 h-2.5 rounded-full" style="background:${rang}"></span>
-                  <span class="text-xs font-bold" style="color:${rang}">${foizText}</span>
-                </div>
-              </div>`;
-          }).join('') ||
-          '<div class="px-4 py-3 text-sm text-slate-500">Ob\'ektlar topilmadi</div>';
-        }).catch(() => {});
+    // ── Navigatsiya ──
+    function showStep(step) {
+      ['xarita','tumanlar','maktablar'].forEach(s => {
+        document.getElementById('step-'+s).classList.toggle('hidden', s !== step);
+      });
+      window.scrollTo({top:0, behavior:'smooth'});
     }
 
-    function drillBack() {
-      drillStack.pop();
-      if (drillStack.length === 0) {
-        document.getElementById('drillPanel').classList.add('hidden');
+    function updateNav() {
+      const bc = document.getElementById('breadcrumb');
+      const bcText = document.getElementById('breadcrumbText');
+      if (navStack.length <= 1) {
+        bc.classList.add('hidden');
       } else {
-        const prev = drillStack[drillStack.length - 1];
-        drillStack = [];
-        ochViloyatPanel(prev.kod, prev.nom);
+        bc.classList.remove('hidden');
+        const prev = navStack[navStack.length - 2];
+        if (prev.step === 'xarita') bcText.textContent = 'O\'zbekiston';
+        else if (prev.step === 'tumanlar') bcText.textContent = prev.viloyat;
+        else bcText.textContent = 'Orqaga';
       }
     }
 
-    // Xarita tab ochilganda init qil
-    // SVG xarita — Leaflet kerak emas, avtomatik ko'rinadi
+    function orqaga() {
+      if (navStack.length <= 1) return;
+      navStack.pop();
+      const current = navStack[navStack.length - 1];
+      if (current.step === 'xarita') {
+        showStep('xarita');
+      } else if (current.step === 'tumanlar') {
+        ochViloyat(current.viloyat);
+        return; // ochViloyat o'zi navStack ni set qiladi
+      }
+      updateNav();
+    }
+
+    function setTab(tab) {
+      if (tab === 'xarita') {
+        navStack = [{step:'xarita'}];
+        showStep('xarita');
+        updateNav();
+      }
+    }
+
+    // ── Maktabni ochish (GEOASR → lokal sync → detail sahifa) ──
+    let syncingIdx = -1;
+    async function ochMaktab(idx, viloyatNom, tumanNom) {
+      if (syncingIdx === idx) return; // ikki marta bosilmasin
+      syncingIdx = idx;
+      const maktablar = allMaktablar.filter(m => m.viloyat === viloyatNom && m.tuman === tumanNom);
+      const m = maktablar[idx];
+      if (!m) return;
+
+      // Lokal maktab bo'lsa to'g'ridan-to'g'ri
+      if (m._local && m.id) {
+        window.location = `/tma/maktablar/${m.id}/`;
+        return;
+      }
+
+      // GEOASR maktabni lokal DB ga sinxronlash
+      try {
+        const res = await fetch('/api/maktab-sync/', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            obekt_nomi: m.obekt_nomi || m.nom,
+            viloyat: viloyatNom,
+            tuman: tumanNom,
+          })
+        });
+        const d = await res.json();
+        if (d.success && d.maktab_id) {
+          window.location = `/tma/maktablar/${d.maktab_id}/`;
+        } else {
+          tg.showAlert("Xatolik: " + (d.error || "Sinxronlash xatosi"));
+          syncingIdx = -1;
+        }
+      } catch(e) {
+        tg.showAlert("Server bilan bog'lanib bo'lmadi");
+        syncingIdx = -1;
+      }
+    }
+
+    // ── Boshlash ──
+    yuklaAPI();
   </script>
 </body>
 </html>

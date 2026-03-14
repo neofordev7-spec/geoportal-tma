@@ -16,6 +16,7 @@ urlpatterns = [
     path('api/maktablar/', views.maktablar_royxati, name='api_maktablar'),
     path('api/maktablar/<int:maktab_id>/', views.maktab_detail_api, name='api_maktab_detail'),
     path('api/tekshiruv/', views.tekshiruv_yuborish, name='api_tekshiruv'),
+    path('api/maktab-sync/', views.maktab_sync, name='api_maktab_sync'),
     path('api/tahlil/', views.tahlil_api, name='api_tahlil'),
     path('api/meta/', views.meta_api, name='api_meta'),
     path('api/viloyatlar/', views.viloyatlar_api, name='api_viloyatlar'),
