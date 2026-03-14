@@ -92,35 +92,28 @@
         <label class="text-xs font-semibold text-slate-300 uppercase tracking-widest block mb-2">
           Foto va video dalillar <span class="text-slate-500 normal-case">(max 5 ta)</span>
         </label>
+        <!-- Galereyadan tanlash (rasm + video, ko'p tanlov) -->
         <input type="file" id="rasmInput" name="rasmlar" accept="image/*,video/*" multiple class="hidden" />
-        <input type="file" id="cameraInput" accept="image/*" class="hidden" />
-        <input type="file" id="videoInput" accept="video/*" class="hidden" />
+        <!-- Kameradan olish (rasm yoki video — telefon o'zi tanlaydi) -->
+        <input type="file" id="kameraInput" accept="image/*,video/*" class="hidden" />
         <div id="rasmGrid" class="grid gap-2" style="grid-template-columns: repeat(3, 1fr);">
-          <!-- Preview kartalar JS dan -->
           <button type="button" onclick="document.getElementById('rasmInput').click()"
             id="addRasmBtn"
             class="flex flex-col items-center justify-center rounded-2xl cursor-pointer transition-all active:scale-95"
             style="min-height:100px; border: 2px dashed rgba(255,255,255,0.2); background: rgba(157,43,238,0.06);">
             <span class="material-symbols-outlined text-primary" style="font-size:28px">add_photo_alternate</span>
-            <span class="text-xs text-slate-400 mt-1">Fayldan tanlash</span>
+            <span class="text-xs text-slate-400 mt-1">Galereyadan</span>
           </button>
         </div>
-        <!-- Kameradan olish tugmalari -->
-        <div class="grid grid-cols-2 gap-2 mt-2">
-          <button type="button" onclick="document.getElementById('cameraInput').click()"
-            class="flex items-center justify-center gap-2 rounded-xl py-2.5 active:scale-95 transition-all"
+        <div class="mt-2">
+          <button type="button" onclick="document.getElementById('kameraInput').click()"
+            class="w-full flex items-center justify-center gap-2 rounded-xl py-3 active:scale-95 transition-all"
             style="border:1.5px dashed rgba(255,255,255,0.2);background:rgba(34,197,94,0.06)">
-            <span class="material-symbols-outlined" style="font-size:18px;color:#22c55e">photo_camera</span>
-            <span class="text-xs font-semibold text-slate-400">Rasmga olish</span>
-          </button>
-          <button type="button" onclick="document.getElementById('videoInput').click()"
-            class="flex items-center justify-center gap-2 rounded-xl py-2.5 active:scale-95 transition-all"
-            style="border:1.5px dashed rgba(255,255,255,0.2);background:rgba(239,68,68,0.06)">
-            <span class="material-symbols-outlined" style="font-size:18px;color:#ef4444">videocam</span>
-            <span class="text-xs font-semibold text-slate-400">Video olish</span>
+            <span class="material-symbols-outlined" style="font-size:20px;color:#22c55e">photo_camera</span>
+            <span class="text-sm font-semibold text-slate-300">Kameradan olish</span>
           </button>
         </div>
-        <p class="text-xs text-slate-500 mt-2">Rasm va video yuklash mumkin</p>
+        <p class="text-xs text-slate-500 mt-2">Rasm va video yuklash mumkin (max 5 ta)</p>
       </div>
 
       <!-- ── Dropdowns 2x2 ───────────────────────────────── -->
@@ -147,18 +140,10 @@
           <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-primary transition-colors" style="font-size:18px">expand_more</span>
         </div>
 
-        <!-- Tuman -->
+        <!-- Tuman (viloyatga qarab dinamik) -->
         <div class="relative group">
-          <select id="tuman" class="glass-input w-full h-12 pl-5 pr-8 rounded-full text-sm font-semibold appearance-none focus:ring-0 cursor-pointer">
-            <option disabled selected value="">Tuman</option>
-            <option value="Mirobod tumani">Mirobod</option>
-            <option value="Yunusobod tumani">Yunusobod</option>
-            <option value="Chilonzor tumani">Chilonzor</option>
-            <option value="Bektemir tumani">Bektemir</option>
-            <option value="Yakkasaroy tumani">Yakkasaroy</option>
-            <option value="Shayxontohur tumani">Shayxontohur</option>
-            <option value="Uchtepa tumani">Uchtepa</option>
-            <option value="Olmazar tumani">Olmazar</option>
+          <select id="tuman" class="glass-input w-full h-12 pl-5 pr-8 rounded-full text-sm font-semibold appearance-none focus:ring-0 cursor-pointer" disabled>
+            <option disabled selected value="">Avval viloyat tanlang</option>
           </select>
           <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" style="font-size:16px">expand_more</span>
         </div>
@@ -236,9 +221,36 @@
     tg.ready();
     tg.expand();
 
-    // Telegram MainButton — o'chirildi, pastda o'z tugmamiz bor
+    // ── Viloyat → Tuman mapping (to'liq O'zbekiston) ──────────────
+    const TUMANLARI = {
+      toshkent_sh: ['Bektemir','Chilonzor','Mirobod','Mirzo Ulug\'bek','Olmazor','Sergeli','Shayxontohur','Uchtepa','Yakkasaroy','Yashnobod','Yunusobod'],
+      toshkent_v: ['Angren','Bekobod','Chirchiq','Olmaliq','Ohangaron','Bo\'ka','Bo\'stonliq','Chinoz','Qibray','Oqqo\'rg\'on','Ohangaron tumani','Parkent','Piskent','Toshkent tumani','Zangiota','Yuqorichirchiq','Quyi Chirchiq'],
+      samarqand: ['Samarqand shahri','Bulung\'ur','Ishtixon','Jomboy','Kattaqo\'rg\'on','Narpay','Nurobod','Oqdaryo','Pastdarg\'om','Payariq','Qo\'shrabot','Samarqand tumani','Toyloq','Urgut'],
+      fargona: ['Farg\'ona shahri','Marg\'ilon','Quvasoy','Qo\'qon','Rishton','Beshariq','Bog\'dod','Buvayda','Dang\'ara','Furqat','O\'zbekiston','Qo\'shtepa','Rishton tumani','So\'x','Toshloq','Uchko\'prik','Yozyovon'],
+      andijon: ['Andijon shahri','Xonobod','Andijon tumani','Asaka','Baliqchi','Bo\'z','Buloqboshi','Izboskan','Jalolquduq','Marhamat','Oltinko\'l','Paxtaobod','Qo\'rg\'ontepa','Shahrixon','Ulug\'nor','Xo\'jaobod'],
+      namangan: ['Namangan shahri','Chortoq','Chust','Kosonsoy','Mingbuloq','Namangan tumani','Norin','Pop','To\'raqo\'rg\'on','Uchqo\'rg\'on','Uychi','Yangiqo\'rg\'on'],
+      buxoro: ['Buxoro shahri','Kogon','Buxoro tumani','G\'ijduvon','Jondor','Kogon tumani','Olot','Peshku','Qorako\'l','Qorovulbozor','Romitan','Shofirkon','Vobkent'],
+      xorazm: ['Urganch shahri','Xiva','Bog\'ot','Gurlan','Qo\'shko\'pir','Shovot','Urganch tumani','Xazorasp','Xiva tumani','Yangiariq','Yangibozor'],
+      qashqadaryo: ['Qarshi shahri','Shahrisabz','Chiroqchi','Dehqonobod','G\'uzor','Kasbi','Kitob','Koson','Mirishkor','Muborak','Nishon','Qarshi tumani','Shahrisabz tumani','Yakkabog\''],
+      surxondaryo: ['Termiz shahri','Angor','Bandixon','Boysun','Denov','Jarqo\'rg\'on','Muzrabot','Oltinsoy','Qiziriq','Qumqo\'rg\'on','Sariosiyo','Sherobod','Sho\'rchi','Termiz tumani','Uzun'],
+      jizzax: ['Jizzax shahri','Arnasoy','Baxmal','Do\'stlik','Forish','G\'allaorol','Mirzacho\'l','Paxtakor','Yangiobod','Zafarobod','Zarband','Zarbdor','Zomin'],
+      sirdaryo: ['Guliston shahri','Sirdaryo shahri','Yangiyer shahri','Boyovut','Guliston tumani','Mirzaobod','Oqoltin','Sardoba','Sayxunobod','Sirdaryo tumani','Xovos'],
+      navoiy: ['Navoiy shahri','Zarafshon','Karmana','Konimex','Navbahor','Nurota','Qiziltepa','Tomdi','Uchquduq','Xatirchi'],
+      qoraqalpogiston: ['Nukus shahri','Amudaryo','Beruniy','Chimboy','Ellikqala','Kegeyli','Mo\'ynoq','Nukus tumani','Qonliko\'l','Qo\'ng\'irot','Shumanay','Taxtako\'pir','To\'rtko\'l','Xo\'jayli','Taxiatosh'],
+    };
 
-    // Ko'p rasm preview
+    // Viloyat tanlaganda tumanlarni yangilash
+    document.getElementById('viloyat').addEventListener('change', function() {
+      const sel = document.getElementById('tuman');
+      const tumans = TUMANLARI[this.value] || [];
+      sel.innerHTML = '<option disabled selected value="">Tumanni tanlang</option>';
+      tumans.forEach(t => {
+        sel.innerHTML += `<option value="${t}">${t}</option>`;
+      });
+      sel.disabled = false;
+    });
+
+    // ── Fayl yuklash (universal — barcha telefonlar) ────────────
     let tanlangan_rasmlar = [];
 
     function faylQoshish(files) {
@@ -253,10 +265,7 @@
     document.getElementById('rasmInput').addEventListener('change', function() {
       faylQoshish(this.files); this.value = '';
     });
-    document.getElementById('cameraInput').addEventListener('change', function() {
-      faylQoshish(this.files); this.value = '';
-    });
-    document.getElementById('videoInput').addEventListener('change', function() {
+    document.getElementById('kameraInput').addEventListener('change', function() {
       faylQoshish(this.files); this.value = '';
     });
 
@@ -286,7 +295,7 @@
             class="flex flex-col items-center justify-center rounded-2xl cursor-pointer active:scale-95"
             style="min-height:100px; border:2px dashed rgba(255,255,255,0.2); background:rgba(157,43,238,0.06);">
             <span class="material-symbols-outlined text-primary" style="font-size:28px">add_photo_alternate</span>
-            <span class="text-xs text-slate-400 mt-1">Fayldan tanlash</span>
+            <span class="text-xs text-slate-400 mt-1">Galereyadan</span>
           </button>` : '';
 
       grid.innerHTML = kartalar + addBtn;
