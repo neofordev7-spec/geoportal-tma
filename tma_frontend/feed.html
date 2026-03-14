@@ -6,407 +6,346 @@
   <title>Lenta | GEOPORTAL</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,100..700,0..1&display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
   <script>tailwind.config={theme:{extend:{colors:{primary:"#9d2bee"},fontFamily:{display:["Inter","sans-serif"]}}}}</script>
   <style>
-    body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#dcfce7 0%,#e0f2fe 50%,#f3e8ff 100%);min-height:100vh;color:#0f172a;}
-    .glass{background:rgba(255,255,255,0.55);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.7);}
-    .glass-sm{background:rgba(255,255,255,0.4);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.6);}
+    body{font-family:'Inter',sans-serif;background:#fafafa;min-height:100vh;color:#0f172a;}
     ::-webkit-scrollbar{display:none;}
-    .scroll-x{overflow-x:auto;scrollbar-width:none;}
-    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-    .fade-up{animation:fadeUp 0.3s ease-out forwards;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp 0.25s ease-out both;}
     @keyframes spin{to{transform:rotate(360deg)}}
-    .spinner{animation:spin 0.8s linear infinite;border:2px solid rgba(0,0,0,0.1);border-top-color:#9d2bee;border-radius:50%;width:24px;height:24px;}
-    .like-pop{animation:likePop 0.35s ease-out}
-    @keyframes likePop{0%{transform:scale(1)}30%{transform:scale(1.3)}100%{transform:scale(1)}}
+    .spinner{animation:spin 0.7s linear infinite;border:2.5px solid rgba(0,0,0,0.08);border-top-color:#9d2bee;border-radius:50%;width:24px;height:24px;}
+    @keyframes likePop{0%{transform:scale(1)}40%{transform:scale(1.3)}100%{transform:scale(1)}}
+    .like-pop{animation:likePop 0.3s ease-out;}
     @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-    .slide-up{animation:slideUp 0.3s ease-out forwards;}
-    .chip-active{background:#9d2bee !important;color:#fff !important;border-color:#9d2bee !important;}
+    .slide-up{animation:slideUp 0.25s ease-out;}
+    @keyframes sigPulse{0%{transform:scale(1);opacity:0.5}100%{transform:scale(1.6);opacity:0}}
+
+    /* Carousel */
+    .carousel{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;}
+    .carousel>*{scroll-snap-align:start;flex:0 0 100%;width:100%;}
+    .carousel img,.carousel video{width:100%;height:100%;object-fit:cover;display:block;}
+    .dots{display:flex;gap:4px;justify-content:center;padding:6px 0;}
+    .dot{width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,0.15);transition:all 0.2s;}
+    .dot.active{background:#0f172a;width:16px;border-radius:3px;}
+
+    /* Post card */
+    .post{background:#fff;border-bottom:1px solid rgba(0,0,0,0.06);}
+
+    /* Filter chips */
+    .chip{padding:6px 14px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap;
+      background:#fff;color:#64748b;border:1px solid #e2e8f0;transition:all 0.15s;}
+    .chip.on{background:#0f172a;color:#fff;border-color:#0f172a;}
+
+    /* Bottom tabs */
+    .btab{display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 12px;}
+    .signal-fab{
+      width:48px;height:48px;border-radius:50%;margin-top:-18px;
+      background:linear-gradient(135deg,#9d2bee,#7c3aed);
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 4px 18px rgba(157,43,238,0.4);position:relative;
+    }
+    .signal-fab::before{content:'';position:absolute;inset:-3px;border-radius:50%;border:1.5px solid rgba(157,43,238,0.3);animation:sigPulse 2s ease-out infinite;}
   </style>
 </head>
-<body class="pb-20">
+<body class="pb-16">
 
-  <!-- ═══ Header ═══ -->
-  <div class="sticky top-0 z-50 px-3 pt-3 pb-1" style="background:linear-gradient(to bottom,rgba(220,252,231,0.95) 70%,transparent)">
-    <nav class="glass rounded-full px-4 py-2.5 flex items-center justify-between shadow-sm">
-      <div class="flex items-center gap-2">
-        <div class="w-7 h-7 rounded-full bg-blue-500 flex items-center justify-center">
-          <span class="material-symbols-outlined text-white" style="font-size:15px">public</span>
-        </div>
-        <span class="font-black text-base tracking-tight text-slate-900">Lenta</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <div id="feedCount" class="glass-sm rounded-full px-3 py-1 flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-primary" style="font-size:14px">dynamic_feed</span>
-          <span id="jamiPosts" class="text-xs font-bold text-slate-700">0</span>
-        </div>
-        <a href="/tma/profil/" class="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center active:scale-90 transition-transform">
-          <span class="material-symbols-outlined text-primary" style="font-size:18px">person</span>
-        </a>
-      </div>
-    </nav>
-  </div>
-
-  <!-- ═══ Filter chips ═══ -->
-  <div class="scroll-x px-3 py-2 flex gap-2">
-    <button onclick="filterFeed('')" class="chip-active shrink-0 glass-sm rounded-full px-3.5 py-1.5 text-xs font-bold text-slate-600 border border-white/50 active:scale-95 transition-all" data-filter="">
-      Hammasi
-    </button>
-    <button onclick="filterFeed('maktab')" class="shrink-0 glass-sm rounded-full px-3.5 py-1.5 text-xs font-bold text-slate-600 border border-white/50 active:scale-95 transition-all" data-filter="maktab">
-      Maktab
-    </button>
-    <button onclick="filterFeed('shifoxona')" class="shrink-0 glass-sm rounded-full px-3.5 py-1.5 text-xs font-bold text-slate-600 border border-white/50 active:scale-95 transition-all" data-filter="shifoxona">
-      Shifoxona
-    </button>
-    <button onclick="filterFeed('bogcha')" class="shrink-0 glass-sm rounded-full px-3.5 py-1.5 text-xs font-bold text-slate-600 border border-white/50 active:scale-95 transition-all" data-filter="bogcha">
-      Bog'cha
-    </button>
-    <button onclick="filterFeed('yol')" class="shrink-0 glass-sm rounded-full px-3.5 py-1.5 text-xs font-bold text-slate-600 border border-white/50 active:scale-95 transition-all" data-filter="yol">
-      Yo'l
-    </button>
-    <button onclick="filterFeed('sport')" class="shrink-0 glass-sm rounded-full px-3.5 py-1.5 text-xs font-bold text-slate-600 border border-white/50 active:scale-95 transition-all" data-filter="sport">
-      Sport
-    </button>
-  </div>
-
-  <!-- ═══ Feed list ═══ -->
-  <div id="feedList" class="px-3 space-y-3">
-    <!-- Cards rendered by JS -->
-  </div>
-
-  <!-- Empty state -->
-  <div id="emptyState" class="hidden px-3 py-16 text-center">
-    <span class="material-symbols-outlined text-slate-300" style="font-size:56px">dynamic_feed</span>
-    <p class="text-base font-bold text-slate-400 mt-3">Hali postlar yo'q</p>
-    <p class="text-xs text-slate-400 mt-1">Birinchi bo'lib muammo haqida xabar bering!</p>
-    <a href="/tma/murojaat/" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 rounded-full bg-primary text-white text-sm font-bold active:scale-95 transition-all">
-      <span class="material-symbols-outlined" style="font-size:18px">add</span>
-      Ma'lumot qoldirish
+<!-- ═══ HEADER ═══ -->
+<div class="sticky top-0 z-40 bg-white/90 backdrop-blur-lg" style="border-bottom:1px solid rgba(0,0,0,0.05);">
+  <div class="px-4 py-2.5 flex items-center justify-between">
+    <h1 class="text-lg font-black text-slate-900">Lenta</h1>
+    <a href="/tma/profil/" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center active:scale-90 transition-transform">
+      <span class="material-symbols-outlined text-slate-500" style="font-size:18px;font-variation-settings:'FILL' 1">person</span>
     </a>
   </div>
-
-  <!-- Loading spinner -->
-  <div id="feedLoader" class="py-6 flex justify-center">
-    <div class="spinner"></div>
+  <!-- Filter chips -->
+  <div class="px-4 pb-2 flex gap-2 overflow-x-auto">
+    <button onclick="filter('')" class="chip on" data-f="">Hammasi</button>
+    <button onclick="filter('maktab')" class="chip" data-f="maktab">Maktab</button>
+    <button onclick="filter('shifoxona')" class="chip" data-f="shifoxona">Shifoxona</button>
+    <button onclick="filter('bogcha')" class="chip" data-f="bogcha">Bog'cha</button>
+    <button onclick="filter('yol')" class="chip" data-f="yol">Yo'l</button>
+    <button onclick="filter('sport')" class="chip" data-f="sport">Sport</button>
   </div>
+</div>
 
-  <!-- ═══ Floating + button ═══ -->
-  <a href="/tma/murojaat/"
-     class="fixed z-40 w-14 h-14 rounded-full bg-primary text-white shadow-lg flex items-center justify-center active:scale-90 transition-transform"
-     style="bottom:76px; right:16px; box-shadow:0 4px 20px rgba(157,43,238,0.4)">
-    <span class="material-symbols-outlined" style="font-size:28px">add</span>
+<!-- ═══ FEED ═══ -->
+<div id="feed" class="mt-1"></div>
+
+<!-- Empty state -->
+<div id="empty" class="hidden py-20 text-center px-4">
+  <span class="material-symbols-outlined text-slate-300" style="font-size:48px">dynamic_feed</span>
+  <p class="text-sm font-bold text-slate-400 mt-3">Hali postlar yo'q</p>
+  <a href="/tma/murojaat/" class="inline-flex items-center gap-1.5 mt-3 px-4 py-2 rounded-full bg-primary text-white text-xs font-bold active:scale-95 transition-all">
+    <span class="material-symbols-outlined" style="font-size:16px">add</span> Signal yuborish
   </a>
+</div>
 
-  <!-- ═══ Comment bottom sheet ═══ -->
-  <div id="commentSheet" class="hidden fixed inset-0 z-50">
-    <div class="absolute inset-0" style="background:rgba(0,0,0,0.4);backdrop-filter:blur(4px)" onclick="closeComments()"></div>
-    <div class="absolute bottom-0 left-0 right-0 glass rounded-t-3xl slide-up" style="max-height:70vh;background:rgba(255,255,255,0.92)">
-      <div class="p-4">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-sm font-black text-slate-800">Izohlar</h3>
-          <button onclick="closeComments()" class="w-8 h-8 rounded-full glass-sm flex items-center justify-center">
-            <span class="material-symbols-outlined text-slate-500" style="font-size:18px">close</span>
-          </button>
-        </div>
-        <div id="commentsList" class="space-y-3 overflow-y-auto" style="max-height:calc(70vh - 120px)">
-          <!-- Comments rendered by JS -->
-        </div>
-        <div id="commentsEmpty" class="hidden py-6 text-center">
-          <p class="text-xs text-slate-400">Hali izohlar yo'q. Birinchi bo'ling!</p>
-        </div>
-      </div>
-      <div class="sticky bottom-0 p-3 flex gap-2" style="background:rgba(255,255,255,0.95);border-top:1px solid rgba(0,0,0,0.06)">
-        <input id="commentInput" class="flex-1 glass-sm rounded-full px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30" placeholder="Izoh yozing...">
-        <button onclick="sendComment()" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center shrink-0 active:scale-90 transition-transform">
-          <span class="material-symbols-outlined text-white" style="font-size:18px">send</span>
-        </button>
-      </div>
+<!-- Loader -->
+<div id="loader" class="py-6 flex justify-center"><div class="spinner"></div></div>
+
+<!-- ═══ COMMENT SHEET ═══ -->
+<div id="cSheet" class="hidden fixed inset-0 z-50">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeC()"></div>
+  <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl slide-up" style="max-height:65vh;">
+    <div class="p-4 pb-2">
+      <div class="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-3"></div>
+      <h3 class="text-sm font-bold text-slate-800 mb-3">Izohlar</h3>
+      <div id="cList" class="space-y-3 overflow-y-auto" style="max-height:calc(65vh - 130px)"></div>
+      <div id="cEmpty" class="hidden py-6 text-center text-xs text-slate-400">Hali izohlar yo'q</div>
+    </div>
+    <div class="sticky bottom-0 p-3 flex gap-2 bg-white" style="border-top:1px solid #f1f5f9;">
+      <input id="cInput" class="flex-1 bg-slate-50 rounded-full px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-primary/30" placeholder="Izoh yozing..."/>
+      <button onclick="sendC()" class="w-9 h-9 rounded-full bg-primary flex items-center justify-center shrink-0 active:scale-90 transition-transform">
+        <span class="material-symbols-outlined text-white" style="font-size:16px">send</span>
+      </button>
     </div>
   </div>
+</div>
 
-  <!-- ═══ Bottom tabs ═══ -->
-  <div class="fixed bottom-0 left-0 right-0 z-50" style="background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);border-top:1px solid rgba(0,0,0,0.06);">
-    <div class="flex justify-around py-2 px-2">
-      <a href="/tma/" class="flex flex-col items-center gap-0.5 px-3 py-1">
-        <span class="material-symbols-outlined text-slate-400" style="font-size:22px">map</span>
-        <span class="text-xs font-semibold text-slate-400">Xarita</span>
-      </a>
-      <a href="/tma/murojaat/" class="flex flex-col items-center gap-0.5 px-3 py-1">
-        <span class="material-symbols-outlined text-slate-400" style="font-size:22px">campaign</span>
-        <span class="text-xs font-semibold text-slate-400">Signal</span>
-      </a>
-      <a href="/tma/feed/" class="flex flex-col items-center gap-0.5 px-3 py-1">
-        <span class="material-symbols-outlined" style="font-size:22px;color:#9d2bee">dynamic_feed</span>
-        <span class="text-xs font-bold" style="color:#9d2bee">Lenta</span>
-      </a>
-      <a href="/tma/tahlil/" class="flex flex-col items-center gap-0.5 px-3 py-1">
-        <span class="material-symbols-outlined text-slate-400" style="font-size:22px">bar_chart</span>
-        <span class="text-xs font-semibold text-slate-400">Tahlil</span>
-      </a>
-    </div>
+<!-- ═══ BOTTOM TABS ═══ -->
+<div class="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg" style="border-top:1px solid rgba(0,0,0,0.06);">
+  <div class="flex items-end justify-around py-1.5 px-1">
+    <a href="/tma/" class="btab"><span class="material-symbols-outlined text-slate-400" style="font-size:20px;font-variation-settings:'FILL' 1">map</span><span class="text-[9px] font-semibold text-slate-400">Xarita</span></a>
+    <a href="/tma/feed/" class="btab"><span class="material-symbols-outlined" style="font-size:20px;color:#0f172a;font-variation-settings:'FILL' 1">dynamic_feed</span><span class="text-[9px] font-bold text-slate-900">Lenta</span></a>
+    <a href="/tma/murojaat/" class="flex flex-col items-center">
+      <div class="signal-fab"><span class="material-symbols-outlined text-white" style="font-size:22px;font-variation-settings:'FILL' 1">campaign</span></div>
+      <span class="text-[9px] font-bold mt-0.5" style="color:#9d2bee">Signal</span>
+    </a>
+    <a href="/tma/tahlil/" class="btab"><span class="material-symbols-outlined text-slate-400" style="font-size:20px;font-variation-settings:'FILL' 1">bar_chart</span><span class="text-[9px] font-semibold text-slate-400">Tahlil</span></a>
+    <a href="/tma/profil/" class="btab"><span class="material-symbols-outlined text-slate-400" style="font-size:20px;font-variation-settings:'FILL' 1">person</span><span class="text-[9px] font-semibold text-slate-400">Profil</span></a>
   </div>
+</div>
 
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.ready(); tg.expand();
-    const TG_USER = tg.initDataUnsafe?.user || {};
-    const USER_ID = TG_USER.id || '';
-    const USER_NAME = `${TG_USER.first_name || ''} ${TG_USER.last_name || ''}`.trim();
+<script>
+const tg=window.Telegram.WebApp; tg.ready(); tg.expand();
+const U=tg.initDataUnsafe?.user||{};
+const UID=U.id||'';
+const UNAME=`${U.first_name||''} ${U.last_name||''}`.trim();
 
-    // ── Feed state ──
-    let feedOffset = 0;
-    const FEED_LIMIT = 10;
-    let feedLoading = false;
-    let feedHasMore = true;
-    let currentFilter = '';
-    let activeMurojaatId = null;
+let offset=0, loading=false, hasMore=true, curFilter='', activePost=null;
 
-    // ── Holat ranglari ──
-    const HOLAT_RANG = {
-      'kutilmoqda': { bg: 'rgba(245,158,11,0.12)', color: '#f59e0b', icon: 'schedule' },
-      'korib_chiqilmoqda': { bg: 'rgba(59,130,246,0.12)', color: '#3b82f6', icon: 'visibility' },
-      'hal_qilindi': { bg: 'rgba(34,197,94,0.12)', color: '#22c55e', icon: 'check_circle' },
-    };
+// ── Post card ──────────────────────────────────
+function card(p){
+  // Avatar
+  const av=p.is_anonim
+    ?`<div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"><span class="material-symbols-outlined text-slate-400" style="font-size:16px">person_off</span></div>`
+    :`<div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center"><span class="text-xs font-black text-primary">${(p.user[0]||'?').toUpperCase()}</span></div>`;
 
-    // ── Card render ──
-    function postCard(p) {
-      const h = HOLAT_RANG[p.holat_kod] || HOLAT_RANG.kutilmoqda;
-      const avatar = p.is_anonim
-        ? `<div class="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
-             <span class="material-symbols-outlined text-slate-400" style="font-size:18px">person_off</span>
-           </div>`
-        : `<div class="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
-             <span class="text-sm font-black text-primary">${(p.user[0] || '?').toUpperCase()}</span>
-           </div>`;
+  // Media carousel
+  let media='';
+  if(p.rasmlar&&p.rasmlar.length){
+    const items=p.rasmlar.map(url=>{
+      const isVid=/\.(mp4|mov|webm|avi)/i.test(url);
+      return isVid
+        ?`<div><video src="${url}" controls playsinline preload="metadata" style="width:100%;max-height:400px;object-fit:cover;background:#000"></video></div>`
+        :`<div><img src="${url}" loading="lazy" style="width:100%;max-height:400px;object-fit:cover;background:#f1f5f9" onerror="this.parentElement.remove()"/></div>`;
+    }).join('');
 
-      const img = p.rasmlar.length
-        ? `<div class="rounded-2xl overflow-hidden mt-2.5 bg-slate-100" style="max-height:300px">
-             <img src="${p.rasmlar[0]}" alt="" class="w-full object-cover" style="max-height:300px" loading="lazy"
-               onerror="this.parentElement.style.display='none'"/>
-           </div>`
-        : '';
+    const dots=p.rasmlar.length>1
+      ?`<div class="dots" id="dots-${p.id}">${p.rasmlar.map((_,i)=>`<div class="dot${i===0?' active':''}"></div>`).join('')}</div>`
+      :'';
 
-      const location = (p.viloyat || p.tuman)
-        ? `<div class="flex items-center gap-1 mt-2">
-             <span class="material-symbols-outlined text-slate-400" style="font-size:14px">location_on</span>
-             <span class="text-xs text-slate-500">${[p.viloyat, p.tuman].filter(Boolean).join(', ')}</span>
-             ${p.infratuzilma ? `<span class="ml-1 px-2 py-0.5 rounded-full text-xs font-semibold" style="background:rgba(157,43,238,0.08);color:#9d2bee">${p.infratuzilma}</span>` : ''}
-           </div>`
-        : '';
+    // o'ngda yana bor ko'rsatkich
+    const more=p.rasmlar.length>1
+      ?`<div class="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-bold text-white" style="background:rgba(0,0,0,0.5)">1/${p.rasmlar.length}</div>`
+      :'';
 
-      const heartClass = p.is_liked ? 'text-red-500' : 'text-slate-400';
-      const heartFill = p.is_liked ? 'font-variation-settings:"FILL"1' : '';
+    media=`<div class="relative">
+      <div class="carousel" id="car-${p.id}" onscroll="onScroll(${p.id},${p.rasmlar.length})">${items}</div>
+      ${more}
+    </div>${dots}`;
+  }
 
-      return `<div class="glass rounded-2xl p-4 shadow-sm fade-up" id="post-${p.id}">
-        <!-- Header -->
-        <div class="flex items-center gap-2.5">
-          ${avatar}
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-bold text-slate-800 truncate">${p.user}</p>
-            <p class="text-xs text-slate-400">${p.vaqt}</p>
+  // Izoh text — truncated
+  let izohHtml='';
+  if(p.izoh){
+    const short=p.izoh.length>120;
+    izohHtml=`<div class="px-4 mt-1">
+      <p class="text-[13px] text-slate-800 leading-relaxed" id="txt-${p.id}" style="${short?'display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden':''}">
+        <span class="font-bold">${p.user}</span> ${p.izoh}
+      </p>
+      ${short?`<button onclick="expand(${p.id})" class="text-xs text-slate-400 mt-0.5" id="more-${p.id}">ko'proq</button>`:''}
+    </div>`;
+  }
+
+  // Location + type
+  const loc=(p.viloyat||p.tuman)
+    ?`<div class="px-4 mt-1 flex items-center gap-1">
+        <span class="material-symbols-outlined text-slate-400" style="font-size:12px">location_on</span>
+        <span class="text-[11px] text-slate-400">${[p.viloyat,p.tuman].filter(Boolean).join(', ')}</span>
+      </div>`:''
+
+  // Like/dislike
+  const liked=p.is_liked;
+
+  return`<div class="post fade-up" id="post-${p.id}">
+    <!-- Header -->
+    <div class="px-4 py-2.5 flex items-center gap-2.5">
+      ${av}
+      <div class="flex-1 min-w-0">
+        <p class="text-[13px] font-bold text-slate-900 truncate">${p.user}</p>
+        ${p.infratuzilma?`<span class="text-[10px] text-slate-400">${p.infratuzilma}</span>`:''}
+      </div>
+      <span class="text-[10px] text-slate-400">${p.vaqt}</span>
+    </div>
+    <!-- Media -->
+    ${media}
+    <!-- Actions -->
+    <div class="px-4 py-2 flex items-center gap-4">
+      <button onclick="like(${p.id})" class="flex items-center gap-1 active:scale-90 transition-transform">
+        <span class="material-symbols-outlined ${liked?'text-red-500':'text-slate-600'}" style="font-size:24px;${liked?'font-variation-settings:\"FILL\" 1':''}" id="lk-${p.id}">favorite</span>
+        <span class="text-xs font-bold text-slate-500" id="lkn-${p.id}">${p.likes_soni||''}</span>
+      </button>
+      <button onclick="openC(${p.id})" class="flex items-center gap-1 active:scale-90 transition-transform">
+        <span class="material-symbols-outlined text-slate-600" style="font-size:22px">chat_bubble_outline</span>
+        <span class="text-xs font-bold text-slate-500" id="cn-${p.id}">${p.comments_soni||''}</span>
+      </button>
+      <button onclick="share(${p.id})" class="ml-auto active:scale-90 transition-transform">
+        <span class="material-symbols-outlined text-slate-500" style="font-size:20px">share</span>
+      </button>
+    </div>
+    ${izohHtml}
+    ${loc}
+    <!-- Comments preview -->
+    ${p.comments_soni?`<button onclick="openC(${p.id})" class="px-4 py-1 text-xs text-slate-400">Barcha ${p.comments_soni} ta izohni ko'rish</button>`:''}
+    <div class="h-2"></div>
+  </div>`;
+}
+
+// ── Carousel scroll ──────────────────────────
+function onScroll(id,total){
+  const car=document.getElementById('car-'+id);
+  if(!car)return;
+  const idx=Math.round(car.scrollLeft/car.offsetWidth);
+  const dots=document.getElementById('dots-'+id);
+  if(dots){
+    dots.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  }
+  // Counter
+  const counter=car.parentElement.querySelector('[class*="rounded-full"]');
+  if(counter) counter.textContent=`${idx+1}/${total}`;
+}
+
+// ── Expand text ──────────────────────────────
+function expand(id){
+  const el=document.getElementById('txt-'+id);
+  if(el){el.style.display='block';el.style.webkitLineClamp='unset';}
+  const btn=document.getElementById('more-'+id);
+  if(btn) btn.remove();
+}
+
+// ── Load feed ────────────────────────────────
+async function load(reset){
+  if(loading||(!hasMore&&!reset))return;
+  if(reset){offset=0;hasMore=true;}
+  loading=true;
+  document.getElementById('loader').classList.remove('hidden');
+  try{
+    const url=`/api/feed/?limit=10&offset=${offset}&user_id=${UID}${curFilter?'&infratuzilma='+curFilter:''}`;
+    const d=await(await fetch(url)).json();
+    const el=document.getElementById('feed');
+    if(reset) el.innerHTML='';
+    if(!d.results.length&&!offset){document.getElementById('empty').classList.remove('hidden');}
+    else{
+      document.getElementById('empty').classList.add('hidden');
+      d.results.forEach(p=>el.insertAdjacentHTML('beforeend',card(p)));
+    }
+    offset+=d.results.length;
+    hasMore=d.has_more;
+  }catch(e){console.error(e);}
+  loading=false;
+  if(!hasMore) document.getElementById('loader').classList.add('hidden');
+}
+
+// ── Infinite scroll ──────────────────────────
+new IntersectionObserver(e=>{if(e[0].isIntersecting&&hasMore)load();},{rootMargin:'300px'}).observe(document.getElementById('loader'));
+
+// ── Filter ───────────────────────────────────
+function filter(f){
+  curFilter=f;
+  document.querySelectorAll('[data-f]').forEach(b=>b.classList.toggle('on',b.dataset.f===f));
+  load(true);
+}
+
+// ── Like ─────────────────────────────────────
+async function like(id){
+  if(!UID){tg.showAlert('Telegram orqali kiring');return;}
+  const ic=document.getElementById('lk-'+id);
+  const cn=document.getElementById('lkn-'+id);
+  const isLiked=ic.classList.contains('text-red-500');
+  if(isLiked){
+    ic.classList.remove('text-red-500');ic.classList.add('text-slate-600');
+    ic.style.fontVariationSettings='';
+    cn.textContent=Math.max(0,(parseInt(cn.textContent)||0)-1)||'';
+  }else{
+    ic.classList.remove('text-slate-600');ic.classList.add('text-red-500');
+    ic.style.fontVariationSettings='"FILL" 1';
+    ic.classList.add('like-pop');
+    cn.textContent=(parseInt(cn.textContent)||0)+1;
+    setTimeout(()=>ic.classList.remove('like-pop'),300);
+  }
+  try{await fetch('/api/feed/like/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({murojaat_id:id,telegram_user_id:UID})})}catch{}
+}
+
+// ── Comments ─────────────────────────────────
+function openC(id){
+  activePost=id;
+  document.getElementById('cSheet').classList.remove('hidden');
+  loadC(id);
+}
+function closeC(){document.getElementById('cSheet').classList.add('hidden');activePost=null;}
+
+async function loadC(id){
+  const list=document.getElementById('cList');
+  const emp=document.getElementById('cEmpty');
+  list.innerHTML='<div class="flex justify-center py-4"><div class="spinner"></div></div>';
+  emp.classList.add('hidden');
+  try{
+    const d=await(await fetch(`/api/feed/${id}/comments/`)).json();
+    if(!d.comments.length){list.innerHTML='';emp.classList.remove('hidden');}
+    else{
+      list.innerHTML=d.comments.map(c=>`
+        <div class="flex gap-2">
+          <div class="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <span class="text-[10px] font-black text-primary">${(c.user[0]||'?').toUpperCase()}</span>
           </div>
-          <div class="px-2 py-1 rounded-full flex items-center gap-1" style="background:${h.bg}">
-            <span class="material-symbols-outlined" style="font-size:12px;color:${h.color}">${h.icon}</span>
-            <span class="text-xs font-semibold" style="color:${h.color}">${p.holat}</span>
+          <div class="flex-1">
+            <span class="text-xs font-bold text-slate-800">${c.user}</span>
+            <span class="text-[10px] text-slate-400 ml-1">${c.vaqt}</span>
+            <p class="text-[13px] text-slate-700 mt-0.5">${c.matn}</p>
           </div>
-        </div>
-        <!-- Media -->
-        ${img}
-        <!-- Location -->
-        ${location}
-        <!-- Description -->
-        ${p.izoh ? `<p class="text-sm text-slate-700 mt-2 leading-relaxed" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${p.izoh}</p>` : ''}
-        <!-- Actions -->
-        <div class="flex items-center gap-5 mt-3 pt-2.5" style="border-top:1px solid rgba(0,0,0,0.05)">
-          <button onclick="toggleLike(${p.id})" class="flex items-center gap-1.5 active:scale-90 transition-transform" id="likeBtn-${p.id}">
-            <span class="material-symbols-outlined ${heartClass}" style="font-size:22px;${heartFill}" id="likeIcon-${p.id}">favorite</span>
-            <span class="text-xs font-bold text-slate-500" id="likeCnt-${p.id}">${p.likes_soni}</span>
-          </button>
-          <button onclick="openComments(${p.id})" class="flex items-center gap-1.5 active:scale-90 transition-transform">
-            <span class="material-symbols-outlined text-slate-400" style="font-size:22px">chat_bubble_outline</span>
-            <span class="text-xs font-bold text-slate-500" id="commentCnt-${p.id}">${p.comments_soni}</span>
-          </button>
-          <button onclick="sharePost(${p.id}, '${p.izoh ? p.izoh.substring(0,60).replace(/'/g,"\\'") : ''}')" class="flex items-center gap-1.5 active:scale-90 transition-transform ml-auto">
-            <span class="material-symbols-outlined text-slate-400" style="font-size:20px">share</span>
-          </button>
-        </div>
-      </div>`;
+        </div>`).join('');
     }
+  }catch{list.innerHTML='<p class="text-xs text-red-400 text-center py-4">Xatolik</p>';}
+}
 
-    // ── Load feed ──
-    async function loadFeed(reset = false) {
-      if (feedLoading || (!feedHasMore && !reset)) return;
-      if (reset) { feedOffset = 0; feedHasMore = true; }
-      feedLoading = true;
-      document.getElementById('feedLoader').classList.remove('hidden');
-
-      try {
-        const url = `/api/feed/?limit=${FEED_LIMIT}&offset=${feedOffset}&user_id=${USER_ID}` +
-          (currentFilter ? `&infratuzilma=${currentFilter}` : '');
-        const res = await fetch(url);
-        const data = await res.json();
-
-        const list = document.getElementById('feedList');
-        if (reset) list.innerHTML = '';
-
-        if (data.results.length === 0 && feedOffset === 0) {
-          document.getElementById('emptyState').classList.remove('hidden');
-        } else {
-          document.getElementById('emptyState').classList.add('hidden');
-          data.results.forEach(p => {
-            list.insertAdjacentHTML('beforeend', postCard(p));
-          });
-        }
-
-        document.getElementById('jamiPosts').textContent = data.jami;
-        feedOffset += data.results.length;
-        feedHasMore = data.has_more;
-      } catch(e) {
-        console.error('Feed load error:', e);
-      }
-      feedLoading = false;
-      if (!feedHasMore) {
-        document.getElementById('feedLoader').classList.add('hidden');
-      }
+async function sendC(){
+  if(!activePost||!UID)return;
+  const inp=document.getElementById('cInput');
+  const m=inp.value.trim();
+  if(!m)return;
+  inp.value='';
+  try{
+    const d=await(await fetch('/api/feed/comment/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({murojaat_id:activePost,telegram_user_id:UID,telegram_full_name:UNAME,matn:m})})).json();
+    if(d.success){
+      const cn=document.getElementById('cn-'+activePost);
+      if(cn) cn.textContent=d.comments_soni;
+      loadC(activePost);
     }
+  }catch{}
+}
 
-    // ── Infinite scroll ──
-    const observer = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && feedHasMore) loadFeed();
-    }, { rootMargin: '200px' });
-    observer.observe(document.getElementById('feedLoader'));
+document.getElementById('cInput').addEventListener('keypress',e=>{if(e.key==='Enter')sendC();});
 
-    // ── Filter ──
-    function filterFeed(infra) {
-      currentFilter = infra;
-      document.querySelectorAll('[data-filter]').forEach(btn => {
-        btn.classList.toggle('chip-active', btn.dataset.filter === infra);
-      });
-      loadFeed(true);
-    }
+function share(id){
+  const url=location.origin+'/tma/feed/#post-'+id;
+  if(navigator.share) navigator.share({title:'Real Holat',url});
+  else tg.showAlert('Havola nusxalandi');
+}
 
-    // ── Like toggle ──
-    async function toggleLike(id) {
-      if (!USER_ID) { tg.showAlert('Telegram orqali kiring'); return; }
-      const icon = document.getElementById(`likeIcon-${id}`);
-      const cnt = document.getElementById(`likeCnt-${id}`);
-      const isLiked = icon.classList.contains('text-red-500');
-
-      // Optimistic update
-      if (isLiked) {
-        icon.classList.remove('text-red-500'); icon.classList.add('text-slate-400');
-        icon.style = 'font-size:22px';
-        cnt.textContent = Math.max(0, parseInt(cnt.textContent) - 1);
-      } else {
-        icon.classList.remove('text-slate-400'); icon.classList.add('text-red-500');
-        icon.style = 'font-size:22px;font-variation-settings:"FILL"1';
-        icon.classList.add('like-pop');
-        cnt.textContent = parseInt(cnt.textContent) + 1;
-        setTimeout(() => icon.classList.remove('like-pop'), 350);
-      }
-
-      try {
-        await fetch('/api/feed/like/', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ murojaat_id: id, telegram_user_id: USER_ID })
-        });
-      } catch(e) {}
-    }
-
-    // ── Comments ──
-    function openComments(murojaatId) {
-      activeMurojaatId = murojaatId;
-      document.getElementById('commentSheet').classList.remove('hidden');
-      loadComments(murojaatId);
-    }
-
-    function closeComments() {
-      document.getElementById('commentSheet').classList.add('hidden');
-      activeMurojaatId = null;
-    }
-
-    async function loadComments(murojaatId) {
-      const list = document.getElementById('commentsList');
-      const empty = document.getElementById('commentsEmpty');
-      list.innerHTML = '<div class="flex justify-center py-4"><div class="spinner"></div></div>';
-      empty.classList.add('hidden');
-
-      try {
-        const res = await fetch(`/api/feed/${murojaatId}/comments/`);
-        const data = await res.json();
-        if (data.comments.length === 0) {
-          list.innerHTML = '';
-          empty.classList.remove('hidden');
-        } else {
-          list.innerHTML = data.comments.map(c => `
-            <div class="flex gap-2.5">
-              <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <span class="text-xs font-black text-primary">${(c.user[0] || '?').toUpperCase()}</span>
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2">
-                  <span class="text-xs font-bold text-slate-800">${c.user}</span>
-                  <span class="text-xs text-slate-400">${c.vaqt}</span>
-                </div>
-                <p class="text-sm text-slate-600 mt-0.5">${c.matn}</p>
-              </div>
-            </div>
-          `).join('');
-        }
-      } catch(e) {
-        list.innerHTML = '<p class="text-xs text-red-400 text-center py-4">Xatolik yuz berdi</p>';
-      }
-    }
-
-    async function sendComment() {
-      if (!activeMurojaatId || !USER_ID) return;
-      const input = document.getElementById('commentInput');
-      const matn = input.value.trim();
-      if (!matn) return;
-      input.value = '';
-
-      try {
-        const res = await fetch('/api/feed/comment/', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            murojaat_id: activeMurojaatId,
-            telegram_user_id: USER_ID,
-            telegram_full_name: USER_NAME,
-            matn: matn,
-          })
-        });
-        const data = await res.json();
-        if (data.success) {
-          // Update count in card
-          const cnt = document.getElementById(`commentCnt-${activeMurojaatId}`);
-          if (cnt) cnt.textContent = data.comments_soni;
-          // Reload comments
-          loadComments(activeMurojaatId);
-        }
-      } catch(e) {}
-    }
-
-    // ── Share ──
-    function sharePost(id, text) {
-      const url = window.location.origin + '/tma/feed/#post-' + id;
-      if (navigator.share) {
-        navigator.share({ title: 'Real Holat', text: text || 'Muammo haqida xabar', url: url });
-      } else {
-        tg.showAlert('Havola nusxalandi!');
-      }
-    }
-
-    // ── Enter sends comment ──
-    document.getElementById('commentInput').addEventListener('keypress', e => {
-      if (e.key === 'Enter') sendComment();
-    });
-
-    // ── Init ──
-    loadFeed(true);
-  </script>
+load(true);
+</script>
 </body>
 </html>

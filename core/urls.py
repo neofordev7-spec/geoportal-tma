@@ -17,7 +17,7 @@ def serve_geojson(request, filename):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', RedirectView.as_view(url='/tma/', permanent=False)),
+    path('', RedirectView.as_view(url='/tma/feed/', permanent=False)),
     path('', include('app.urls')),
     path('media/<path:path>', serve, {'document_root': settings.MEDIA_ROOT}),
     path('geojson/<str:filename>', serve_geojson, name='geojson'),
