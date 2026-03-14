@@ -78,8 +78,13 @@
 
   <!-- Va'dalar sarlavhasi -->
   <div class="px-3 mt-4">
+    <!-- Yo'riqnoma -->
+    <div class="glass-sm rounded-xl p-3 mb-3" style="border-left:3px solid #9d2bee">
+      <p class="text-xs font-semibold text-slate-700">Davlat bu maktabga quyidagi ishlarni va'da qilgan.</p>
+      <p class="text-xs text-slate-500 mt-0.5">Har birini bosib, real holatni tekshiring: bajarilganmi yoki muammo bormi?</p>
+    </div>
     <div class="flex items-center justify-between mb-2">
-      <h2 class="text-xs font-black text-slate-500 uppercase tracking-widest">Davlat va'dalari</h2>
+      <h2 class="text-xs font-black text-slate-500 uppercase tracking-widest">Tekshirish ro'yxati</h2>
       <span id="vaadalarSoni" class="text-xs text-slate-400"></span>
     </div>
     <div id="vaadalarList" class="space-y-2">
@@ -218,7 +223,7 @@
         document.getElementById('modalVaadaText').textContent = vaada?.tavsif || '';
       } else {
         document.getElementById('modalTitle').textContent = "Umumiy tekshiruv";
-        document.getElementById('modalVaadaText').textContent = "Maktabning umumiy holati haqida fikr bildiring";
+        document.getElementById('modalVaadaText').textContent = "Maktabning umumiy holati haqida fikr bildiring. Sizning fikringiz muhim — natija ochiq dashboardda ko'rinadi!";
       }
       document.getElementById('modal').classList.remove('hidden');
     }
