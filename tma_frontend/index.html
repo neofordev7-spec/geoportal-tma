@@ -748,13 +748,17 @@
         maxBounds: UZB_BOUNDS,
         minZoom: 5,
         maxZoom: 11,
-        maxBoundsViscosity: 1.0,
-      });
-      leafletMap.fitBounds(UZB_BOUNDS);
+        maxBoundsViscosity: 0.9,
+      }).setView([41.2995, 69.2401], 5);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap',
         maxZoom: 18,
       }).addTo(leafletMap);
+      // Container o'lchamlari tayyor bo'lgandan keyin qayta hisoblash
+      setTimeout(() => {
+        leafletMap.invalidateSize();
+        leafletMap.fitBounds(UZB_BOUNDS);
+      }, 150);
       loadViloyatBubbles();
     }
 
