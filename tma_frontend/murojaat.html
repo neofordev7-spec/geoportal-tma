@@ -54,6 +54,10 @@
       </button>
       <h1 class="text-base font-black text-white">Signal</h1>
     </div>
+    <button onclick="toggleAnon()" id="anonBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full gl active:scale-95 transition-transform">
+      <span class="material-symbols-outlined" style="font-size:15px;color:#94a3b8;font-variation-settings:'FILL' 1" id="anonIcon">visibility_off</span>
+      <span class="text-[10px] font-bold text-slate-300" id="anonLabel">Shaxsiy</span>
+    </button>
   </div>
 </header>
 
@@ -233,7 +237,14 @@
 <script>
 const tg=window.Telegram.WebApp; tg.ready(); tg.expand();
 const user=tg.initDataUnsafe?.user||{};
-let selectedType='', mediaFiles=[], gpsCoords=null;
+let isAnonim=true, selectedType='', mediaFiles=[], gpsCoords=null;
+
+function toggleAnon(){
+  isAnonim=!isAnonim;
+  document.getElementById('anonIcon').textContent=isAnonim?'visibility_off':'visibility';
+  document.getElementById('anonIcon').style.color=isAnonim?'#94a3b8':'#3b82f6';
+  document.getElementById('anonLabel').textContent=isAnonim?'Shaxsiy':'Ommaviy';
+}
 
 // ── Ekranlar ──────────────────────────────────
 function openReport(){
@@ -345,7 +356,7 @@ async function submit(){
   fd.append('viloyat',''); fd.append('tuman','');
   fd.append('infratuzilma',selectedType||'boshqa');
   fd.append('sektor','');
-  fd.append('is_anonim','true');
+  fd.append('is_anonim',isAnonim?'true':'false');
   fd.append('izoh',izoh);
   fd.append('telegram_user_id',user.id||'0');
   fd.append('telegram_username',user.username||'');
