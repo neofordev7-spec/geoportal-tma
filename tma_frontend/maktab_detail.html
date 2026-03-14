@@ -103,12 +103,34 @@
 
   <!-- Fixed bottom: "Tekshirish" tugmasi -->
   <div class="fixed bottom-0 left-0 right-0 px-3 pb-4 pt-2 z-50" style="background:linear-gradient(to top,rgba(220,252,231,0.98) 60%,transparent)">
-    <button id="tekshirBtn" onclick="modalOch(null)"
-      class="w-full py-4 rounded-full font-black text-base flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-lg"
-      style="background:#9d2bee;color:white;box-shadow:0 0 20px rgba(157,43,238,0.35)">
-      <span class="material-symbols-outlined" style="font-size:20px">fact_check</span>
-      Tekshirish
-    </button>
+    <div class="flex items-center gap-2">
+      <div id="ballChip" class="hidden glass rounded-full px-3 py-2 flex items-center gap-1.5 flex-shrink-0">
+        <span class="material-symbols-outlined" style="font-size:16px;color:#f59e0b">star</span>
+        <span id="ballSoni" class="text-sm font-black text-slate-800">0</span>
+      </div>
+      <button id="tekshirBtn" onclick="modalOch(null)"
+        class="flex-1 py-4 rounded-full font-black text-base flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-lg"
+        style="background:#9d2bee;color:white;box-shadow:0 0 20px rgba(157,43,238,0.35)">
+        <span class="material-symbols-outlined" style="font-size:20px">fact_check</span>
+        Tekshirish
+      </button>
+    </div>
+  </div>
+
+  <!-- Badge popup -->
+  <div id="badgePopup" class="hidden fixed inset-0 z-[60] flex items-center justify-center">
+    <div class="absolute inset-0" style="background:rgba(0,0,0,0.5);backdrop-filter:blur(6px)" onclick="document.getElementById('badgePopup').classList.add('hidden')"></div>
+    <div class="relative glass rounded-3xl p-6 text-center z-10 max-w-[280px]" style="background:rgba(255,255,255,0.95);animation:fadeUp 0.3s ease-out">
+      <div id="badgeIcon" class="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center"></div>
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Yangi yutuq!</p>
+      <p class="text-lg font-black text-slate-900" id="badgeNom"></p>
+      <p class="text-xs text-slate-500 mt-1" id="badgeDesc"></p>
+      <button onclick="document.getElementById('badgePopup').classList.add('hidden')"
+        class="mt-4 px-6 py-2.5 rounded-full text-sm font-bold text-white active:scale-95 transition-transform"
+        style="background:#9d2bee">
+        Ajoyib!
+      </button>
+    </div>
   </div>
 
   <!-- ═══ Tekshiruv Modal (Bottom Sheet) ═══ -->
@@ -258,7 +280,25 @@
         const d = await res.json();
         if (res.ok && d.success) {
           modalYop();
-          showToast(`✓ Rahmat! Mamnuniyat: ${d.mamnuniyat_foizi}%`);
+          // Ball va badge ko'rsatish
+          if (d.user_ball !== undefined) {
+            showToast(`+10 ball! Jami: ${d.user_ball} ball`);
+            document.getElementById('ballChip').classList.remove('hidden');
+            document.getElementById('ballSoni').textContent = d.user_ball;
+          } else {
+            showToast(`✓ Rahmat! Mamnuniyat: ${d.mamnuniyat_foizi}%`);
+          }
+          // Yangi badge popup
+          if (d.yangi_badge) {
+            setTimeout(() => {
+              document.getElementById('badgeIcon').innerHTML =
+                `<span class="material-symbols-outlined" style="font-size:32px;color:${d.yangi_badge.rang}">${d.yangi_badge.icon}</span>`;
+              document.getElementById('badgeIcon').style.background = d.yangi_badge.rang + '15';
+              document.getElementById('badgeNom').textContent = d.yangi_badge.nom;
+              document.getElementById('badgeDesc').textContent = d.yangi_badge.tavsif;
+              document.getElementById('badgePopup').classList.remove('hidden');
+            }, 1200);
+          }
           setTimeout(() => yukla(), 800);
         } else {
           throw new Error(d.error || 'Xatolik');

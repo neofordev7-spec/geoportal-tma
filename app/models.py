@@ -65,7 +65,7 @@ class Murojaat(models.Model):
 
 class MurojaatRasm(models.Model):
     murojaat = models.ForeignKey(Murojaat, on_delete=models.CASCADE, related_name='rasmlar')
-    rasm = models.ImageField(upload_to='murojaatlar/')
+    rasm = models.FileField(upload_to='murojaatlar/')
 
     class Meta:
         verbose_name = 'Murojaat rasmi'

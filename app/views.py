@@ -306,10 +306,49 @@ def tekshiruv_yuborish(request):
         maktab.holat = 'nosoz'
     maktab.save(update_fields=['holat'])
 
+    # ── Geymifikatsiya: ball va badge hisoblash ──
+    uid = int(telegram_user_id)
+    user_jami = Tekshiruv.objects.filter(telegram_user_id=uid).count()
+    user_rasmli = Tekshiruv.objects.filter(
+        telegram_user_id=uid
+    ).exclude(rasm='').exclude(rasm__isnull=True).count()
+
+    # Ball hisoblash
+    ball = user_jami * 10
+    if user_rasmli:
+        ball += user_rasmli * 5  # rasm bonus
+
+    # Badge tekshirish
+    BADGES = [
+        {'nom': 'Birinchi qadam', 'shart': 1, 'tur': 'jami', 'icon': 'emoji_events', 'rang': '#22c55e',
+         'tavsif': 'Birinchi tekshiruvingizni bajardingiz!'},
+        {'nom': 'Faol fuqaro', 'shart': 5, 'tur': 'jami', 'icon': 'verified', 'rang': '#3b82f6',
+         'tavsif': '5 ta tekshiruv bajardingiz!'},
+        {'nom': 'Fotograf', 'shart': 3, 'tur': 'rasmli', 'icon': 'photo_camera', 'rang': '#14b8a6',
+         'tavsif': '3 ta rasmli tekshiruv!'},
+        {'nom': 'Ekspert', 'shart': 15, 'tur': 'jami', 'icon': 'workspace_premium', 'rang': '#f59e0b',
+         'tavsif': '15 ta tekshiruv — siz ekspertsiz!'},
+        {'nom': 'Ovoz beruvchi', 'shart': 10, 'tur': 'jami', 'icon': 'record_voice_over', 'rang': '#9d2bee',
+         'tavsif': '10 ta tekshiruv bajardingiz!'},
+    ]
+
+    yangi_badge = None
+    for b in BADGES:
+        qiymat = user_jami if b['tur'] == 'jami' else user_rasmli
+        if qiymat == b['shart']:
+            yangi_badge = {
+                'nom': b['nom'], 'icon': b['icon'],
+                'rang': b['rang'], 'tavsif': b['tavsif']
+            }
+            break
+
     return Response({
         'success': True,
         'id': tekshiruv.id,
         'mamnuniyat_foizi': foiz,
+        'user_ball': ball,
+        'user_tekshiruvlar': user_jami,
+        'yangi_badge': yangi_badge,
         'message': "Tekshiruvingiz qabul qilindi! Rahmat.",
     }, status=status.HTTP_201_CREATED)
 
