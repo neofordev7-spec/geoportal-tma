@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
 from aiogram import Bot, Dispatcher, F
@@ -10,6 +11,8 @@ from aiogram.types import (
     InlineKeyboardMarkup,
     InlineKeyboardButton,
     WebAppInfo,
+    FSInputFile,
+    MenuButtonWebApp,
 )
 
 load_dotenv()
@@ -23,17 +26,22 @@ logger = logging.getLogger(__name__)
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+LOGO_PATH = BASE_DIR / 'real_hoalt.jpg'
+
 XUSH_KELIBSIZ = """
-Assalomu alaykum! 👋
+🏛 <b>REAL HOLAT — Geoportal</b>
 
-*GEOPORTAL* — O'zbekiston infratuzilmasi monitoringi platformasiga xush kelibsiz.
+Assalomu alaykum, {name}! 👋
 
-Bu yerda siz:
-• Singan maktab, shifoxona, yo'l, bog'cha haqida xabar berishingiz
-• Barcha murojaatlarni kuzatishingiz
-• Respublika bo'yicha statistikani ko'rishingiz mumkin.
+O'zbekiston infratuzilmasini <b>real vaqtda</b> kuzating va muammolarni xabar bering.
 
-Quyidagi tugmani bosib, ilovani oching 👇
+🔹 Singan maktab, shifoxona, yo'l haqida xabar bering
+🔹 Lenta orqali boshqalar xabarlarini ko'ring
+🔹 Xaritada barcha murojaatlarni kuzating
+🔹 Statistikani real vaqtda ko'ring
+
+👇 <b>Ilovani ochish uchun tugmani bosing</b>
 """
 
 
@@ -44,23 +52,40 @@ async def start_handler(message: Message):
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(
-                text="🌍 GEOPORTAL ochish",
+                text="📲 Ilovani ochish",
                 web_app=WebAppInfo(url=webapp_url)
             )
         ],
         [
             InlineKeyboardButton(
-                text="📋 Mening murojaatlarim",
+                text="🗺 Xarita",
+                web_app=WebAppInfo(url=f"{APP_URL}/tma/map/")
+            ),
+            InlineKeyboardButton(
+                text="📋 Murojaatlarim",
                 web_app=WebAppInfo(url=webapp_url)
             )
-        ]
+        ],
     ])
 
-    await message.answer(
-        XUSH_KELIBSIZ,
-        parse_mode='Markdown',
-        reply_markup=keyboard
-    )
+    user_name = message.from_user.first_name or "foydalanuvchi"
+    caption = XUSH_KELIBSIZ.format(name=user_name)
+
+    if LOGO_PATH.exists():
+        photo = FSInputFile(LOGO_PATH)
+        await message.answer_photo(
+            photo=photo,
+            caption=caption,
+            parse_mode='HTML',
+            reply_markup=keyboard
+        )
+    else:
+        await message.answer(
+            caption,
+            parse_mode='HTML',
+            reply_markup=keyboard
+        )
+
     logger.info(f"User {message.from_user.id} (@{message.from_user.username}) started bot")
 
 
@@ -104,14 +129,30 @@ async def fallback_handler(message: Message):
     webapp_url = f"{APP_URL}/tma/feed/"
     keyboard = InlineKeyboardMarkup(inline_keyboard=[[
         InlineKeyboardButton(
-            text="🌍 GEOPORTAL ochish",
+            text="📲 Ilovani ochish",
             web_app=WebAppInfo(url=webapp_url)
         )
     ]])
     await message.answer(
-        "Botdan foydalanish uchun quyidagi tugmani bosing:",
+        "📲 Ilovadan foydalanish uchun quyidagi tugmani bosing yoki pastdagi <b>Menu</b> tugmasini bosing:",
+        parse_mode='HTML',
         reply_markup=keyboard
     )
+
+
+async def set_menu_button():
+    """Chatning pastida doimiy Mini App tugmasini o'rnatish"""
+    webapp_url = f"{APP_URL}/tma/feed/"
+    try:
+        await bot.set_chat_menu_button(
+            menu_button=MenuButtonWebApp(
+                text="📲 Ilovani ochish",
+                web_app=WebAppInfo(url=webapp_url)
+            )
+        )
+        logger.info("Menu button o'rnatildi")
+    except Exception as e:
+        logger.error(f"Menu button o'rnatishda xatolik: {e}")
 
 
 async def main():
@@ -119,6 +160,7 @@ async def main():
         logger.error("BOT_TOKEN .env faylida topilmadi!")
         return
 
+    await set_menu_button()
     logger.info(f"Bot ishga tushmoqda... NGROK: {APP_URL}")
     await dp.start_polling(bot, skip_updates=True)
 
