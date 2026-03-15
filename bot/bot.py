@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import os
-from pathlib import Path
 from dotenv import load_dotenv
 
 from aiogram import Bot, Dispatcher, F
@@ -11,7 +10,6 @@ from aiogram.types import (
     InlineKeyboardMarkup,
     InlineKeyboardButton,
     WebAppInfo,
-    FSInputFile,
     MenuButtonWebApp,
 )
 
@@ -26,22 +24,18 @@ logger = logging.getLogger(__name__)
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-LOGO_PATH = BASE_DIR / 'real_hoalt.jpg'
-
 XUSH_KELIBSIZ = """
-🏛 <b>REAL HOLAT — Geoportal</b>
+Assalomu alaykum, <b>{name}</b>! 👋
 
-Assalomu alaykum, {name}! 👋
+<b>Real Holat</b> — fuqarolar monitoring platformasi.
 
-O'zbekiston infratuzilmasini <b>real vaqtda</b> kuzating va muammolarni xabar bering.
+Siz bu yerda:
+🔹 Maktab, shifoxona, yo'l muammolarini xabar berasiz
+🔹 Yaqiningizdagi ob'yektlarni tekshirasiz
+🔹 Boshqa fuqarolar signallarini ko'rasiz
+🔹 Statistikani real vaqtda kuzatasiz
 
-🔹 Singan maktab, shifoxona, yo'l haqida xabar bering
-🔹 Lenta orqali boshqalar xabarlarini ko'ring
-🔹 Xaritada barcha murojaatlarni kuzating
-🔹 Statistikani real vaqtda ko'ring
-
-👇 <b>Ilovani ochish uchun tugmani bosing</b>
+👇 <b>Boshlash uchun tugmani bosing:</b>
 """
 
 
@@ -59,42 +53,19 @@ async def start_handler(message: Message):
         [
             InlineKeyboardButton(
                 text="🗺 Xarita",
-                web_app=WebAppInfo(url=f"{APP_URL}/tma/map/")
+                web_app=WebAppInfo(url=f"{APP_URL}/tma/tahlil/")
             ),
             InlineKeyboardButton(
-                text="📋 Murojaatlarim",
-                web_app=WebAppInfo(url=webapp_url)
+                text="📢 Signal",
+                web_app=WebAppInfo(url=f"{APP_URL}/tma/murojaat/")
             )
         ],
     ])
 
     user_name = message.from_user.first_name or "foydalanuvchi"
-    caption = XUSH_KELIBSIZ.format(name=user_name)
+    text = XUSH_KELIBSIZ.format(name=user_name)
 
-    try:
-        if LOGO_PATH.exists():
-            photo = FSInputFile(LOGO_PATH)
-            await message.answer_photo(
-                photo=photo,
-                caption=caption,
-                parse_mode='HTML',
-                reply_markup=keyboard
-            )
-        else:
-            logger.warning(f"Logo topilmadi: {LOGO_PATH}")
-            await message.answer(
-                caption,
-                parse_mode='HTML',
-                reply_markup=keyboard
-            )
-    except Exception as e:
-        logger.error(f"Start handler photo error: {e}")
-        await message.answer(
-            caption,
-            parse_mode='HTML',
-            reply_markup=keyboard
-        )
-
+    await message.answer(text, parse_mode='HTML', reply_markup=keyboard)
     logger.info(f"User {message.from_user.id} (@{message.from_user.username}) started bot")
 
 
