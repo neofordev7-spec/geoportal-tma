@@ -99,10 +99,11 @@ interface StatsBoxProps {
   viloyatName: string | null;
   tumanName: string | null;
   count: number;
-  label: string;
+  tekshirilgan: number;
+  bajarilgan: number;
 }
 
-export function StatsBox({ level, viloyatName, tumanName, count, label }: StatsBoxProps) {
+export function StatsBox({ level, viloyatName, tumanName, count, tekshirilgan, bajarilgan }: StatsBoxProps) {
   const title =
     level === 'country'
       ? "O'zbekiston"
@@ -111,11 +112,21 @@ export function StatsBox({ level, viloyatName, tumanName, count, label }: StatsB
         : tumanName || '';
 
   return (
-    <div className="absolute bottom-6 left-3 z-[1000] bg-white/95 backdrop-blur rounded-xl shadow-lg p-4 min-w-[180px]">
-      <h3 className="text-sm font-bold text-gray-900 mb-1">{title}</h3>
-      <div className="flex items-end gap-2">
+    <div className="absolute bottom-6 left-3 z-[1000] bg-white/95 backdrop-blur rounded-xl shadow-lg p-4 min-w-[220px]">
+      <h3 className="text-sm font-bold text-gray-900 mb-2">{title}</h3>
+      <div className="flex items-end gap-2 mb-2">
         <span className="text-2xl font-bold text-blue-600">{count}</span>
-        <span className="text-xs text-gray-500 pb-1">{label}</span>
+        <span className="text-xs text-gray-500 pb-1">ob'yekt</span>
+      </div>
+      <div className="grid grid-cols-2 gap-2 text-xs">
+        <div className="bg-emerald-50 rounded-lg px-2 py-1.5 text-center">
+          <div className="font-bold text-emerald-600">{tekshirilgan}</div>
+          <div className="text-emerald-500/80 text-[10px]">tekshirilgan</div>
+        </div>
+        <div className="bg-blue-50 rounded-lg px-2 py-1.5 text-center">
+          <div className="font-bold text-blue-600">{bajarilgan}</div>
+          <div className="text-blue-500/80 text-[10px]">bajarilgan</div>
+        </div>
       </div>
     </div>
   );

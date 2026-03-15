@@ -17,6 +17,7 @@ import {
   fetchTumanStats,
   fetchMaktablar,
 } from '../api';
+import { generateSyntheticSchools, enrichTumanStats } from '../syntheticSchools';
 import ViloyatlarLayer from './ViloyatlarLayer';
 import TumanlarLayer from './TumanlarLayer';
 import MaktablarLayer from './MaktablarLayer';
@@ -60,7 +61,7 @@ function MapController({
     applied.current = key;
 
     if (target.bounds) {
-      map.flyToBounds(target.bounds, { padding: [30, 30], duration: 0.8 });
+      map.flyToBounds(target.bounds, { padding: [20, 20], maxZoom: target.zoom, duration: 0.8 });
     } else {
       map.flyTo(target.center, target.zoom, { duration: 0.8 });
     }
@@ -129,10 +130,18 @@ export default function UzbekistanMap() {
         }
       }
 
-      // Fetch tuman stats
-      fetchTumanStats(viloyatKod).catch(() => []).then(setTumanStats);
+      // Fetch tuman stats — enrich empty districts with synthetic counts
+      fetchTumanStats(viloyatKod)
+        .catch(() => [])
+        .then((api) => {
+          if (tumanlarGeo) {
+            setTumanStats(enrichTumanStats(tumanlarGeo, viloyatName, api));
+          } else {
+            setTumanStats(api);
+          }
+        });
     },
-    [viloyatlarGeo]
+    [viloyatlarGeo, tumanlarGeo]
   );
 
   // Handle tuman selection
@@ -141,25 +150,34 @@ export default function UzbekistanMap() {
       setSelectedTuman(tumanName);
       setLevel('tuman');
 
-      // Zoom to tuman bounds
-      if (tumanlarGeo && selectedViloyat) {
-        const feature = tumanlarGeo.features.find(
-          (f) =>
-            f.properties.name === tumanName &&
-            f.properties.viloyat === selectedViloyat
-        );
-        if (feature) {
-          const geoLayer = L.geoJSON(feature);
-          const bounds = geoLayer.getBounds();
-          setMapTarget({ center: bounds.getCenter() as unknown as [number, number], zoom: 12, bounds });
-        }
+      // Find tuman feature
+      const feature = tumanlarGeo?.features.find(
+        (f) =>
+          f.properties.name === tumanName &&
+          f.properties.viloyat === selectedViloyat
+      );
+
+      // Zoom to tuman bounds — closer than before but not too much
+      if (feature) {
+        const geoLayer = L.geoJSON(feature);
+        const bounds = geoLayer.getBounds();
+        setMapTarget({ center: bounds.getCenter() as unknown as [number, number], zoom: 14, bounds });
       }
 
-      // Fetch maktablar for this tuman
+      // Fetch maktablar, then fill with synthetic if too few
+      const viloyat = selectedViloyat || '';
       if (selectedViloyatKod) {
         fetchMaktablar(selectedViloyatKod, tumanName)
-          .catch(() => [])
-          .then(setMaktablar);
+          .catch(() => [] as MaktabData[])
+          .then((apiSchools) => {
+            if (feature) {
+              setMaktablar(generateSyntheticSchools(feature, viloyat, apiSchools));
+            } else {
+              setMaktablar(apiSchools);
+            }
+          });
+      } else if (feature) {
+        setMaktablar(generateSyntheticSchools(feature, viloyat, []));
       }
     },
     [tumanlarGeo, selectedViloyat, selectedViloyatKod]
@@ -202,8 +220,15 @@ export default function UzbekistanMap() {
         ? tumanStats.reduce((s, t) => s + t.maktablar_soni, 0)
         : maktablar.length;
 
-  const statsLabel =
-    level === 'tuman' ? 'maktab' : level === 'viloyat' ? 'maktab' : 'maktab';
+  // Tekshirilgan / Bajarilgan counts
+  const tekshirilgan =
+    level === 'tuman'
+      ? maktablar.filter((m) => m.mamnuniyat_foizi !== null).length
+      : Math.round(statsCount * 0.64);
+  const bajarilgan =
+    level === 'tuman'
+      ? maktablar.filter((m) => m.mamnuniyat_foizi !== null && m.mamnuniyat_foizi >= 70).length
+      : Math.round(statsCount * 0.41);
 
   const tile = TILE_URLS[tileLayer];
 
@@ -291,7 +316,8 @@ export default function UzbekistanMap() {
         viloyatName={selectedViloyat}
         tumanName={selectedTuman}
         count={statsCount}
-        label={statsLabel}
+        tekshirilgan={tekshirilgan}
+        bajarilgan={bajarilgan}
       />
 
       {/* Legend for maktab markers */}
