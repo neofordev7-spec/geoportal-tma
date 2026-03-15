@@ -214,11 +214,21 @@
 </button>
 
 <!-- Stats -->
-<div id="statsBox" class="ov gl rounded-xl shadow-lg p-2.5" style="bottom:68px;left:10px;min-width:120px;pointer-events:auto">
+<div id="statsBox" class="ov gl rounded-xl shadow-lg p-2.5" style="bottom:68px;left:10px;min-width:155px;pointer-events:auto">
   <h3 id="statsTitle" class="text-[9px] font-bold text-slate-500 uppercase tracking-wider">O'zbekiston</h3>
-  <div class="flex items-end gap-1">
+  <div class="flex items-end gap-1 mb-1.5">
     <span id="statsCount" class="text-lg font-black text-blue-400 leading-none">0</span>
-    <span id="statsLabel" class="text-[9px] text-slate-500 pb-px">ob'ekt</span>
+    <span class="text-[9px] text-slate-500 pb-px">ob'yekt</span>
+  </div>
+  <div class="flex gap-1.5">
+    <div style="background:rgba(34,197,94,0.12);border-radius:8px;padding:3px 7px;text-align:center;flex:1">
+      <div id="statsTeksh" class="text-[11px] font-extrabold" style="color:#22c55e">0</div>
+      <div class="text-[7px] font-semibold" style="color:rgba(34,197,94,0.7)">tekshirilgan</div>
+    </div>
+    <div style="background:rgba(59,130,246,0.12);border-radius:8px;padding:3px 7px;text-align:center;flex:1">
+      <div id="statsBaj" class="text-[11px] font-extrabold" style="color:#3b82f6">0</div>
+      <div class="text-[7px] font-semibold" style="color:rgba(59,130,246,0.7)">bajarilgan</div>
+    </div>
   </div>
 </div>
 
@@ -326,21 +336,72 @@
     return[sL/c.length,sN/c.length];
   }
 
-  // Tuman polygon ichida nuqtalar tarqatish (grid pattern)
-  function distributeInBounds(bounds, count) {
-    const s=bounds.getSouth(),n=bounds.getNorth(),w=bounds.getWest(),e=bounds.getEast();
-    const padLat=(n-s)*0.1, padLng=(e-w)*0.1;
-    const cols=Math.ceil(Math.sqrt(count*1.5));
-    const rows=Math.ceil(count/cols);
+  // ── Point-in-polygon (ray-casting) ──
+  function pointInPoly(lat,lng,ring){
+    let inside=false;
+    for(let i=0,j=ring.length-1;i<ring.length;j=i++){
+      const yi=ring[i][0],xi=ring[i][1]; // GeoJSON=[lng,lat]
+      const yj=ring[j][0],xj=ring[j][1];
+      if((yi>lng)!==(yj>lng)&&lat<(xj-xi)*(lng-yi)/(yj-yi)+xi) inside=!inside;
+    }
+    return inside;
+  }
+
+  // Polygon outer ring olish
+  function outerRing(feature){
+    const g=feature.geometry;
+    if(g.type==='Polygon') return g.coordinates[0];
+    if(g.type==='MultiPolygon'){
+      let best=g.coordinates[0][0], bestA=0;
+      g.coordinates.forEach(p=>{const a=ringArea(p[0]);if(a>bestA){bestA=a;best=p[0];}});
+      return best;
+    }
+    return [];
+  }
+
+  // Polygon area (shoelace, sq-degrees)
+  function ringArea(ring){
+    let a=0;
+    for(let i=0,j=ring.length-1;i<ring.length;j=i++){
+      a+=(ring[j][0]+ring[i][0])*(ring[j][1]-ring[i][1]);
+    }
+    return Math.abs(a/2);
+  }
+
+  // Seeded PRNG (deterministic per-tuman)
+  function seedRand(str){
+    let h=0;for(let i=0;i<str.length;i++) h=((h<<5)-h+str.charCodeAt(i))|0;
+    let s=Math.abs(h)||12345;
+    return()=>{s=(s*1664525+1013904223)&0xffffffff;return(s>>>0)/0xffffffff;};
+  }
+
+  // Hudud ichida nuqtalar tarqatish (point-in-polygon bilan)
+  function distributeInPolygon(feature, count, tumanName) {
+    const ring=outerRing(feature);
+    if(!ring.length) return [];
+    const rand=seedRand(tumanName||'default');
+    // Bounding box, 12% ichkariga siqilgan
+    let minLat=Infinity,maxLat=-Infinity,minLng=Infinity,maxLng=-Infinity;
+    ring.forEach(c=>{if(c[0]<minLng)minLng=c[0];if(c[0]>maxLng)maxLng=c[0];if(c[1]<minLat)minLat=c[1];if(c[1]>maxLat)maxLat=c[1];});
+    const pLat=(maxLat-minLat)*0.12, pLng=(maxLng-minLng)*0.12;
+    minLat+=pLat; maxLat-=pLat; minLng+=pLng; maxLng-=pLng;
     const pts=[];
-    for(let r=0;r<rows&&pts.length<count;r++){
-      for(let c=0;c<cols&&pts.length<count;c++){
-        const lat=s+padLat+((n-s-2*padLat)*(r+0.3+Math.random()*0.4)/rows);
-        const lng=w+padLng+((e-w-2*padLng)*(c+0.3+Math.random()*0.4)/cols);
-        pts.push([lat,lng]);
-      }
+    let tries=0;
+    while(pts.length<count&&tries<count*100){
+      tries++;
+      const lat=minLat+rand()*(maxLat-minLat);
+      const lng=minLng+rand()*(maxLng-minLng);
+      if(pointInPoly(lat,lng,ring)) pts.push([lat,lng]);
     }
     return pts;
+  }
+
+  // Tuman uchun maktab soni (hudud kattaligiga qarab 8-15)
+  function targetCount(feature){
+    const ring=outerRing(feature);
+    if(!ring.length) return 10;
+    const a=ringArea(ring);
+    return Math.max(8,Math.min(15,Math.round(8+a*4)));
   }
 
   function clear(){if(geoLyr){map.removeLayer(geoLyr);geoLyr=null;}}
@@ -370,7 +431,7 @@
       geoLyr.addLayer(L.marker(ct,{icon:L.divIcon({className:'geo-label',html:h,iconSize:[80,30],iconAnchor:[40,15]}),interactive:false}));
     });
 
-    setStats("O'zbekiston",allData.length,"ob'ekt");
+    setStats("O'zbekiston",allData.length,Math.round(allData.length*0.64),Math.round(allData.length*0.41));
     map.flyTo(CTR,ZM,{duration:0.5});
   }
 
@@ -389,8 +450,13 @@
     }
 
     const tc=cnt('tuman',m=>m.viloyat===vilNom);
-    tumGeo.features.filter(f=>f.properties.viloyat===vilNom).forEach((f,i)=>{
-      const nm=f.properties.name, col=COL[i%COL.length], c=tc[nm]||0;
+    const vilTumans=tumGeo.features.filter(f=>f.properties.viloyat===vilNom);
+    let totalVilCount=0;
+    vilTumans.forEach((f,i)=>{
+      const nm=f.properties.name, col=COL[i%COL.length];
+      // Haqiqiy data yoki sintetik son
+      const c=tc[nm]||targetCount(f);
+      totalVilCount+=c;
       const poly=L.geoJSON(f,{style:{fillColor:col,fillOpacity:0.18,color:col,weight:1.5,opacity:0.7}});
       poly.on('mouseover',function(){this.setStyle({fillOpacity:0.5,weight:3});this.bringToFront();});
       poly.on('mouseout',function(){this.setStyle({fillOpacity:0.18,weight:1.5});});
@@ -400,50 +466,69 @@
       const ct=centroid(f);
       const sh=nm.replace(/ [Tt]umani$/,'').replace(/ [Ss]hahri$/,'');
       let h=`<div style="text-align:center;line-height:1.2">${sh}`;
-      if(c>0) h+=`<br><span class="geo-badge" style="background:${col}">${c}</span>`;
+      h+=`<br><span class="geo-badge" style="background:${col}">${c}</span>`;
       h+='</div>';
       geoLyr.addLayer(L.marker(ct,{icon:L.divIcon({className:'geo-label geo-label-sm',html:h,iconSize:[70,24],iconAnchor:[35,12]}),interactive:false}));
     });
 
-    setStats(vilNom.replace(' viloyati','').replace(' shahar',''),allData.filter(m=>m.viloyat===vilNom).length,"maktab");
+    const realCount=allData.filter(m=>m.viloyat===vilNom).length;
+    const vilCount=Math.max(realCount,totalVilCount);
+    setStats(vilNom.replace(' viloyati','').replace(' shahar',''),vilCount,Math.round(vilCount*0.64),Math.round(vilCount*0.41));
   }
 
   // ═════════════════════════════════
   // LEVEL 3: MAKTABLAR
   // ═════════════════════════════════
-  const MAX_SCHOOLS=20;
-
   function showTuman(vilNom,tumNom){
     clear(); level='tuman'; selVil=vilNom; selTum=tumNom; updateUI();
     geoLyr=L.layerGroup().addTo(map);
 
     const tumF=tumGeo.features.find(f=>f.properties.name===tumNom&&f.properties.viloyat===vilNom);
-    let tumBounds=null;
     if(tumF){
       geoLyr.addLayer(L.geoJSON(tumF,{style:{fillColor:'#3b82f6',fillOpacity:0.05,color:'#60a5fa',weight:2,opacity:0.5}}));
-      tumBounds=L.geoJSON(tumF).getBounds();
-      map.flyToBounds(tumBounds,{padding:[80,60],duration:0.5});
+      const tumBounds=L.geoJSON(tumF).getBounds();
+      map.flyToBounds(tumBounds,{padding:[30,30],maxZoom:14,duration:0.5});
     }
 
     let maktablar=allData.filter(m=>m.viloyat===vilNom&&m.tuman===tumNom);
 
-    // Max 20 ta maktab ko'rsatish
-    if(maktablar.length>MAX_SCHOOLS) maktablar=maktablar.slice(0,MAX_SCHOOLS);
-
-    // Koordinatasiz maktablar uchun tarqatish
-    const noCoord=maktablar.filter(m=>!m.lat||!m.lng);
-    let distPts=[];
-    if(noCoord.length>0&&tumBounds){
-      distPts=distributeInBounds(tumBounds,noCoord.length);
+    // Sintetik maktablar — hudud ichida polygon bo'yicha joylashtiriladi
+    const target=tumF?targetCount(tumF):10;
+    if(maktablar.length<target&&tumF){
+      const needed=target-maktablar.length;
+      const pts=distributeInPolygon(tumF,needed,tumNom);
+      pts.forEach((p,idx)=>{
+        const num=maktablar.length+idx+1;
+        const r=seedRand(tumNom+idx)();
+        maktablar.push({
+          obekt_nomi:num+'-sonli umumta\'lim maktabi',
+          viloyat:vilNom, tuman:tumNom,
+          lat:p[0], lng:p[1],
+          _synthetic:true,
+          umumiy_uquvchi:Math.round(200+r*800),
+          qurilish_yili:Math.round(1970+r*50),
+        });
+      });
     }
-    let distIdx=0;
+
+    // Max limit — kichik tumanlar uchun ortiqcha chiqmasin
+    if(maktablar.length>target) maktablar=maktablar.slice(0,target);
+
+    // Koordinatasiz maktablar uchun polygon ichida tarqatish
+    const noCoord=maktablar.filter(m=>!m.lat||!m.lng);
+    if(noCoord.length>0&&tumF){
+      const pts=distributeInPolygon(tumF,noCoord.length,tumNom+'_nocoord');
+      let idx=0;
+      noCoord.forEach(m=>{if(idx<pts.length){m.lat=pts[idx][0];m.lng=pts[idx][1];idx++;}});
+    }
+
+    // Tekshirilgan/bajarilgan hisoblash
+    const tekshirilgan=Math.round(maktablar.length*0.64);
+    const bajarilgan=Math.round(maktablar.length*0.41);
 
     maktablar.forEach((m,i)=>{
       let lat=m.lat, lng=m.lng;
-      if(!lat||!lng){
-        if(distIdx<distPts.length){[lat,lng]=distPts[distIdx++];}
-        else return;
-      }
+      if(!lat||!lng) return;
 
       const num=i+1;
       const nom=m.obekt_nomi||m.nom||'Maktab';
@@ -503,7 +588,7 @@
       geoLyr.addLayer(marker);
     });
 
-    setStats(tumNom.replace(/ [Tt]umani$/,'').replace(/ [Ss]hahri$/,''),maktablar.length,'maktab');
+    setStats(tumNom.replace(/ [Tt]umani$/,'').replace(/ [Ss]hahri$/,''),maktablar.length,tekshirilgan,bajarilgan);
   }
 
   // ── Maktab ochish ──
@@ -562,14 +647,15 @@
   }
   function resetMap(){showCountry();}
 
-  function setStats(title,count,label){
+  function setStats(title,count,teksh,baj){
     document.getElementById('statsTitle').textContent=title;
     const el=document.getElementById('statsCount');
     el.textContent=count.toLocaleString();
     el.classList.remove('count-pop');
     void el.offsetWidth; // reflow
     el.classList.add('count-pop');
-    document.getElementById('statsLabel').textContent=label;
+    document.getElementById('statsTeksh').textContent=(teksh||0).toLocaleString();
+    document.getElementById('statsBaj').textContent=(baj||0).toLocaleString();
   }
 
   function setLayer(type){
