@@ -71,15 +71,24 @@ async def start_handler(message: Message):
     user_name = message.from_user.first_name or "foydalanuvchi"
     caption = XUSH_KELIBSIZ.format(name=user_name)
 
-    if LOGO_PATH.exists():
-        photo = FSInputFile(LOGO_PATH)
-        await message.answer_photo(
-            photo=photo,
-            caption=caption,
-            parse_mode='HTML',
-            reply_markup=keyboard
-        )
-    else:
+    try:
+        if LOGO_PATH.exists():
+            photo = FSInputFile(LOGO_PATH)
+            await message.answer_photo(
+                photo=photo,
+                caption=caption,
+                parse_mode='HTML',
+                reply_markup=keyboard
+            )
+        else:
+            logger.warning(f"Logo topilmadi: {LOGO_PATH}")
+            await message.answer(
+                caption,
+                parse_mode='HTML',
+                reply_markup=keyboard
+            )
+    except Exception as e:
+        logger.error(f"Start handler photo error: {e}")
         await message.answer(
             caption,
             parse_mode='HTML',
