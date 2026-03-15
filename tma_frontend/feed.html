@@ -174,10 +174,13 @@
   </div>
 </div>
 
-<!-- Tekshir FAB -->
-<button onclick="openTekshir()" id="tekshirFab" class="tekshir-fab">
-  <span class="material-symbols-outlined" style="font-size:24px;font-variation-settings:'FILL' 1">radar</span>
-</button>
+<!-- Tekshir FAB with label -->
+<div id="tekshirFabWrap" style="position:fixed;bottom:68px;right:12px;z-index:49;display:flex;flex-direction:column;align-items:center;gap:4px;">
+  <button onclick="openTekshir()" id="tekshirFab" class="tekshir-fab" style="position:relative;bottom:auto;right:auto;">
+    <span class="material-symbols-outlined" style="font-size:24px;font-variation-settings:'FILL' 1">radar</span>
+  </button>
+  <span style="background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;font-size:9px;font-weight:800;padding:3px 8px;border-radius:99px;white-space:nowrap;box-shadow:0 2px 8px rgba(59,130,246,0.3);letter-spacing:0.3px;">Tekshir!</span>
+</div>
 
 <!-- Tekshir Sheet -->
 <div id="tksBg" class="tks-bg" onclick="closeTekshir()"></div>
@@ -641,7 +644,7 @@ const TUR_ICONS={maktab:{icon:'school',color:'#3b82f6',bg:'rgba(59,130,246,0.12)
 function openTekshir(){
   document.getElementById('tksBg').classList.add('open');
   document.getElementById('tksSheet').classList.add('open');
-  document.getElementById('tekshirFab').style.display='none';
+  document.getElementById('tekshirFabWrap').style.display='none';
   // Reset to step 1
   document.getElementById('tksStep1').classList.remove('hidden');
   document.getElementById('tksStep2').classList.add('hidden');
@@ -653,7 +656,7 @@ function closeTekshir(){
   document.getElementById('tksSheet').classList.remove('open');
   setTimeout(()=>{
     document.getElementById('tksBg').classList.remove('open');
-    document.getElementById('tekshirFab').style.display='';
+    document.getElementById('tekshirFabWrap').style.display='';
     document.body.style.overflow='';
     // Reset state
     tksSelectedObj=null; tksSelectedNatija=''; tksFile=null;

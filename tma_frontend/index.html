@@ -208,29 +208,43 @@
   </button>
 </div>
 
-<!-- GPS — pastroqda, bottom tabs ustida -->
-<button onclick="gpsLocate()" class="ov gl rounded-full shadow-lg flex items-center justify-center cursor-pointer" style="bottom:68px;right:10px;width:38px;height:38px;pointer-events:auto" title="Joylashuvim">
+<!-- GPS -->
+<button onclick="gpsLocate()" class="ov gl rounded-full shadow-lg flex items-center justify-center cursor-pointer" style="bottom:156px;right:10px;width:38px;height:38px;pointer-events:auto" title="Joylashuvim">
   <span class="material-symbols-outlined text-blue-400" style="font-size:19px;font-variation-settings:'FILL' 1">my_location</span>
 </button>
 
-<!-- Stats -->
-<div id="statsBox" class="ov gl rounded-xl shadow-lg p-2.5" style="bottom:68px;left:10px;min-width:155px;pointer-events:auto">
-  <h3 id="statsTitle" class="text-[9px] font-bold text-slate-500 uppercase tracking-wider">O'zbekiston</h3>
-  <div class="flex items-end gap-1 mb-1.5">
-    <span id="statsCount" class="text-lg font-black text-blue-400 leading-none">0</span>
-    <span class="text-[9px] text-slate-500 pb-px">ob'yekt</span>
-  </div>
-  <div class="flex gap-1.5">
-    <div style="background:rgba(34,197,94,0.12);border-radius:8px;padding:3px 7px;text-align:center;flex:1">
-      <div id="statsTeksh" class="text-[11px] font-extrabold" style="color:#22c55e">0</div>
-      <div class="text-[7px] font-semibold" style="color:rgba(34,197,94,0.7)">tekshirilgan</div>
+<!-- Stats — compact horizontal strip -->
+<div id="statsBox" class="ov" style="bottom:68px;left:10px;right:10px;pointer-events:auto">
+  <div class="gl rounded-2xl px-3 py-2 flex items-center gap-2.5" style="border-radius:16px">
+    <div style="flex-shrink:0">
+      <p id="statsTitle" class="text-[8px] font-bold text-slate-500 uppercase tracking-wider leading-tight">O'zbekiston</p>
+      <p class="leading-tight"><span id="statsCount" class="text-base font-black text-blue-400">0</span> <span class="text-[8px] text-slate-500">ob'yekt</span></p>
     </div>
-    <div style="background:rgba(59,130,246,0.12);border-radius:8px;padding:3px 7px;text-align:center;flex:1">
-      <div id="statsBaj" class="text-[11px] font-extrabold" style="color:#3b82f6">0</div>
-      <div class="text-[7px] font-semibold" style="color:rgba(59,130,246,0.7)">bajarilgan</div>
+    <div style="width:1px;height:24px;background:rgba(255,255,255,0.1);flex-shrink:0"></div>
+    <div class="flex items-center gap-3 flex-1">
+      <div class="flex items-center gap-1">
+        <span style="width:6px;height:6px;border-radius:50%;background:#22c55e;flex-shrink:0"></span>
+        <span id="statsTeksh" class="text-[11px] font-bold text-slate-300">0</span>
+      </div>
+      <div class="flex items-center gap-1">
+        <span style="width:6px;height:6px;border-radius:50%;background:#3b82f6;flex-shrink:0"></span>
+        <span id="statsBaj" class="text-[11px] font-bold text-slate-300">0</span>
+      </div>
+    </div>
+    <div id="statsPctRing" style="width:32px;height:32px;flex-shrink:0;position:relative;display:flex;align-items:center;justify-content:center">
+      <svg style="position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)" viewBox="0 0 36 36">
+        <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="3"/>
+        <circle id="statsPctCircle" cx="18" cy="18" r="14" fill="none" stroke="#3b82f6" stroke-width="3" stroke-dasharray="0 100" stroke-linecap="round"/>
+      </svg>
+      <span id="statsPct" class="text-[8px] font-black text-blue-400">0%</span>
     </div>
   </div>
 </div>
+
+<!-- Uyim tugmasi — GPS orqali o'z tumaniga -->
+<button onclick="goHome()" class="ov gl rounded-full shadow-lg flex items-center justify-center cursor-pointer" style="bottom:112px;right:10px;width:38px;height:38px;pointer-events:auto" title="Mening tumanim">
+  <span class="material-symbols-outlined text-indigo-400" style="font-size:19px;font-variation-settings:'FILL' 1">home</span>
+</button>
 
 <!-- Bottom tabs -->
 <div class="ov" style="bottom:0;left:0;right:0">
@@ -656,6 +670,10 @@
     el.classList.add('count-pop');
     document.getElementById('statsTeksh').textContent=(teksh||0).toLocaleString();
     document.getElementById('statsBaj').textContent=(baj||0).toLocaleString();
+    // Doiraviy progress
+    const pct=count>0?Math.round((baj||0)/count*100):0;
+    document.getElementById('statsPct').textContent=pct+'%';
+    document.getElementById('statsPctCircle').setAttribute('stroke-dasharray',`${pct*0.88} 100`);
   }
 
   function setLayer(type){
@@ -669,7 +687,15 @@
   }
 
   function gpsLocate(){
-    map.locate({setView:true, maxZoom:12}); // ~10km radius ko'rinadi
+    map.locate({setView:true, maxZoom:12});
+  }
+
+  function goHome(){
+    navigator.geolocation.getCurrentPosition(
+      pos=>{map.flyTo([pos.coords.latitude,pos.coords.longitude],13,{duration:0.8});},
+      ()=>{tg.showAlert("GPS aniqlanmadi. Joylashuv ruxsatini bering.");},
+      {enableHighAccuracy:true,timeout:10000}
+    );
   }
 
   loadAll();
