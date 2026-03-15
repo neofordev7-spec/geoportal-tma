@@ -41,6 +41,16 @@
     .sheet-bg{background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);}
     @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
     .sheet{animation:slideUp 0.25s ease-out;}
+
+    /* Vaada wizard steps */
+    .vst{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;background:rgba(255,255,255,0.06);color:#475569;border:2px solid rgba(255,255,255,0.08);transition:all 0.3s;}
+    .vst.on{background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border-color:transparent;box-shadow:0 0 12px rgba(59,130,246,0.3);}
+    .vst.done{background:#22c55e;color:#fff;border-color:transparent;}
+    .vline{flex:1;height:2px;background:rgba(255,255,255,0.06);border-radius:99px;transition:background 0.3s;}
+    .vline.done{background:#22c55e;}
+    .obj-btn.selected{border:2px solid #3b82f6!important;background:rgba(59,130,246,0.12)!important;}
+    .baho-btn.selected{border:2px solid #22c55e!important;background:rgba(34,197,94,0.1)!important;}
+    .baho-btn.selected-no{border:2px solid #ef4444!important;background:rgba(239,68,68,0.1)!important;}
   </style>
 </head>
 <body class="pb-16">
@@ -77,16 +87,142 @@
   </button>
 
   <!-- Va'dalarni tekshirish -->
-  <button onclick="openPicker()" class="w-full gl rounded-2xl p-4 flex items-center gap-4 text-left active:scale-[0.98] transition-transform">
+  <button onclick="openVaada()" class="w-full gl rounded-2xl p-4 flex items-center gap-4 text-left active:scale-[0.98] transition-transform">
     <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(59,130,246,0.1)">
       <span class="material-symbols-outlined" style="font-size:24px;color:#3b82f6;font-variation-settings:'FILL' 1">fact_check</span>
     </div>
     <div class="flex-1 min-w-0">
       <p class="text-sm font-bold text-white">Va'dalar bajarilganmi?</p>
-      <p class="text-[11px] text-slate-500 mt-0.5">Xaritada hududingizni tekshiring</p>
+      <p class="text-[11px] text-slate-500 mt-0.5">Hududingizni tanlab tekshiring</p>
     </div>
     <span class="material-symbols-outlined text-slate-600" style="font-size:20px">chevron_right</span>
   </button>
+</div>
+
+<!-- ═══ VA'DA TEKSHIRISH WIZARD ═══ -->
+<div id="viewVaada" class="hidden px-4 mt-3 fade-up pb-24">
+
+  <!-- Progress steps -->
+  <div class="flex items-center gap-2 mb-5">
+    <div class="vst on" id="vs1"><span>1</span></div>
+    <div class="vline" id="vl1"></div>
+    <div class="vst" id="vs2"><span>2</span></div>
+    <div class="vline" id="vl2"></div>
+    <div class="vst" id="vs3"><span>3</span></div>
+  </div>
+
+  <!-- STEP 1: Hudud -->
+  <div id="vaadaStep1" class="fade-up">
+    <h2 class="text-sm font-bold text-white mb-1">Hududingizni tanlang</h2>
+    <p class="text-[11px] text-slate-500 mb-4">Qaysi viloyat va tumanda tekshirasiz?</p>
+
+    <!-- Viloyat -->
+    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Viloyat</label>
+    <div class="relative mb-3">
+      <select id="vViloyat" onchange="onViloyatChange()" class="w-full py-3 px-4 rounded-xl text-sm font-semibold appearance-none cursor-pointer" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#f1f5f9;">
+        <option value="">Tanlang...</option>
+        <option value="toshkent_sh">Toshkent shahri</option>
+        <option value="toshkent_v">Toshkent viloyati</option>
+        <option value="samarqand">Samarqand viloyati</option>
+        <option value="fargona">Farg'ona viloyati</option>
+        <option value="andijon">Andijon viloyati</option>
+        <option value="namangan">Namangan viloyati</option>
+        <option value="buxoro">Buxoro viloyati</option>
+        <option value="xorazm">Xorazm viloyati</option>
+        <option value="qashqadaryo">Qashqadaryo viloyati</option>
+        <option value="surxondaryo">Surxondaryo viloyati</option>
+        <option value="jizzax">Jizzax viloyati</option>
+        <option value="sirdaryo">Sirdaryo viloyati</option>
+        <option value="navoiy">Navoiy viloyati</option>
+        <option value="qoraqalpogiston">Qoraqalpog'iston R.</option>
+      </select>
+      <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" style="font-size:18px">expand_more</span>
+    </div>
+
+    <!-- Tuman -->
+    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Tuman</label>
+    <div class="relative mb-4">
+      <select id="vTuman" class="w-full py-3 px-4 rounded-xl text-sm font-semibold appearance-none cursor-pointer" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#f1f5f9;" disabled>
+        <option value="">Avval viloyatni tanlang</option>
+      </select>
+      <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" style="font-size:18px">expand_more</span>
+    </div>
+
+    <button onclick="goVaadaStep(2)" id="vNext1" class="w-full py-3 rounded-xl text-sm font-bold text-white active:scale-95 transition-all opacity-40 pointer-events-none" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">
+      Davom etish
+      <span class="material-symbols-outlined align-middle ml-1" style="font-size:16px">arrow_forward</span>
+    </button>
+  </div>
+
+  <!-- STEP 2: Ob'ekt turi -->
+  <div id="vaadaStep2" class="hidden fade-up">
+    <h2 class="text-sm font-bold text-white mb-1">Ob'yekt turini tanlang</h2>
+    <p class="text-[11px] text-slate-500 mb-4">Nimani tekshirmoqchisiz?</p>
+
+    <div class="grid grid-cols-2 gap-2 mb-4" id="objTypes">
+      <button onclick="selObj(this,'maktab')" class="obj-btn gl rounded-xl p-4 flex flex-col items-center gap-2 text-center active:scale-95 transition-all">
+        <div class="w-11 h-11 rounded-full flex items-center justify-center" style="background:rgba(59,130,246,0.12)"><span class="material-symbols-outlined" style="font-size:22px;color:#3b82f6;font-variation-settings:'FILL' 1">school</span></div>
+        <span class="text-xs font-bold text-white">Maktab</span>
+      </button>
+      <button onclick="selObj(this,'shifoxona')" class="obj-btn gl rounded-xl p-4 flex flex-col items-center gap-2 text-center active:scale-95 transition-all">
+        <div class="w-11 h-11 rounded-full flex items-center justify-center" style="background:rgba(239,68,68,0.12)"><span class="material-symbols-outlined" style="font-size:22px;color:#ef4444;font-variation-settings:'FILL' 1">local_hospital</span></div>
+        <span class="text-xs font-bold text-white">Shifoxona</span>
+      </button>
+      <button onclick="selObj(this,'bogcha')" class="obj-btn gl rounded-xl p-4 flex flex-col items-center gap-2 text-center active:scale-95 transition-all">
+        <div class="w-11 h-11 rounded-full flex items-center justify-center" style="background:rgba(34,197,94,0.12)"><span class="material-symbols-outlined" style="font-size:22px;color:#22c55e;font-variation-settings:'FILL' 1">child_care</span></div>
+        <span class="text-xs font-bold text-white">Bog'cha</span>
+      </button>
+      <button onclick="selObj(this,'boshqa')" class="obj-btn gl rounded-xl p-4 flex flex-col items-center gap-2 text-center active:scale-95 transition-all">
+        <div class="w-11 h-11 rounded-full flex items-center justify-center" style="background:rgba(157,43,238,0.12)"><span class="material-symbols-outlined" style="font-size:22px;color:#9d2bee;font-variation-settings:'FILL' 1">apartment</span></div>
+        <span class="text-xs font-bold text-white">Boshqa</span>
+      </button>
+    </div>
+
+    <div class="flex gap-2">
+      <button onclick="goVaadaStep(1)" class="flex-1 py-3 rounded-xl text-sm font-semibold text-slate-400 active:scale-95 transition-all" style="background:rgba(255,255,255,0.05)">Orqaga</button>
+      <button onclick="goVaadaStep(3)" id="vNext2" class="flex-1 py-3 rounded-xl text-sm font-bold text-white active:scale-95 transition-all opacity-40 pointer-events-none" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">Davom etish</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Baholash -->
+  <div id="vaadaStep3" class="hidden fade-up">
+    <h2 class="text-sm font-bold text-white mb-1">Va'da bajarilganmi?</h2>
+    <p class="text-[11px] text-slate-500 mb-4" id="vaadaSummary">Hududingiz haqida fikringiz</p>
+
+    <!-- Ha / Yo'q -->
+    <div class="flex gap-3 mb-4">
+      <button onclick="selBaho('ha')" id="bahoHa" class="baho-btn flex-1 gl rounded-2xl py-5 flex flex-col items-center gap-2 active:scale-95 transition-all">
+        <span style="font-size:36px">&#128515;</span>
+        <span class="text-sm font-bold text-white">Ha, bajarildi</span>
+      </button>
+      <button onclick="selBaho('yoq')" id="bahoYoq" class="baho-btn flex-1 gl rounded-2xl py-5 flex flex-col items-center gap-2 active:scale-95 transition-all">
+        <span style="font-size:36px">&#128543;</span>
+        <span class="text-sm font-bold text-white">Yo'q, bajarilmadi</span>
+      </button>
+    </div>
+
+    <!-- Izoh (ixtiyoriy) -->
+    <textarea id="vaadaIzoh" rows="2" placeholder="Izoh (ixtiyoriy)..." class="w-full p-3 rounded-xl text-sm resize-none mb-3" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#f1f5f9;"></textarea>
+
+    <!-- Rasm (ixtiyoriy) -->
+    <input type="file" id="vaadaMedia" accept="image/*" class="hidden"/>
+    <button onclick="document.getElementById('vaadaMedia').click()" id="vaadaPhotoBtn" class="w-full gl rounded-xl p-3 flex items-center gap-3 mb-4 active:scale-[0.98] transition-all text-left">
+      <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(157,43,238,0.1)">
+        <span class="material-symbols-outlined" style="font-size:18px;color:#9d2bee;font-variation-settings:'FILL' 1" id="vaadaPhotoIcon">add_a_photo</span>
+      </div>
+      <div class="flex-1">
+        <p class="text-sm font-semibold text-white" id="vaadaPhotoText">Rasm qo'shish</p>
+        <p class="text-[10px] text-slate-500">Ixtiyoriy — dalil sifatida</p>
+      </div>
+    </button>
+
+    <div class="flex gap-2">
+      <button onclick="goVaadaStep(2)" class="flex-1 py-3 rounded-xl text-sm font-semibold text-slate-400 active:scale-95 transition-all" style="background:rgba(255,255,255,0.05)">Orqaga</button>
+      <button onclick="submitVaada()" id="vSubmitBtn" class="flex-1 py-3 rounded-xl text-sm font-bold text-white active:scale-95 transition-all opacity-40 pointer-events-none" style="background:linear-gradient(135deg,#22c55e,#16a34a)">
+        <span class="material-symbols-outlined align-middle mr-1" style="font-size:16px;font-variation-settings:'FILL' 1">send</span>Yuborish
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- ═══ MUAMMO FORMASI ═══ -->
@@ -171,39 +307,6 @@
   </div>
 </div>
 
-<!-- ═══ OB'EKT TANLASH (bottom sheet) ═══ -->
-<div id="pickerSheet" class="hidden fixed inset-0 z-[55] flex items-end">
-  <div class="sheet-bg absolute inset-0" onclick="closePicker()"></div>
-  <div class="relative w-full sheet rounded-t-3xl p-5 z-10" style="background:#141418;border-top:1px solid rgba(255,255,255,0.08);">
-    <div class="w-10 h-1 bg-slate-700 rounded-full mx-auto mb-4"></div>
-    <p class="text-sm font-bold text-white mb-3">Qaysi ob'ektlarni tekshiramiz?</p>
-    <div class="space-y-2">
-      <a href="/tma/xarita/" class="flex items-center gap-3 p-3 rounded-xl active:scale-[0.98] transition-transform" style="background:rgba(59,130,246,0.08)">
-        <span class="material-symbols-outlined" style="font-size:22px;color:#3b82f6;font-variation-settings:'FILL' 1">school</span>
-        <div class="flex-1">
-          <p class="text-sm font-semibold text-white">Maktablar</p>
-          <p class="text-[10px] text-slate-500">Xaritada ko'ring va tekshiring</p>
-        </div>
-        <span class="material-symbols-outlined text-slate-600" style="font-size:18px">chevron_right</span>
-      </a>
-      <div class="flex items-center gap-3 p-3 rounded-xl" style="background:rgba(255,255,255,0.02);opacity:0.4;">
-        <span class="material-symbols-outlined" style="font-size:22px;color:#ef4444;font-variation-settings:'FILL' 1">local_hospital</span>
-        <div class="flex-1">
-          <p class="text-sm font-semibold text-white">Shifoxonalar</p>
-          <p class="text-[10px] text-slate-500">Tez kunda</p>
-        </div>
-      </div>
-      <div class="flex items-center gap-3 p-3 rounded-xl" style="background:rgba(255,255,255,0.02);opacity:0.4;">
-        <span class="material-symbols-outlined" style="font-size:22px;color:#22c55e;font-variation-settings:'FILL' 1">child_care</span>
-        <div class="flex-1">
-          <p class="text-sm font-semibold text-white">Bog'chalar</p>
-          <p class="text-[10px] text-slate-500">Tez kunda</p>
-        </div>
-      </div>
-    </div>
-    <button onclick="closePicker()" class="w-full mt-4 py-3 rounded-full text-sm font-semibold text-slate-400 active:scale-95 transition-transform" style="background:rgba(255,255,255,0.05)">Bekor qilish</button>
-  </div>
-</div>
 
 <!-- ═══ SUCCESS ═══ -->
 <div id="successModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center px-5" style="background:rgba(0,0,0,0.7);backdrop-filter:blur(6px)">
@@ -245,18 +348,23 @@ function toggleAnon(){
 }
 
 // ── Ekranlar ──────────────────────────────────
+function hideAll(){['viewChoice','viewReport','viewVaada'].forEach(id=>document.getElementById(id).classList.add('hidden'));}
 function openReport(){
-  document.getElementById('viewChoice').classList.add('hidden');
+  hideAll();
   document.getElementById('viewReport').classList.remove('hidden');
   calcReach();
 }
-function openPicker(){ document.getElementById('pickerSheet').classList.remove('hidden'); }
-function closePicker(){ document.getElementById('pickerSheet').classList.add('hidden'); }
+function openVaada(){
+  hideAll();
+  document.getElementById('viewVaada').classList.remove('hidden');
+  goVaadaStep(1);
+}
 function resetForm(){
   document.getElementById('successModal').classList.add('hidden');
-  document.getElementById('viewReport').classList.add('hidden');
+  hideAll();
   document.getElementById('viewChoice').classList.remove('hidden');
   mediaFiles=[]; gpsCoords=null; selectedType='';
+  vaadaObj=''; vaadaBaho=''; vaadaFile=null;
 }
 
 // ── GPS ───────────────────────────────────────
@@ -371,6 +479,122 @@ async function submit(){
   finally{
     btn.disabled=false;
     btn.innerHTML='<span class="material-symbols-outlined" style="font-size:18px;font-variation-settings:\'FILL\' 1">send</span> Signal yuborish';
+  }
+}
+
+// ══════════════════════════════════════════════
+// VA'DA TEKSHIRISH WIZARD
+// ══════════════════════════════════════════════
+
+const TUMANLAR={
+  toshkent_sh:['Bektemir','Chilonzor','Mirobod','Mirzo Ulug\'bek','Olmazor','Sergeli','Shayxontohur','Uchtepa','Yakkasaroy','Yashnobod','Yunusobod'],
+  toshkent_v:['Angren','Bekobod','Bo\'ka','Bo\'stonliq','Chinoz','Ohangaron','Olmaliq','Parkent','Piskent','Qibray','Quyi Chirchiq','Toshkent','Yangiyo\'l','Zangiota','Chirchiq'],
+  samarqand:['Bulung\'ur','Ishtixon','Jomboy','Kattaqo\'rg\'on','Narpay','Nurobod','Oqdaryo','Pastdarg\'om','Payariq','Samarqand','Tayloq','Urgut'],
+  fargona:['Bag\'dod','Beshariq','Buvayda','Dang\'ara','Farg\'ona','Furqat','Oltiariq','Quva','Qo\'qon','Rishton','So\'x','Toshloq','Uchko\'prik','Yozyovon'],
+  andijon:['Andijon','Asaka','Baliqchi','Bo\'z','Buloqboshi','Izboskan','Jalaquduq','Marhamat','Oltinko\'l','Paxtaobod','Qo\'rg\'ontepa','Shahrixon','Ulug\'nor','Xo\'jaobod'],
+  namangan:['Chortoq','Chust','Kosonsoy','Mingbuloq','Namangan','Norin','Pop','To\'raqo\'rg\'on','Uchqo\'rg\'on','Yangiqo\'rg\'on'],
+  buxoro:['Buxoro','G\'ijduvon','Jondor','Kogon','Olot','Peshku','Qorakul','Qorako\'l','Romitan','Shofirkon','Vobkent'],
+  xorazm:['Bog\'ot','Gurlan','Xazorasp','Xiva','Qo\'shko\'pir','Shovot','Urganch','Yangiariq','Yangibozor'],
+  qashqadaryo:['Chiroqchi','Dehqonobod','G\'uzor','Kasbi','Kitob','Koson','Mirishkor','Muborak','Nishon','Qarshi','Shahrisabz','Yakkabog\''],
+  surxondaryo:['Angor','Bandixon','Boysun','Denov','Jarqo\'rg\'on','Muzrabot','Oltinsoy','Qiziriq','Qumqo\'rg\'on','Sariosiyo','Sherobod','Sho\'rchi','Termiz','Uzun'],
+  jizzax:['Arnasoy','Baxmal','Do\'stlik','Forish','G\'allaorol','Jizzax','Mirzacho\'l','Paxtakor','Yangiobod','Zafarobod','Zarbdor','Zomin'],
+  sirdaryo:['Boyovut','Guliston','Mirzaobod','Oqoltin','Sardoba','Sayxunobod','Sirdaryo','Xovos'],
+  navoiy:['Karmana','Konimex','Navbahor','Navoiy','Nurota','Qiziltepa','Tomdi','Uchquduq','Xatirchi'],
+  qoraqalpogiston:['Amudaryo','Beruniy','Chimboy','Ellikqala','Kegeyli','Mo\'ynoq','Nukus','Qanliko\'l','Qo\'ng\'irot','Qorao\'zak','Shumanay','Taxtako\'pir','To\'rtko\'l','Xo\'jayli']
+};
+
+let vaadaObj='', vaadaBaho='', vaadaFile=null;
+
+function onViloyatChange(){
+  const v=document.getElementById('vViloyat').value;
+  const sel=document.getElementById('vTuman');
+  sel.innerHTML='<option value="">Tanlang...</option>';
+  if(v&&TUMANLAR[v]){
+    TUMANLAR[v].forEach(t=>sel.innerHTML+=`<option value="${t}">${t}</option>`);
+    sel.disabled=false;
+  } else { sel.disabled=true; }
+  checkStep1();
+}
+
+function checkStep1(){
+  const ok=document.getElementById('vViloyat').value&&document.getElementById('vTuman').value;
+  const btn=document.getElementById('vNext1');
+  btn.classList.toggle('opacity-40',!ok);btn.classList.toggle('pointer-events-none',!ok);
+}
+// Listen for tuman change
+document.getElementById('vTuman').addEventListener('change',checkStep1);
+
+function selObj(el,type){
+  vaadaObj=vaadaObj===type?'':type;
+  document.querySelectorAll('.obj-btn').forEach(b=>b.classList.remove('selected'));
+  if(vaadaObj)el.classList.add('selected');
+  const btn=document.getElementById('vNext2');
+  btn.classList.toggle('opacity-40',!vaadaObj);btn.classList.toggle('pointer-events-none',!vaadaObj);
+}
+
+function selBaho(val){
+  vaadaBaho=val;
+  document.querySelectorAll('.baho-btn').forEach(b=>{b.classList.remove('selected','selected-no');});
+  if(val==='ha') document.getElementById('bahoHa').classList.add('selected');
+  else document.getElementById('bahoYoq').classList.add('selected-no');
+  const btn=document.getElementById('vSubmitBtn');
+  btn.classList.remove('opacity-40','pointer-events-none');
+}
+
+document.getElementById('vaadaMedia').addEventListener('change',function(){
+  if(this.files.length){
+    vaadaFile=this.files[0];
+    document.getElementById('vaadaPhotoIcon').textContent='check_circle';
+    document.getElementById('vaadaPhotoIcon').style.color='#22c55e';
+    document.getElementById('vaadaPhotoText').textContent='Rasm qo\'shildi ✓';
+  }
+});
+
+function goVaadaStep(step){
+  [1,2,3].forEach(s=>{
+    document.getElementById('vaadaStep'+s).classList.toggle('hidden',s!==step);
+    const vs=document.getElementById('vs'+s);
+    vs.classList.remove('on','done');
+    if(s<step) vs.classList.add('done');
+    else if(s===step) vs.classList.add('on');
+    if(s<3){const vl=document.getElementById('vl'+s);vl.classList.toggle('done',s<step);}
+  });
+  if(step===3){
+    const vil=document.getElementById('vViloyat');
+    const vilText=vil.options[vil.selectedIndex]?.text||'';
+    const tum=document.getElementById('vTuman').value;
+    const objNames={maktab:'Maktab',shifoxona:'Shifoxona',bogcha:"Bog'cha",boshqa:'Boshqa'};
+    document.getElementById('vaadaSummary').textContent=`${vilText}, ${tum} — ${objNames[vaadaObj]||'Ob\'yekt'}`;
+  }
+}
+
+async function submitVaada(){
+  if(!vaadaBaho)return;
+  const btn=document.getElementById('vSubmitBtn');
+  btn.innerHTML='<div class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block"></div>';
+  btn.classList.add('pointer-events-none');
+
+  const fd=new FormData();
+  fd.append('viloyat',document.getElementById('vViloyat').value);
+  fd.append('tuman',document.getElementById('vTuman').value);
+  fd.append('infratuzilma',vaadaObj||'maktab');
+  fd.append('sektor','vaada_tekshiruv');
+  fd.append('izoh',(vaadaBaho==='ha'?'✅ Bajarilgan deb tasdiqladi':'❌ Bajarilmagan deb xabar berdi')+'. '+(document.getElementById('vaadaIzoh').value||''));
+  fd.append('is_anonim',isAnonim?'true':'false');
+  fd.append('telegram_user_id',user.id||'0');
+  fd.append('telegram_username',user.username||'');
+  fd.append('telegram_full_name',`${user.first_name||''} ${user.last_name||''}`.trim());
+  if(vaadaFile) fd.append('rasmlar',vaadaFile);
+
+  try{
+    const res=await fetch('/api/murojaat/',{method:'POST',body:fd});
+    const d=await res.json();
+    if(res.ok&&d.success){document.getElementById('successModal').classList.remove('hidden');}
+    else throw new Error(d.error||'Xatolik');
+  }catch(e){tg.showAlert('Xatolik: '+e.message);}
+  finally{
+    btn.innerHTML='<span class="material-symbols-outlined align-middle mr-1" style="font-size:16px;font-variation-settings:\'FILL\' 1">send</span>Yuborish';
+    btn.classList.remove('pointer-events-none');
   }
 }
 </script>
