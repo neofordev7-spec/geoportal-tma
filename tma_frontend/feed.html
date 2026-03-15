@@ -290,7 +290,8 @@
       <span class="material-symbols-outlined" style="font-size:36px;color:#22c55e;font-variation-settings:'FILL' 1">check_circle</span>
     </div>
     <h2 class="text-lg font-black text-slate-900 mb-1">Qabul qilindi!</h2>
-    <p class="text-xs text-slate-400 mb-2">Tekshiruvingiz saqlandi</p>
+    <p class="text-xs text-slate-400 mb-1">Tekshiruvingiz saqlandi</p>
+    <p id="tksMotivation" class="text-[11px] font-semibold mb-2" style="color:#9d2bee;line-height:1.4;"></p>
     <p id="tksBadgeMsg" class="hidden text-sm font-bold mb-3" style="color:#6366f1"></p>
     <button onclick="closeTekshir()" class="px-8 py-2.5 rounded-full text-sm font-bold text-white active:scale-95 transition-transform" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">Yopish</button>
   </div>
@@ -796,6 +797,20 @@ document.getElementById('tksRasmInput').addEventListener('change',function(){
   }
 });
 
+// ── Motivatsion xabarlar ──────────────────────
+const TKS_MOTIVATION=[
+  "Rahmat sizga! Sizning bu harakatingiz minglab fuqarolarning hayotini yaxshilashi mumkin.",
+  "Siz haqiqiy fuqarosiz! Har bir tekshiruv — shaffoflikka qadam.",
+  "Sizning ovozingiz muhim! Bu ma'lumot minglab bolaning hayotini o'zgartirishi mumkin.",
+  "Rahmat! Sizning faolligingiz tufayli O'zbekiston yanada shaffof bo'ladi.",
+  "Ajoyib! Siz bugun minglab fuqarolar nomidan gapirdingiz.",
+  "Sizning bu harakatingiz 1000 minglab fuqarolarning og'irini yengil qilishi mumkin!",
+  "Har bir tekshiruv — o'zgarish boshlanishi. Rahmat sizga!",
+  "Siz xalq ovozi bo'lyapsiz! Bu juda muhim qadam.",
+  "Rahmat! Birgalikda biz haqiqiy holatni ko'rsatamiz.",
+  "Sizning faolligingiz — kelajak avlodlar uchun investitsiya!"
+];
+
 async function tksSubmit(){
   if(!tksSelectedObj||!tksSelectedNatija)return;
   const btn=document.getElementById('tksSubmitBtn');
@@ -817,9 +832,15 @@ async function tksSubmit(){
     if(res.ok&&d.success){
       document.getElementById('tksStep2').classList.add('hidden');
       document.getElementById('tksSuccess').classList.remove('hidden');
+      // Motivational message
+      const msg=TKS_MOTIVATION[Math.floor(Math.random()*TKS_MOTIVATION.length)];
+      document.getElementById('tksMotivation').textContent=msg;
       const badge=document.getElementById('tksBadgeMsg');
-      if(d.yangi_badge){badge.textContent='🏆 '+d.yangi_badge.nom+' yutuq ochildi!';badge.classList.remove('hidden');}
+      if(d.yangi_badge){badge.textContent=d.yangi_badge.nom+' yutuq ochildi!';badge.classList.remove('hidden');}
       else{badge.classList.add('hidden');}
+      // Reload feed to show new post
+      POSTS=[]; feedOffset=0; feedHasMore=true;
+      loadFeed();
     }else throw new Error(d.error||'Xatolik');
   }catch(e){
     tg.showAlert('Xatolik: '+e.message);
