@@ -89,6 +89,29 @@
     @keyframes sigPulse{0%{transform:scale(1);opacity:0.5}100%{transform:scale(1.6);opacity:0}}
     .signal-fab{width:48px;height:48px;border-radius:50%;margin-top:-18px;background:linear-gradient(135deg,#9d2bee,#7c3aed);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(157,43,238,0.4);position:relative;}
     .signal-fab::before{content:'';position:absolute;inset:-3px;border-radius:50%;border:1.5px solid rgba(157,43,238,0.3);animation:sigPulse 2s ease-out infinite;}
+
+    /* ── Tekshir FAB ── */
+    @keyframes tekshirGlow{0%,100%{box-shadow:0 4px 18px rgba(59,130,246,0.3)}50%{box-shadow:0 4px 28px rgba(59,130,246,0.55),0 0 8px rgba(99,102,241,0.3)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .spinner{animation:spin 0.7s linear infinite;border:2.5px solid rgba(0,0,0,0.08);border-top-color:#9333ea;border-radius:50%;width:24px;height:24px;}
+    .tekshir-fab{position:fixed;bottom:72px;right:12px;z-index:1199;display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:50px;border:none;cursor:pointer;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;animation:tekshirGlow 2.5s ease-in-out infinite;transition:transform 0.15s;}
+    .tekshir-fab:active{transform:scale(0.92);}
+    .tks-bg{position:fixed;inset:0;z-index:1300;background:rgba(0,0,0,0);pointer-events:none;transition:background 0.35s;}
+    .tks-bg.open{background:rgba(0,0,0,0.5);pointer-events:auto;}
+    .tks-sheet{position:fixed;bottom:0;left:0;right:0;z-index:1301;background:#fff;border-radius:20px 20px 0 0;max-height:88vh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.32,0.72,0,1);box-shadow:0 -4px 30px rgba(0,0,0,0.12);}
+    .tks-sheet.open{transform:translateY(0);}
+    .tks-list{flex:1;overflow-y:auto;padding:0 16px 16px;overscroll-behavior:contain;max-height:55vh;}
+    .tks-obj{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:rgba(0,0,0,0.02);border:1.5px solid rgba(0,0,0,0.06);margin-bottom:8px;cursor:pointer;transition:all 0.15s;}
+    .tks-obj:active{transform:scale(0.98);background:rgba(59,130,246,0.06);}
+    .tks-obj .tks-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .tks-chip{display:inline-flex;align-items:center;gap:4px;padding:6px 14px;border-radius:99px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid rgba(0,0,0,0.08);background:rgba(255,255,255,0.8);color:#64748b;transition:all 0.15s;}
+    .tks-chip.on{background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border-color:transparent;}
+    .tks-chip:active{transform:scale(0.95);}
+    .tks-baho{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 12px;border-radius:16px;background:rgba(0,0,0,0.02);border:2px solid rgba(0,0,0,0.06);cursor:pointer;transition:all 0.2s;}
+    .tks-baho:active{transform:scale(0.96);}
+    .tks-baho.sel-yes{border-color:#22c55e;background:rgba(34,197,94,0.08);}
+    .tks-baho.sel-no{border-color:#ef4444;background:rgba(239,68,68,0.08);}
   </style>
 </head>
 <body>
@@ -265,6 +288,101 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Tekshir FAB -->
+<button onclick="openTekshir()" id="tekshirFab" class="tekshir-fab">
+  <span class="material-symbols-outlined" style="font-size:20px;font-variation-settings:'FILL' 1">fact_check</span>
+  <span>Tekshir</span>
+</button>
+
+<!-- Tekshir Sheet -->
+<div id="tksBg" class="tks-bg" onclick="closeTekshir()"></div>
+<div id="tksSheet" class="tks-sheet">
+  <div style="display:flex;justify-content:center;padding:10px 0 4px"><div style="width:36px;height:4px;border-radius:99px;background:rgba(0,0,0,0.1)"></div></div>
+  <div id="tksStep1">
+    <div style="padding:0 16px 8px">
+      <div class="flex items-center justify-between mb-1">
+        <h2 style="font-size:15px;font-weight:900;color:#0f172a">Yaqindagi ob'yektlar</h2>
+        <button onclick="closeTekshir()" style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.06);border:none;cursor:pointer">
+          <span class="material-symbols-outlined" style="font-size:16px;color:#94a3b8">close</span>
+        </button>
+      </div>
+      <p style="font-size:11px;color:#64748b;margin-bottom:12px">Joylashuvingiz bo'yicha eng yaqin ob'yektlarni tekshiring</p>
+      <button onclick="tksGetGPS()" id="tksGpsBtn" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;margin-bottom:12px;background:rgba(59,130,246,0.08);border:1.5px solid rgba(59,130,246,0.15);cursor:pointer;transition:transform 0.15s" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform=''">
+        <div style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3b82f6,#6366f1);flex-shrink:0">
+          <span class="material-symbols-outlined" style="font-size:20px;color:#fff;font-variation-settings:'FILL' 1" id="tksGpsIcon">my_location</span>
+        </div>
+        <div style="flex:1;text-align:left">
+          <p style="font-size:14px;font-weight:700;color:#0f172a" id="tksGpsText">Manzilni yoqish</p>
+          <p style="font-size:10px;color:#64748b" id="tksGpsSub">GPS orqali yaqin ob'yektlarni topish</p>
+        </div>
+      </button>
+      <div id="tksFilters" class="hidden" style="display:none;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <button onclick="tksFilter('')" class="tks-chip on" data-tur="">Barchasi</button>
+        <button onclick="tksFilter('maktab')" class="tks-chip" data-tur="maktab"><span class="material-symbols-outlined" style="font-size:14px;font-variation-settings:'FILL' 1">school</span>Maktab</button>
+        <button onclick="tksFilter('shifoxona')" class="tks-chip" data-tur="shifoxona"><span class="material-symbols-outlined" style="font-size:14px;font-variation-settings:'FILL' 1">local_hospital</span>Shifoxona</button>
+        <button onclick="tksFilter('bogcha')" class="tks-chip" data-tur="bogcha"><span class="material-symbols-outlined" style="font-size:14px;font-variation-settings:'FILL' 1">child_care</span>Bog'cha</button>
+        <button onclick="tksFilter('sport')" class="tks-chip" data-tur="sport"><span class="material-symbols-outlined" style="font-size:14px;font-variation-settings:'FILL' 1">fitness_center</span>Sport</button>
+      </div>
+    </div>
+    <div id="tksLoading" class="hidden" style="display:none;justify-content:center;padding:32px 0"><div class="spinner"></div></div>
+    <div id="tksObjList" class="tks-list hidden"></div>
+    <div id="tksEmpty" class="hidden" style="text-align:center;padding:32px 16px;display:none">
+      <span class="material-symbols-outlined" style="font-size:40px;color:#cbd5e1;margin-bottom:8px;display:block">location_off</span>
+      <p style="font-size:14px;font-weight:600;color:#94a3b8">10 km atrofda ob'yekt topilmadi</p>
+      <p style="font-size:11px;color:#cbd5e1;margin-top:4px">Boshqa joydan urinib ko'ring</p>
+    </div>
+  </div>
+  <div id="tksStep2" class="hidden" style="padding:0 16px 24px;display:none">
+    <button onclick="tksBack()" style="display:flex;align-items:center;gap:4px;margin-bottom:12px;background:none;border:none;cursor:pointer">
+      <span class="material-symbols-outlined" style="font-size:18px;color:#64748b">arrow_back</span>
+      <span style="font-size:12px;font-weight:600;color:#64748b">Orqaga</span>
+    </button>
+    <div id="tksObjInfo" style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;margin-bottom:16px;background:rgba(59,130,246,0.06);border:1.5px solid rgba(59,130,246,0.12);">
+      <div id="tksObjIcon" style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(59,130,246,0.12)">
+        <span class="material-symbols-outlined" style="font-size:20px;color:#3b82f6;font-variation-settings:'FILL' 1">school</span>
+      </div>
+      <div style="flex:1;min-width:0">
+        <p id="tksObjName" style="font-size:14px;font-weight:700;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">-</p>
+        <p id="tksObjMeta" style="font-size:10px;color:#64748b">-</p>
+      </div>
+    </div>
+    <p style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Va'da bajarilganmi?</p>
+    <div style="display:flex;gap:12px;margin-bottom:16px">
+      <button onclick="tksNatija('bajarildi')" id="tksBahoHa" class="tks-baho">
+        <span class="material-symbols-outlined" style="font-size:32px;color:#22c55e;font-variation-settings:'FILL' 1">check_circle</span>
+        <span style="font-size:14px;font-weight:700;color:#0f172a">Bajarildi</span>
+      </button>
+      <button onclick="tksNatija('muammo')" id="tksBahoYoq" class="tks-baho">
+        <span class="material-symbols-outlined" style="font-size:32px;color:#ef4444;font-variation-settings:'FILL' 1">cancel</span>
+        <span style="font-size:14px;font-weight:700;color:#0f172a">Yo'q</span>
+      </button>
+    </div>
+    <textarea id="tksIzoh" rows="2" placeholder="Izoh (ixtiyoriy)..." style="width:100%;padding:12px;border-radius:12px;font-size:14px;resize:none;margin-bottom:12px;background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.08);color:#0f172a;font-family:'Inter',sans-serif;box-sizing:border-box"></textarea>
+    <input type="file" id="tksRasmInput" accept="image/*" class="hidden" style="display:none"/>
+    <button onclick="document.getElementById('tksRasmInput').click()" id="tksPhotoBtn" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;margin-bottom:16px;background:rgba(0,0,0,0.02);border:1.5px solid rgba(0,0,0,0.06);cursor:pointer;text-align:left">
+      <div style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(99,102,241,0.1)">
+        <span class="material-symbols-outlined" style="font-size:18px;color:#6366f1;font-variation-settings:'FILL' 1" id="tksPhotoIcon">add_a_photo</span>
+      </div>
+      <div style="flex:1">
+        <p id="tksPhotoText" style="font-size:14px;font-weight:600;color:#0f172a">Rasm qo'shish</p>
+        <p style="font-size:10px;color:#64748b">Ixtiyoriy — dalil sifatida</p>
+      </div>
+    </button>
+    <button onclick="tksSubmit()" id="tksSubmitBtn" style="width:100%;padding:14px;border-radius:50px;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;color:#fff;background:linear-gradient(135deg,#3b82f6,#6366f1);box-shadow:0 4px 18px rgba(59,130,246,0.3);border:none;cursor:pointer;opacity:0.4;pointer-events:none;transition:all 0.2s">
+      <span class="material-symbols-outlined" style="font-size:18px;font-variation-settings:'FILL' 1">send</span>Yuborish
+    </button>
+  </div>
+  <div id="tksSuccess" class="hidden" style="text-align:center;padding:32px 16px;display:none">
+    <div style="width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;background:rgba(34,197,94,0.12)">
+      <span class="material-symbols-outlined" style="font-size:36px;color:#22c55e;font-variation-settings:'FILL' 1">check_circle</span>
+    </div>
+    <h2 style="font-size:18px;font-weight:900;color:#0f172a;margin-bottom:4px">Qabul qilindi!</h2>
+    <p style="font-size:12px;color:#94a3b8;margin-bottom:8px">Tekshiruvingiz saqlandi</p>
+    <p id="tksBadgeMsg" class="hidden" style="font-size:14px;font-weight:700;color:#6366f1;margin-bottom:12px;display:none"></p>
+    <button onclick="closeTekshir()" style="padding:10px 32px;border-radius:50px;font-size:14px;font-weight:700;color:#fff;background:linear-gradient(135deg,#3b82f6,#6366f1);border:none;cursor:pointer">Yopish</button>
   </div>
 </div>
 
@@ -518,6 +636,144 @@ function renderReyting(d){const medals=['🥇','🥈','🥉','4️⃣','5️⃣'
 function renderMuammolar(d){const u=d.umumiy,f=u.mamnuniyat_foizi,mp=100-f,circ=2*Math.PI*44;document.getElementById('pie-baj').style.strokeDasharray=`${f/100*circ} ${circ}`;document.getElementById('pie-mum').style.strokeDasharray=`${mp/100*circ} ${circ}`;document.getElementById('pie-mum').style.strokeDashoffset=-f/100*circ;document.getElementById('pie-baj-pct').textContent=f+'%';document.getElementById('pie-mum-pct').textContent=mp+'%';const c=document.getElementById('muammoTurlari');if(!d.muammo_turlari.length){c.innerHTML='<p class="text-center text-xs text-slate-400 py-4">Muammolar qayd etilmagan</p>';return;}const mx=Math.max(...d.muammo_turlari.map(m=>m.soni));const colors=['#ef4444','#f59e0b','#9d2bee','#3b82f6','#ec4899','#14b8a6','#84cc16','#f97316'];c.innerHTML=d.muammo_turlari.map((m,i)=>{const r=colors[i%colors.length],w=Math.round(m.soni/mx*100);return`<div><div class="flex justify-between text-xs mb-1"><span class="font-semibold text-slate-700 truncate">${m.nom}</span><span class="font-black flex-shrink-0 ml-2" style="color:${r}">${m.soni} ta</span></div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:${w}%;background:${r};transition:width 0.8s"></div></div></div>`;}).join('');}
 
 (async function(){try{const res=await fetch('/api/tahlil/');if(!res.ok)throw 0;const d=await res.json();if(!d?.umumiy)throw 0;renderUmumiy(d);renderViloyatlar(d);renderReyting(d);renderMuammolar(d);}catch{renderUmumiy(SINTETIK);renderViloyatlar(SINTETIK);renderReyting(SINTETIK);renderMuammolar(SINTETIK);}})();
+
+/* ══════════════════════════════════════════════
+   TEKSHIR FLOW
+   ══════════════════════════════════════════════ */
+const tksUser=tg.initDataUnsafe?.user||{};
+let tksCoords=null, tksAllObjects=[], tksFiltered=[], tksSelectedObj=null, tksSelectedNatija='', tksFile=null, tksActiveFilter='';
+
+function haversine(lat1,lng1,lat2,lng2){
+  const R=6371, dLat=(lat2-lat1)*Math.PI/180, dLng=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function fmtDist(km){return km<1?(km*1000).toFixed(0)+' m':km.toFixed(1)+' km';}
+const TUR_ICONS={maktab:{icon:'school',color:'#3b82f6',bg:'rgba(59,130,246,0.12)'},shifoxona:{icon:'local_hospital',color:'#ef4444',bg:'rgba(239,68,68,0.12)'},bogcha:{icon:'child_care',color:'#22c55e',bg:'rgba(34,197,94,0.12)'},sport:{icon:'fitness_center',color:'#f59e0b',bg:'rgba(245,158,11,0.12)'}};
+
+function tksShow(id){document.getElementById(id).style.display='';document.getElementById(id).classList.remove('hidden');}
+function tksHide(id){document.getElementById(id).style.display='none';document.getElementById(id).classList.add('hidden');}
+
+function openTekshir(){
+  document.getElementById('tksBg').classList.add('open');
+  document.getElementById('tksSheet').classList.add('open');
+  document.getElementById('tekshirFab').style.display='none';
+  tksShow('tksStep1'); tksHide('tksStep2'); tksHide('tksSuccess');
+}
+function closeTekshir(){
+  document.getElementById('tksSheet').classList.remove('open');
+  setTimeout(()=>{
+    document.getElementById('tksBg').classList.remove('open');
+    document.getElementById('tekshirFab').style.display='';
+    tksSelectedObj=null; tksSelectedNatija=''; tksFile=null;
+    tksShow('tksStep1'); tksHide('tksStep2'); tksHide('tksSuccess');
+  },400);
+}
+function tksGetGPS(){
+  const icon=document.getElementById('tksGpsIcon'), txt=document.getElementById('tksGpsText'), sub=document.getElementById('tksGpsSub');
+  icon.textContent='sync'; icon.style.animation='spin 1s linear infinite';
+  txt.textContent='Aniqlanmoqda...'; sub.textContent='GPS signal qidirilmoqda';
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      tksCoords={lat:pos.coords.latitude,lng:pos.coords.longitude};
+      icon.textContent='check_circle'; icon.style.animation='';
+      txt.textContent='Joylashuv aniqlandi';
+      sub.textContent=`${tksCoords.lat.toFixed(4)}, ${tksCoords.lng.toFixed(4)}`;
+      document.getElementById('tksGpsBtn').style.borderColor='rgba(34,197,94,0.3)';
+      document.getElementById('tksGpsBtn').style.background='rgba(34,197,94,0.06)';
+      tksLoadObjects();
+    },
+    ()=>{icon.textContent='location_off';icon.style.animation='';txt.textContent='GPS aniqlanmadi';sub.textContent='Qaytadan urinib ko\'ring';},
+    {enableHighAccuracy:true,timeout:12000}
+  );
+}
+async function tksLoadObjects(){
+  tksShow('tksLoading'); document.getElementById('tksLoading').style.display='flex';
+  tksHide('tksObjList'); tksHide('tksEmpty');
+  try{
+    const res=await fetch('/api/maktablar/');
+    const d=await res.json();
+    tksAllObjects=(d.maktablar||[]).map(o=>({...o,dist:haversine(tksCoords.lat,tksCoords.lng,o.lat,o.lng)})).filter(o=>o.dist<=10).sort((a,b)=>a.dist-b.dist);
+    tksActiveFilter=''; tksRenderList();
+    document.getElementById('tksFilters').style.display='flex';
+    document.getElementById('tksFilters').classList.remove('hidden');
+  }catch(e){tksHide('tksLoading');tksShow('tksEmpty');document.getElementById('tksEmpty').style.display='block';}
+}
+function tksFilter(tur){
+  tksActiveFilter=tur;
+  document.querySelectorAll('.tks-chip').forEach(c=>c.classList.toggle('on',(c.dataset.tur||'')===tur));
+  tksRenderList();
+}
+function tksRenderList(){
+  tksHide('tksLoading');
+  const list=document.getElementById('tksObjList');
+  tksFiltered=tksActiveFilter?tksAllObjects.filter(o=>o.tur===tksActiveFilter):tksAllObjects;
+  if(!tksFiltered.length){list.style.display='none';tksShow('tksEmpty');document.getElementById('tksEmpty').style.display='block';return;}
+  tksHide('tksEmpty');
+  list.innerHTML=tksFiltered.map((o,i)=>{
+    const ti=TUR_ICONS[o.tur]||{icon:'apartment',color:'#9d2bee',bg:'rgba(157,43,238,0.12)'};
+    const dot=o.holat_rangi?`<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${o.holat_rangi};margin-right:4px;"></span>`:'';
+    return`<div class="tks-obj" onclick="tksSelectObj(${i})" style="animation:fadeUp 0.25s ease-out ${i*0.04}s both"><div class="tks-icon" style="background:${ti.bg}"><span class="material-symbols-outlined" style="font-size:20px;color:${ti.color};font-variation-settings:'FILL' 1">${ti.icon}</span></div><div style="flex:1;min-width:0"><p style="font-size:14px;font-weight:700;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.nom}</p><div style="display:flex;align-items:center;gap:4px;margin-top:2px">${dot}<span style="font-size:10px;color:#94a3b8">${o.tur_nomi||o.tur}</span><span style="font-size:10px;color:#cbd5e1">·</span><span style="font-size:10px;color:#94a3b8">${o.tuman||''}</span></div></div><span style="font-size:12px;font-weight:700;color:#94a3b8;flex-shrink:0">${fmtDist(o.dist)}</span></div>`;
+  }).join('');
+  list.style.display=''; list.classList.remove('hidden');
+}
+function tksSelectObj(idx){
+  tksSelectedObj=tksFiltered[idx]; if(!tksSelectedObj)return;
+  tksSelectedNatija=''; tksFile=null;
+  const ti=TUR_ICONS[tksSelectedObj.tur]||{icon:'apartment',color:'#9d2bee',bg:'rgba(157,43,238,0.12)'};
+  document.getElementById('tksObjIcon').style.background=ti.bg;
+  document.getElementById('tksObjIcon').innerHTML=`<span class="material-symbols-outlined" style="font-size:20px;color:${ti.color};font-variation-settings:'FILL' 1">${ti.icon}</span>`;
+  document.getElementById('tksObjName').textContent=tksSelectedObj.nom;
+  document.getElementById('tksObjMeta').textContent=`${tksSelectedObj.tur_nomi||tksSelectedObj.tur} · ${tksSelectedObj.tuman||''} · ${fmtDist(tksSelectedObj.dist)}`;
+  document.getElementById('tksBahoHa').className='tks-baho';
+  document.getElementById('tksBahoYoq').className='tks-baho';
+  document.getElementById('tksIzoh').value='';
+  document.getElementById('tksPhotoIcon').textContent='add_a_photo';
+  document.getElementById('tksPhotoIcon').style.color='#6366f1';
+  document.getElementById('tksPhotoText').textContent='Rasm qo\'shish';
+  const btn=document.getElementById('tksSubmitBtn');
+  btn.style.opacity='0.4'; btn.style.pointerEvents='none';
+  tksHide('tksStep1'); tksShow('tksStep2'); document.getElementById('tksStep2').style.display='block';
+}
+function tksBack(){tksHide('tksStep2');tksShow('tksStep1');tksSelectedObj=null;tksSelectedNatija='';}
+function tksNatija(val){
+  tksSelectedNatija=val;
+  document.getElementById('tksBahoHa').className='tks-baho'+(val==='bajarildi'?' sel-yes':'');
+  document.getElementById('tksBahoYoq').className='tks-baho'+(val==='muammo'?' sel-no':'');
+  const btn=document.getElementById('tksSubmitBtn');
+  btn.style.opacity='1'; btn.style.pointerEvents='auto';
+}
+document.getElementById('tksRasmInput').addEventListener('change',function(){
+  if(this.files.length){tksFile=this.files[0];document.getElementById('tksPhotoIcon').textContent='check_circle';document.getElementById('tksPhotoIcon').style.color='#22c55e';document.getElementById('tksPhotoText').textContent='Rasm qo\'shildi';}
+});
+async function tksSubmit(){
+  if(!tksSelectedObj||!tksSelectedNatija)return;
+  const btn=document.getElementById('tksSubmitBtn');
+  btn.innerHTML='<div class="spinner" style="width:18px;height:18px;border-width:2px;display:inline-block;border-top-color:#fff;border-color:rgba(255,255,255,0.3);border-top-color:#fff;"></div> Yuborilmoqda...';
+  btn.style.pointerEvents='none';
+  const fd=new FormData();
+  fd.append('maktab_id',tksSelectedObj.id);
+  fd.append('natija',tksSelectedNatija);
+  fd.append('izoh',document.getElementById('tksIzoh').value||'');
+  fd.append('telegram_user_id',tksUser.id||'0');
+  fd.append('telegram_username',tksUser.username||'');
+  fd.append('telegram_full_name',`${tksUser.first_name||''} ${tksUser.last_name||''}`.trim());
+  if(tksFile)fd.append('rasm',tksFile);
+  try{
+    const res=await fetch('/api/tekshiruv/',{method:'POST',body:fd});
+    const d=await res.json();
+    if(res.ok&&d.success){
+      tksHide('tksStep2');tksShow('tksSuccess');document.getElementById('tksSuccess').style.display='block';
+      const badge=document.getElementById('tksBadgeMsg');
+      if(d.yangi_badge){badge.textContent='🏆 '+d.yangi_badge.nom+' yutuq ochildi!';badge.style.display='block';badge.classList.remove('hidden');}
+      else{badge.style.display='none';}
+    }else throw new Error(d.error||'Xatolik');
+  }catch(e){
+    tg.showAlert('Xatolik: '+e.message);
+    btn.innerHTML='<span class="material-symbols-outlined" style="font-size:18px;font-variation-settings:\'FILL\' 1">send</span>Yuborish';
+    btn.style.pointerEvents='auto';
+  }
+}
 </script>
 </body>
 </html>

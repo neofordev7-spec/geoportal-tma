@@ -37,20 +37,25 @@
     }
     .signal-fab-sm::before{content:'';position:absolute;inset:-3px;border-radius:50%;border:1.5px solid rgba(157,43,238,0.3);animation:sigPulse 2s ease-out infinite;}
 
-    /* Object picker sheet */
-    .sheet-bg{background:rgba(0,0,0,0.3);backdrop-filter:blur(4px);}
-    @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-    .sheet{animation:slideUp 0.25s ease-out;}
-
-    /* Vaada wizard steps */
-    .vst{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;background:rgba(0,0,0,0.04);color:#94a3b8;border:2px solid rgba(0,0,0,0.08);transition:all 0.3s;}
-    .vst.on{background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border-color:transparent;box-shadow:0 0 12px rgba(59,130,246,0.3);}
-    .vst.done{background:#22c55e;color:#fff;border-color:transparent;}
-    .vline{flex:1;height:2px;background:rgba(0,0,0,0.08);border-radius:99px;transition:background 0.3s;}
-    .vline.done{background:#22c55e;}
-    .obj-btn.selected{border:2px solid #3b82f6!important;background:rgba(59,130,246,0.12)!important;}
-    .baho-btn.selected{border:2px solid #22c55e!important;background:rgba(34,197,94,0.1)!important;}
-    .baho-btn.selected-no{border:2px solid #ef4444!important;background:rgba(239,68,68,0.1)!important;}
+    /* ── Tekshir FAB ── */
+    @keyframes tekshirGlow{0%,100%{box-shadow:0 4px 18px rgba(59,130,246,0.3)}50%{box-shadow:0 4px 28px rgba(59,130,246,0.55),0 0 8px rgba(99,102,241,0.3)}}
+    .tekshir-fab{position:fixed;bottom:72px;right:12px;z-index:49;display:flex;align-items:center;gap:6px;padding:10px 16px;border-radius:50px;border:none;cursor:pointer;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;animation:tekshirGlow 2.5s ease-in-out infinite;transition:transform 0.15s;}
+    .tekshir-fab:active{transform:scale(0.92);}
+    .tks-bg{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,0);pointer-events:none;transition:background 0.35s;}
+    .tks-bg.open{background:rgba(0,0,0,0.5);pointer-events:auto;}
+    .tks-sheet{position:fixed;bottom:0;left:0;right:0;z-index:71;background:#fff;border-radius:20px 20px 0 0;max-height:88vh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.32,0.72,0,1);box-shadow:0 -4px 30px rgba(0,0,0,0.12);}
+    .tks-sheet.open{transform:translateY(0);}
+    .tks-list{flex:1;overflow-y:auto;padding:0 16px 16px;overscroll-behavior:contain;max-height:55vh;}
+    .tks-obj{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:rgba(0,0,0,0.02);border:1.5px solid rgba(0,0,0,0.06);margin-bottom:8px;cursor:pointer;transition:all 0.15s;}
+    .tks-obj:active{transform:scale(0.98);background:rgba(59,130,246,0.06);}
+    .tks-obj .tks-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .tks-chip{display:inline-flex;align-items:center;gap:4px;padding:6px 14px;border-radius:99px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid rgba(0,0,0,0.08);background:rgba(255,255,255,0.8);color:#64748b;transition:all 0.15s;}
+    .tks-chip.on{background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border-color:transparent;}
+    .tks-chip:active{transform:scale(0.95);}
+    .tks-baho{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 12px;border-radius:16px;background:rgba(0,0,0,0.02);border:2px solid rgba(0,0,0,0.06);cursor:pointer;transition:all 0.2s;}
+    .tks-baho:active{transform:scale(0.96);}
+    .tks-baho.sel-yes{border-color:#22c55e;background:rgba(34,197,94,0.08);}
+    .tks-baho.sel-no{border-color:#ef4444;background:rgba(239,68,68,0.08);}
   </style>
 </head>
 <body class="pb-16">
@@ -71,162 +76,8 @@
   </div>
 </header>
 
-<!-- ═══ 2 TA TANLOV ═══ -->
-<div id="viewChoice" class="px-4 mt-4 space-y-3 fade-up">
-
-  <!-- Muammo xabar berish -->
-  <button onclick="openReport()" class="w-full gl rounded-2xl p-4 flex items-center gap-4 text-left active:scale-[0.98] transition-transform">
-    <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(239,68,68,0.1)">
-      <span class="material-symbols-outlined" style="font-size:24px;color:#ef4444;font-variation-settings:'FILL' 1">report</span>
-    </div>
-    <div class="flex-1 min-w-0">
-      <p class="text-sm font-bold text-slate-900">Muammo haqida xabar bering</p>
-      <p class="text-[11px] text-slate-500 mt-0.5">Rasm, video va joylashuv bilan</p>
-    </div>
-    <span class="material-symbols-outlined text-slate-600" style="font-size:20px">chevron_right</span>
-  </button>
-
-  <!-- Va'dalarni tekshirish -->
-  <button onclick="openVaada()" class="w-full gl rounded-2xl p-4 flex items-center gap-4 text-left active:scale-[0.98] transition-transform">
-    <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(59,130,246,0.1)">
-      <span class="material-symbols-outlined" style="font-size:24px;color:#3b82f6;font-variation-settings:'FILL' 1">fact_check</span>
-    </div>
-    <div class="flex-1 min-w-0">
-      <p class="text-sm font-bold text-slate-900">Va'dalar bajarilganmi?</p>
-      <p class="text-[11px] text-slate-500 mt-0.5">Hududingizni tanlab tekshiring</p>
-    </div>
-    <span class="material-symbols-outlined text-slate-600" style="font-size:20px">chevron_right</span>
-  </button>
-</div>
-
-<!-- ═══ VA'DA TEKSHIRISH WIZARD ═══ -->
-<div id="viewVaada" class="hidden px-4 mt-3 fade-up pb-24">
-
-  <!-- Progress steps -->
-  <div class="flex items-center gap-2 mb-5">
-    <div class="vst on" id="vs1"><span>1</span></div>
-    <div class="vline" id="vl1"></div>
-    <div class="vst" id="vs2"><span>2</span></div>
-    <div class="vline" id="vl2"></div>
-    <div class="vst" id="vs3"><span>3</span></div>
-  </div>
-
-  <!-- STEP 1: Hudud -->
-  <div id="vaadaStep1" class="fade-up">
-    <h2 class="text-sm font-bold text-slate-900 mb-1">Hududingizni tanlang</h2>
-    <p class="text-[11px] text-slate-500 mb-4">Qaysi viloyat va tumanda tekshirasiz?</p>
-
-    <!-- Viloyat -->
-    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Viloyat</label>
-    <div class="relative mb-3">
-      <select id="vViloyat" onchange="onViloyatChange()" class="w-full py-3 px-4 rounded-xl text-sm font-semibold appearance-none cursor-pointer" style="background:rgba(255,255,255,0.7);border:1px solid rgba(0,0,0,0.08);color:#0f172a;">
-        <option value="">Tanlang...</option>
-        <option value="toshkent_sh">Toshkent shahri</option>
-        <option value="toshkent_v">Toshkent viloyati</option>
-        <option value="samarqand">Samarqand viloyati</option>
-        <option value="fargona">Farg'ona viloyati</option>
-        <option value="andijon">Andijon viloyati</option>
-        <option value="namangan">Namangan viloyati</option>
-        <option value="buxoro">Buxoro viloyati</option>
-        <option value="xorazm">Xorazm viloyati</option>
-        <option value="qashqadaryo">Qashqadaryo viloyati</option>
-        <option value="surxondaryo">Surxondaryo viloyati</option>
-        <option value="jizzax">Jizzax viloyati</option>
-        <option value="sirdaryo">Sirdaryo viloyati</option>
-        <option value="navoiy">Navoiy viloyati</option>
-        <option value="qoraqalpogiston">Qoraqalpog'iston R.</option>
-      </select>
-      <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" style="font-size:18px">expand_more</span>
-    </div>
-
-    <!-- Tuman -->
-    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Tuman</label>
-    <div class="relative mb-4">
-      <select id="vTuman" class="w-full py-3 px-4 rounded-xl text-sm font-semibold appearance-none cursor-pointer" style="background:rgba(255,255,255,0.7);border:1px solid rgba(0,0,0,0.08);color:#0f172a;" disabled>
-        <option value="">Avval viloyatni tanlang</option>
-      </select>
-      <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" style="font-size:18px">expand_more</span>
-    </div>
-
-    <button onclick="goVaadaStep(2)" id="vNext1" class="w-full py-3 rounded-xl text-sm font-bold text-white active:scale-95 transition-all opacity-40 pointer-events-none" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">
-      Davom etish
-      <span class="material-symbols-outlined align-middle ml-1" style="font-size:16px">arrow_forward</span>
-    </button>
-  </div>
-
-  <!-- STEP 2: Ob'ekt turi -->
-  <div id="vaadaStep2" class="hidden fade-up">
-    <h2 class="text-sm font-bold text-slate-900 mb-1">Ob'yekt turini tanlang</h2>
-    <p class="text-[11px] text-slate-500 mb-4">Nimani tekshirmoqchisiz?</p>
-
-    <div class="grid grid-cols-2 gap-2 mb-4" id="objTypes">
-      <button onclick="selObj(this,'maktab')" class="obj-btn gl rounded-xl p-4 flex flex-col items-center gap-2 text-center active:scale-95 transition-all">
-        <div class="w-11 h-11 rounded-full flex items-center justify-center" style="background:rgba(59,130,246,0.12)"><span class="material-symbols-outlined" style="font-size:22px;color:#3b82f6;font-variation-settings:'FILL' 1">school</span></div>
-        <span class="text-xs font-bold text-slate-900">Maktab</span>
-      </button>
-      <button onclick="selObj(this,'shifoxona')" class="obj-btn gl rounded-xl p-4 flex flex-col items-center gap-2 text-center active:scale-95 transition-all">
-        <div class="w-11 h-11 rounded-full flex items-center justify-center" style="background:rgba(239,68,68,0.12)"><span class="material-symbols-outlined" style="font-size:22px;color:#ef4444;font-variation-settings:'FILL' 1">local_hospital</span></div>
-        <span class="text-xs font-bold text-slate-900">Shifoxona</span>
-      </button>
-      <button onclick="selObj(this,'bogcha')" class="obj-btn gl rounded-xl p-4 flex flex-col items-center gap-2 text-center active:scale-95 transition-all">
-        <div class="w-11 h-11 rounded-full flex items-center justify-center" style="background:rgba(34,197,94,0.12)"><span class="material-symbols-outlined" style="font-size:22px;color:#22c55e;font-variation-settings:'FILL' 1">child_care</span></div>
-        <span class="text-xs font-bold text-slate-900">Bog'cha</span>
-      </button>
-      <button onclick="selObj(this,'boshqa')" class="obj-btn gl rounded-xl p-4 flex flex-col items-center gap-2 text-center active:scale-95 transition-all">
-        <div class="w-11 h-11 rounded-full flex items-center justify-center" style="background:rgba(157,43,238,0.12)"><span class="material-symbols-outlined" style="font-size:22px;color:#9d2bee;font-variation-settings:'FILL' 1">apartment</span></div>
-        <span class="text-xs font-bold text-slate-900">Boshqa</span>
-      </button>
-    </div>
-
-    <div class="flex gap-2">
-      <button onclick="goVaadaStep(1)" class="flex-1 py-3 rounded-xl text-sm font-semibold text-slate-500 active:scale-95 transition-all" style="background:rgba(0,0,0,0.04)">Orqaga</button>
-      <button onclick="goVaadaStep(3)" id="vNext2" class="flex-1 py-3 rounded-xl text-sm font-bold text-white active:scale-95 transition-all opacity-40 pointer-events-none" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">Davom etish</button>
-    </div>
-  </div>
-
-  <!-- STEP 3: Baholash -->
-  <div id="vaadaStep3" class="hidden fade-up">
-    <h2 class="text-sm font-bold text-slate-900 mb-1">Va'da bajarilganmi?</h2>
-    <p class="text-[11px] text-slate-500 mb-4" id="vaadaSummary">Hududingiz haqida fikringiz</p>
-
-    <!-- Ha / Yo'q -->
-    <div class="flex gap-3 mb-4">
-      <button onclick="selBaho('ha')" id="bahoHa" class="baho-btn flex-1 gl rounded-2xl py-5 flex flex-col items-center gap-2 active:scale-95 transition-all">
-        <span style="font-size:36px">&#128515;</span>
-        <span class="text-sm font-bold text-slate-900">Ha, bajarildi</span>
-      </button>
-      <button onclick="selBaho('yoq')" id="bahoYoq" class="baho-btn flex-1 gl rounded-2xl py-5 flex flex-col items-center gap-2 active:scale-95 transition-all">
-        <span style="font-size:36px">&#128543;</span>
-        <span class="text-sm font-bold text-slate-900">Yo'q, bajarilmadi</span>
-      </button>
-    </div>
-
-    <!-- Izoh (ixtiyoriy) -->
-    <textarea id="vaadaIzoh" rows="2" placeholder="Izoh (ixtiyoriy)..." class="w-full p-3 rounded-xl text-sm resize-none mb-3" style="background:rgba(255,255,255,0.7);border:1px solid rgba(0,0,0,0.08);color:#0f172a;"></textarea>
-
-    <!-- Rasm (ixtiyoriy) -->
-    <input type="file" id="vaadaMedia" accept="image/*" class="hidden"/>
-    <button onclick="document.getElementById('vaadaMedia').click()" id="vaadaPhotoBtn" class="w-full gl rounded-xl p-3 flex items-center gap-3 mb-4 active:scale-[0.98] transition-all text-left">
-      <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(157,43,238,0.1)">
-        <span class="material-symbols-outlined" style="font-size:18px;color:#9d2bee;font-variation-settings:'FILL' 1" id="vaadaPhotoIcon">add_a_photo</span>
-      </div>
-      <div class="flex-1">
-        <p class="text-sm font-semibold text-slate-900" id="vaadaPhotoText">Rasm qo'shish</p>
-        <p class="text-[10px] text-slate-500">Ixtiyoriy — dalil sifatida</p>
-      </div>
-    </button>
-
-    <div class="flex gap-2">
-      <button onclick="goVaadaStep(2)" class="flex-1 py-3 rounded-xl text-sm font-semibold text-slate-500 active:scale-95 transition-all" style="background:rgba(0,0,0,0.04)">Orqaga</button>
-      <button onclick="submitVaada()" id="vSubmitBtn" class="flex-1 py-3 rounded-xl text-sm font-bold text-white active:scale-95 transition-all opacity-40 pointer-events-none" style="background:linear-gradient(135deg,#22c55e,#16a34a)">
-        <span class="material-symbols-outlined align-middle mr-1" style="font-size:16px;font-variation-settings:'FILL' 1">send</span>Yuborish
-      </button>
-    </div>
-  </div>
-</div>
-
 <!-- ═══ MUAMMO FORMASI ═══ -->
-<div id="viewReport" class="hidden px-4 mt-3 fade-up pb-24">
+<div id="viewReport" class="px-4 mt-3 fade-up pb-24">
 
   <!-- Ta'sir darajasi -->
   <div class="flex items-center justify-between mb-4">
@@ -323,6 +174,101 @@
   </div>
 </div>
 
+<!-- Tekshir FAB -->
+<button onclick="openTekshir()" id="tekshirFab" class="tekshir-fab">
+  <span class="material-symbols-outlined" style="font-size:20px;font-variation-settings:'FILL' 1">fact_check</span>
+  <span>Tekshir</span>
+</button>
+
+<!-- Tekshir Sheet -->
+<div id="tksBg" class="tks-bg" onclick="closeTekshir()"></div>
+<div id="tksSheet" class="tks-sheet">
+  <div style="display:flex;justify-content:center;padding:10px 0 4px"><div style="width:36px;height:4px;border-radius:99px;background:rgba(0,0,0,0.1)"></div></div>
+  <div id="tksStep1">
+    <div style="padding:0 16px 8px">
+      <div class="flex items-center justify-between mb-1">
+        <h2 class="text-[15px] font-black text-slate-900">Yaqindagi ob'yektlar</h2>
+        <button onclick="closeTekshir()" class="w-7 h-7 rounded-full flex items-center justify-center" style="background:rgba(0,0,0,0.06)">
+          <span class="material-symbols-outlined text-slate-400" style="font-size:16px">close</span>
+        </button>
+      </div>
+      <p class="text-[11px] text-slate-500 mb-3">Joylashuvingiz bo'yicha eng yaqin ob'yektlarni tekshiring</p>
+      <button onclick="tksGetGPS()" id="tksGpsBtn" class="w-full flex items-center gap-3 p-3 rounded-2xl mb-3 active:scale-[0.98] transition-transform" style="background:rgba(59,130,246,0.08);border:1.5px solid rgba(59,130,246,0.15);">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">
+          <span class="material-symbols-outlined text-white" style="font-size:20px;font-variation-settings:'FILL' 1" id="tksGpsIcon">my_location</span>
+        </div>
+        <div class="flex-1 text-left">
+          <p class="text-sm font-bold text-slate-900" id="tksGpsText">Manzilni yoqish</p>
+          <p class="text-[10px] text-slate-500" id="tksGpsSub">GPS orqali yaqin ob'yektlarni topish</p>
+        </div>
+      </button>
+      <div id="tksFilters" class="hidden flex gap-2 flex-wrap mb-3">
+        <button onclick="tksFilter('')" class="tks-chip on" data-tur="">Barchasi</button>
+        <button onclick="tksFilter('maktab')" class="tks-chip" data-tur="maktab"><span class="material-symbols-outlined" style="font-size:14px;font-variation-settings:'FILL' 1">school</span>Maktab</button>
+        <button onclick="tksFilter('shifoxona')" class="tks-chip" data-tur="shifoxona"><span class="material-symbols-outlined" style="font-size:14px;font-variation-settings:'FILL' 1">local_hospital</span>Shifoxona</button>
+        <button onclick="tksFilter('bogcha')" class="tks-chip" data-tur="bogcha"><span class="material-symbols-outlined" style="font-size:14px;font-variation-settings:'FILL' 1">child_care</span>Bog'cha</button>
+        <button onclick="tksFilter('sport')" class="tks-chip" data-tur="sport"><span class="material-symbols-outlined" style="font-size:14px;font-variation-settings:'FILL' 1">fitness_center</span>Sport</button>
+      </div>
+    </div>
+    <div id="tksLoading" class="hidden flex justify-center py-8"><div class="spinner"></div></div>
+    <div id="tksObjList" class="tks-list hidden"></div>
+    <div id="tksEmpty" class="hidden text-center py-8 px-4">
+      <span class="material-symbols-outlined text-slate-300 mb-2" style="font-size:40px">location_off</span>
+      <p class="text-sm font-semibold text-slate-400">10 km atrofda ob'yekt topilmadi</p>
+      <p class="text-[11px] text-slate-300 mt-1">Boshqa joydan urinib ko'ring</p>
+    </div>
+  </div>
+  <div id="tksStep2" class="hidden" style="padding:0 16px 24px">
+    <button onclick="tksBack()" class="flex items-center gap-1 mb-3 active:scale-95 transition-transform">
+      <span class="material-symbols-outlined text-slate-500" style="font-size:18px">arrow_back</span>
+      <span class="text-xs font-semibold text-slate-500">Orqaga</span>
+    </button>
+    <div id="tksObjInfo" class="flex items-center gap-3 p-3 rounded-2xl mb-4" style="background:rgba(59,130,246,0.06);border:1.5px solid rgba(59,130,246,0.12);">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" id="tksObjIcon" style="background:rgba(59,130,246,0.12)">
+        <span class="material-symbols-outlined" style="font-size:20px;color:#3b82f6;font-variation-settings:'FILL' 1">school</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-bold text-slate-900 truncate" id="tksObjName">-</p>
+        <p class="text-[10px] text-slate-500" id="tksObjMeta">-</p>
+      </div>
+    </div>
+    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Va'da bajarilganmi?</p>
+    <div class="flex gap-3 mb-4">
+      <button onclick="tksNatija('bajarildi')" id="tksBahoHa" class="tks-baho">
+        <span class="material-symbols-outlined" style="font-size:32px;color:#22c55e;font-variation-settings:'FILL' 1">check_circle</span>
+        <span class="text-sm font-bold text-slate-900">Bajarildi</span>
+      </button>
+      <button onclick="tksNatija('muammo')" id="tksBahoYoq" class="tks-baho">
+        <span class="material-symbols-outlined" style="font-size:32px;color:#ef4444;font-variation-settings:'FILL' 1">cancel</span>
+        <span class="text-sm font-bold text-slate-900">Yo'q</span>
+      </button>
+    </div>
+    <textarea id="tksIzoh" rows="2" placeholder="Izoh (ixtiyoriy)..." class="w-full p-3 rounded-xl text-sm resize-none mb-3" style="background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.08);color:#0f172a;font-family:inherit;"></textarea>
+    <input type="file" id="tksRasmInput" accept="image/*" class="hidden"/>
+    <button onclick="document.getElementById('tksRasmInput').click()" id="tksPhotoBtn" class="w-full flex items-center gap-3 p-3 rounded-xl mb-4 active:scale-[0.98] transition-all text-left" style="background:rgba(0,0,0,0.02);border:1.5px solid rgba(0,0,0,0.06);">
+      <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(99,102,241,0.1)">
+        <span class="material-symbols-outlined" style="font-size:18px;color:#6366f1;font-variation-settings:'FILL' 1" id="tksPhotoIcon">add_a_photo</span>
+      </div>
+      <div class="flex-1">
+        <p class="text-sm font-semibold text-slate-900" id="tksPhotoText">Rasm qo'shish</p>
+        <p class="text-[10px] text-slate-500">Ixtiyoriy — dalil sifatida</p>
+      </div>
+    </button>
+    <button onclick="tksSubmit()" id="tksSubmitBtn" class="w-full py-3.5 rounded-full font-black text-sm flex items-center justify-center gap-2 text-white opacity-40 pointer-events-none transition-all active:scale-95" style="background:linear-gradient(135deg,#3b82f6,#6366f1);box-shadow:0 4px 18px rgba(59,130,246,0.3);">
+      <span class="material-symbols-outlined" style="font-size:18px;font-variation-settings:'FILL' 1">send</span>Yuborish
+    </button>
+  </div>
+  <div id="tksSuccess" class="hidden text-center" style="padding:32px 16px">
+    <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3" style="background:rgba(34,197,94,0.12)">
+      <span class="material-symbols-outlined" style="font-size:36px;color:#22c55e;font-variation-settings:'FILL' 1">check_circle</span>
+    </div>
+    <h2 class="text-lg font-black text-slate-900 mb-1">Qabul qilindi!</h2>
+    <p class="text-xs text-slate-400 mb-2">Tekshiruvingiz saqlandi</p>
+    <p id="tksBadgeMsg" class="hidden text-sm font-bold mb-3" style="color:#6366f1"></p>
+    <button onclick="closeTekshir()" class="px-8 py-2.5 rounded-full text-sm font-bold text-white active:scale-95 transition-transform" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">Yopish</button>
+  </div>
+</div>
+
 <!-- ═══ BOTTOM TABS ═══ -->
 <div class="fixed bottom-0 left-0 right-0 z-50" style="background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-top:1px solid rgba(0,0,0,0.06);">
   <div class="flex items-end justify-around py-1.5 px-4">
@@ -348,23 +294,15 @@ function toggleAnon(){
 }
 
 // ── Ekranlar ──────────────────────────────────
-function hideAll(){['viewChoice','viewReport','viewVaada'].forEach(id=>document.getElementById(id).classList.add('hidden'));}
-function openReport(){
-  hideAll();
-  document.getElementById('viewReport').classList.remove('hidden');
-  calcReach();
-}
-function openVaada(){
-  hideAll();
-  document.getElementById('viewVaada').classList.remove('hidden');
-  goVaadaStep(1);
-}
 function resetForm(){
   document.getElementById('successModal').classList.add('hidden');
-  hideAll();
-  document.getElementById('viewChoice').classList.remove('hidden');
   mediaFiles=[]; gpsCoords=null; selectedType='';
-  vaadaObj=''; vaadaBaho=''; vaadaFile=null;
+  document.getElementById('izohInput').value='';
+  document.getElementById('gpsIcon').textContent='my_location';
+  document.getElementById('gpsIcon').style.color='#22c55e';
+  document.getElementById('gpsText').textContent='Joylashuvni aniqlash';
+  document.getElementById('gpsSub').textContent='Bosing — GPS avtomatik';
+  renderMedia(); calcReach();
 }
 
 // ── GPS ───────────────────────────────────────
@@ -483,117 +421,141 @@ async function submit(){
 }
 
 // ══════════════════════════════════════════════
-// VA'DA TEKSHIRISH WIZARD
+// TEKSHIR FLOW
 // ══════════════════════════════════════════════
+let tksCoords=null, tksAllObjects=[], tksFiltered=[], tksSelectedObj=null, tksSelectedNatija='', tksFile=null, tksActiveFilter='';
 
-const TUMANLAR={
-  toshkent_sh:['Bektemir','Chilonzor','Mirobod','Mirzo Ulug\'bek','Olmazor','Sergeli','Shayxontohur','Uchtepa','Yakkasaroy','Yashnobod','Yunusobod'],
-  toshkent_v:['Angren','Bekobod','Bo\'ka','Bo\'stonliq','Chinoz','Ohangaron','Olmaliq','Parkent','Piskent','Qibray','Quyi Chirchiq','Toshkent','Yangiyo\'l','Zangiota','Chirchiq'],
-  samarqand:['Bulung\'ur','Ishtixon','Jomboy','Kattaqo\'rg\'on','Narpay','Nurobod','Oqdaryo','Pastdarg\'om','Payariq','Samarqand','Tayloq','Urgut'],
-  fargona:['Bag\'dod','Beshariq','Buvayda','Dang\'ara','Farg\'ona','Furqat','Oltiariq','Quva','Qo\'qon','Rishton','So\'x','Toshloq','Uchko\'prik','Yozyovon'],
-  andijon:['Andijon','Asaka','Baliqchi','Bo\'z','Buloqboshi','Izboskan','Jalaquduq','Marhamat','Oltinko\'l','Paxtaobod','Qo\'rg\'ontepa','Shahrixon','Ulug\'nor','Xo\'jaobod'],
-  namangan:['Chortoq','Chust','Kosonsoy','Mingbuloq','Namangan','Norin','Pop','To\'raqo\'rg\'on','Uchqo\'rg\'on','Yangiqo\'rg\'on'],
-  buxoro:['Buxoro','G\'ijduvon','Jondor','Kogon','Olot','Peshku','Qorakul','Qorako\'l','Romitan','Shofirkon','Vobkent'],
-  xorazm:['Bog\'ot','Gurlan','Xazorasp','Xiva','Qo\'shko\'pir','Shovot','Urganch','Yangiariq','Yangibozor'],
-  qashqadaryo:['Chiroqchi','Dehqonobod','G\'uzor','Kasbi','Kitob','Koson','Mirishkor','Muborak','Nishon','Qarshi','Shahrisabz','Yakkabog\''],
-  surxondaryo:['Angor','Bandixon','Boysun','Denov','Jarqo\'rg\'on','Muzrabot','Oltinsoy','Qiziriq','Qumqo\'rg\'on','Sariosiyo','Sherobod','Sho\'rchi','Termiz','Uzun'],
-  jizzax:['Arnasoy','Baxmal','Do\'stlik','Forish','G\'allaorol','Jizzax','Mirzacho\'l','Paxtakor','Yangiobod','Zafarobod','Zarbdor','Zomin'],
-  sirdaryo:['Boyovut','Guliston','Mirzaobod','Oqoltin','Sardoba','Sayxunobod','Sirdaryo','Xovos'],
-  navoiy:['Karmana','Konimex','Navbahor','Navoiy','Nurota','Qiziltepa','Tomdi','Uchquduq','Xatirchi'],
-  qoraqalpogiston:['Amudaryo','Beruniy','Chimboy','Ellikqala','Kegeyli','Mo\'ynoq','Nukus','Qanliko\'l','Qo\'ng\'irot','Qorao\'zak','Shumanay','Taxtako\'pir','To\'rtko\'l','Xo\'jayli']
-};
-
-let vaadaObj='', vaadaBaho='', vaadaFile=null;
-
-function onViloyatChange(){
-  const v=document.getElementById('vViloyat').value;
-  const sel=document.getElementById('vTuman');
-  sel.innerHTML='<option value="">Tanlang...</option>';
-  if(v&&TUMANLAR[v]){
-    TUMANLAR[v].forEach(t=>sel.innerHTML+=`<option value="${t}">${t}</option>`);
-    sel.disabled=false;
-  } else { sel.disabled=true; }
-  checkStep1();
+function haversine(lat1,lng1,lat2,lng2){
+  const R=6371, dLat=(lat2-lat1)*Math.PI/180, dLng=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
+function fmtDist(km){return km<1?(km*1000).toFixed(0)+' m':km.toFixed(1)+' km';}
+const TUR_ICONS={maktab:{icon:'school',color:'#3b82f6',bg:'rgba(59,130,246,0.12)'},shifoxona:{icon:'local_hospital',color:'#ef4444',bg:'rgba(239,68,68,0.12)'},bogcha:{icon:'child_care',color:'#22c55e',bg:'rgba(34,197,94,0.12)'},sport:{icon:'fitness_center',color:'#f59e0b',bg:'rgba(245,158,11,0.12)'}};
 
-function checkStep1(){
-  const ok=document.getElementById('vViloyat').value&&document.getElementById('vTuman').value;
-  const btn=document.getElementById('vNext1');
-  btn.classList.toggle('opacity-40',!ok);btn.classList.toggle('pointer-events-none',!ok);
+function openTekshir(){
+  document.getElementById('tksBg').classList.add('open');
+  document.getElementById('tksSheet').classList.add('open');
+  document.getElementById('tekshirFab').style.display='none';
+  document.getElementById('tksStep1').classList.remove('hidden');
+  document.getElementById('tksStep2').classList.add('hidden');
+  document.getElementById('tksSuccess').classList.add('hidden');
+  document.body.style.overflow='hidden';
 }
-// Listen for tuman change
-document.getElementById('vTuman').addEventListener('change',checkStep1);
-
-function selObj(el,type){
-  vaadaObj=vaadaObj===type?'':type;
-  document.querySelectorAll('.obj-btn').forEach(b=>b.classList.remove('selected'));
-  if(vaadaObj)el.classList.add('selected');
-  const btn=document.getElementById('vNext2');
-  btn.classList.toggle('opacity-40',!vaadaObj);btn.classList.toggle('pointer-events-none',!vaadaObj);
+function closeTekshir(){
+  document.getElementById('tksSheet').classList.remove('open');
+  setTimeout(()=>{
+    document.getElementById('tksBg').classList.remove('open');
+    document.getElementById('tekshirFab').style.display='';
+    document.body.style.overflow='';
+    tksSelectedObj=null; tksSelectedNatija=''; tksFile=null;
+    document.getElementById('tksStep1').classList.remove('hidden');
+    document.getElementById('tksStep2').classList.add('hidden');
+    document.getElementById('tksSuccess').classList.add('hidden');
+  },400);
 }
-
-function selBaho(val){
-  vaadaBaho=val;
-  document.querySelectorAll('.baho-btn').forEach(b=>{b.classList.remove('selected','selected-no');});
-  if(val==='ha') document.getElementById('bahoHa').classList.add('selected');
-  else document.getElementById('bahoYoq').classList.add('selected-no');
-  const btn=document.getElementById('vSubmitBtn');
-  btn.classList.remove('opacity-40','pointer-events-none');
+function tksGetGPS(){
+  const icon=document.getElementById('tksGpsIcon'), txt=document.getElementById('tksGpsText'), sub=document.getElementById('tksGpsSub');
+  icon.textContent='sync'; icon.style.animation='spin 1s linear infinite';
+  txt.textContent='Aniqlanmoqda...'; sub.textContent='GPS signal qidirilmoqda';
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      tksCoords={lat:pos.coords.latitude,lng:pos.coords.longitude};
+      icon.textContent='check_circle'; icon.style.animation='';
+      txt.textContent='Joylashuv aniqlandi';
+      sub.textContent=`${tksCoords.lat.toFixed(4)}, ${tksCoords.lng.toFixed(4)}`;
+      document.getElementById('tksGpsBtn').style.borderColor='rgba(34,197,94,0.3)';
+      document.getElementById('tksGpsBtn').style.background='rgba(34,197,94,0.06)';
+      tksLoadObjects();
+    },
+    ()=>{icon.textContent='location_off';icon.style.animation='';txt.textContent='GPS aniqlanmadi';sub.textContent='Qaytadan urinib ko\'ring';},
+    {enableHighAccuracy:true,timeout:12000}
+  );
 }
-
-document.getElementById('vaadaMedia').addEventListener('change',function(){
-  if(this.files.length){
-    vaadaFile=this.files[0];
-    document.getElementById('vaadaPhotoIcon').textContent='check_circle';
-    document.getElementById('vaadaPhotoIcon').style.color='#22c55e';
-    document.getElementById('vaadaPhotoText').textContent='Rasm qo\'shildi ✓';
-  }
+async function tksLoadObjects(){
+  document.getElementById('tksLoading').classList.remove('hidden');
+  document.getElementById('tksObjList').classList.add('hidden');
+  document.getElementById('tksEmpty').classList.add('hidden');
+  try{
+    const res=await fetch('/api/maktablar/');
+    const d=await res.json();
+    tksAllObjects=(d.maktablar||[]).map(o=>({...o,dist:haversine(tksCoords.lat,tksCoords.lng,o.lat,o.lng)})).filter(o=>o.dist<=10).sort((a,b)=>a.dist-b.dist);
+    tksActiveFilter=''; tksRenderList();
+    document.getElementById('tksFilters').classList.remove('hidden');
+  }catch(e){document.getElementById('tksLoading').classList.add('hidden');document.getElementById('tksEmpty').classList.remove('hidden');}
+}
+function tksFilter(tur){
+  tksActiveFilter=tur;
+  document.querySelectorAll('.tks-chip').forEach(c=>c.classList.toggle('on',(c.dataset.tur||'')===tur));
+  tksRenderList();
+}
+function tksRenderList(){
+  document.getElementById('tksLoading').classList.add('hidden');
+  const list=document.getElementById('tksObjList');
+  tksFiltered=tksActiveFilter?tksAllObjects.filter(o=>o.tur===tksActiveFilter):tksAllObjects;
+  if(!tksFiltered.length){list.classList.add('hidden');document.getElementById('tksEmpty').classList.remove('hidden');return;}
+  document.getElementById('tksEmpty').classList.add('hidden');
+  list.innerHTML=tksFiltered.map((o,i)=>{
+    const ti=TUR_ICONS[o.tur]||{icon:'apartment',color:'#9d2bee',bg:'rgba(157,43,238,0.12)'};
+    const dot=o.holat_rangi?`<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${o.holat_rangi};margin-right:4px;"></span>`:'';
+    return`<div class="tks-obj" onclick="tksSelectObj(${i})" style="animation:fadeUp 0.25s ease-out ${i*0.04}s both"><div class="tks-icon" style="background:${ti.bg}"><span class="material-symbols-outlined" style="font-size:20px;color:${ti.color};font-variation-settings:'FILL' 1">${ti.icon}</span></div><div class="flex-1 min-w-0"><p class="text-sm font-bold text-slate-900 truncate">${o.nom}</p><div class="flex items-center gap-1 mt-0.5">${dot}<span class="text-[10px] text-slate-400">${o.tur_nomi||o.tur}</span><span class="text-[10px] text-slate-300">·</span><span class="text-[10px] text-slate-400">${o.tuman||''}</span></div></div><span class="text-xs font-bold text-slate-400 flex-shrink-0">${fmtDist(o.dist)}</span></div>`;
+  }).join('');
+  list.classList.remove('hidden');
+}
+function tksSelectObj(idx){
+  tksSelectedObj=tksFiltered[idx]; if(!tksSelectedObj)return;
+  tksSelectedNatija=''; tksFile=null;
+  const ti=TUR_ICONS[tksSelectedObj.tur]||{icon:'apartment',color:'#9d2bee',bg:'rgba(157,43,238,0.12)'};
+  document.getElementById('tksObjIcon').style.background=ti.bg;
+  document.getElementById('tksObjIcon').innerHTML=`<span class="material-symbols-outlined" style="font-size:20px;color:${ti.color};font-variation-settings:'FILL' 1">${ti.icon}</span>`;
+  document.getElementById('tksObjName').textContent=tksSelectedObj.nom;
+  document.getElementById('tksObjMeta').textContent=`${tksSelectedObj.tur_nomi||tksSelectedObj.tur} · ${tksSelectedObj.tuman||''} · ${fmtDist(tksSelectedObj.dist)}`;
+  document.getElementById('tksBahoHa').className='tks-baho';
+  document.getElementById('tksBahoYoq').className='tks-baho';
+  document.getElementById('tksIzoh').value='';
+  document.getElementById('tksPhotoIcon').textContent='add_a_photo';
+  document.getElementById('tksPhotoIcon').style.color='#6366f1';
+  document.getElementById('tksPhotoText').textContent='Rasm qo\'shish';
+  document.getElementById('tksSubmitBtn').classList.add('opacity-40','pointer-events-none');
+  document.getElementById('tksStep1').classList.add('hidden');
+  document.getElementById('tksStep2').classList.remove('hidden');
+}
+function tksBack(){document.getElementById('tksStep2').classList.add('hidden');document.getElementById('tksStep1').classList.remove('hidden');tksSelectedObj=null;tksSelectedNatija='';}
+function tksNatija(val){
+  tksSelectedNatija=val;
+  document.getElementById('tksBahoHa').className='tks-baho'+(val==='bajarildi'?' sel-yes':'');
+  document.getElementById('tksBahoYoq').className='tks-baho'+(val==='muammo'?' sel-no':'');
+  document.getElementById('tksSubmitBtn').classList.remove('opacity-40','pointer-events-none');
+}
+document.getElementById('tksRasmInput').addEventListener('change',function(){
+  if(this.files.length){tksFile=this.files[0];document.getElementById('tksPhotoIcon').textContent='check_circle';document.getElementById('tksPhotoIcon').style.color='#22c55e';document.getElementById('tksPhotoText').textContent='Rasm qo\'shildi';}
 });
-
-function goVaadaStep(step){
-  [1,2,3].forEach(s=>{
-    document.getElementById('vaadaStep'+s).classList.toggle('hidden',s!==step);
-    const vs=document.getElementById('vs'+s);
-    vs.classList.remove('on','done');
-    if(s<step) vs.classList.add('done');
-    else if(s===step) vs.classList.add('on');
-    if(s<3){const vl=document.getElementById('vl'+s);vl.classList.toggle('done',s<step);}
-  });
-  if(step===3){
-    const vil=document.getElementById('vViloyat');
-    const vilText=vil.options[vil.selectedIndex]?.text||'';
-    const tum=document.getElementById('vTuman').value;
-    const objNames={maktab:'Maktab',shifoxona:'Shifoxona',bogcha:"Bog'cha",boshqa:'Boshqa'};
-    document.getElementById('vaadaSummary').textContent=`${vilText}, ${tum} — ${objNames[vaadaObj]||'Ob\'yekt'}`;
-  }
-}
-
-async function submitVaada(){
-  if(!vaadaBaho)return;
-  const btn=document.getElementById('vSubmitBtn');
-  btn.innerHTML='<div class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block"></div>';
+async function tksSubmit(){
+  if(!tksSelectedObj||!tksSelectedNatija)return;
+  const btn=document.getElementById('tksSubmitBtn');
+  btn.innerHTML='<div class="spinner" style="width:18px;height:18px;border-width:2px;display:inline-block;border-top-color:#fff;border-color:rgba(255,255,255,0.3);border-top-color:#fff;"></div> Yuborilmoqda...';
   btn.classList.add('pointer-events-none');
-
   const fd=new FormData();
-  fd.append('viloyat',document.getElementById('vViloyat').value);
-  fd.append('tuman',document.getElementById('vTuman').value);
-  fd.append('infratuzilma',vaadaObj||'maktab');
-  fd.append('sektor','vaada_tekshiruv');
-  fd.append('izoh',(vaadaBaho==='ha'?'✅ Bajarilgan deb tasdiqladi':'❌ Bajarilmagan deb xabar berdi')+'. '+(document.getElementById('vaadaIzoh').value||''));
-  fd.append('is_anonim',isAnonim?'true':'false');
+  fd.append('maktab_id',tksSelectedObj.id);
+  fd.append('natija',tksSelectedNatija);
+  fd.append('izoh',document.getElementById('tksIzoh').value||'');
   fd.append('telegram_user_id',user.id||'0');
   fd.append('telegram_username',user.username||'');
   fd.append('telegram_full_name',`${user.first_name||''} ${user.last_name||''}`.trim());
-  if(vaadaFile) fd.append('rasmlar',vaadaFile);
-
+  if(tksFile)fd.append('rasm',tksFile);
   try{
-    const res=await fetch('/api/murojaat/',{method:'POST',body:fd});
+    const res=await fetch('/api/tekshiruv/',{method:'POST',body:fd});
     const d=await res.json();
-    if(res.ok&&d.success){document.getElementById('successModal').classList.remove('hidden');}
-    else throw new Error(d.error||'Xatolik');
-  }catch(e){tg.showAlert('Xatolik: '+e.message);}
-  finally{
-    btn.innerHTML='<span class="material-symbols-outlined align-middle mr-1" style="font-size:16px;font-variation-settings:\'FILL\' 1">send</span>Yuborish';
+    if(res.ok&&d.success){
+      document.getElementById('tksStep2').classList.add('hidden');
+      document.getElementById('tksSuccess').classList.remove('hidden');
+      const badge=document.getElementById('tksBadgeMsg');
+      if(d.yangi_badge){badge.textContent='🏆 '+d.yangi_badge.nom+' yutuq ochildi!';badge.classList.remove('hidden');}
+      else badge.classList.add('hidden');
+    }else throw new Error(d.error||'Xatolik');
+  }catch(e){
+    tg.showAlert('Xatolik: '+e.message);
+    btn.innerHTML='<span class="material-symbols-outlined" style="font-size:18px;font-variation-settings:\'FILL\' 1">send</span>Yuborish';
     btn.classList.remove('pointer-events-none');
   }
 }
