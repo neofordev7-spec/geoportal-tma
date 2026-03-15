@@ -162,6 +162,14 @@
     </button>
   </div>
 
+  <!-- GPS + Uyim tugmalari -->
+  <button onclick="gpsLocate()" class="ov rounded-full shadow-lg flex items-center justify-center cursor-pointer" style="bottom:170px;right:10px;width:38px;height:38px;pointer-events:auto;background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);border:1px solid rgba(0,0,0,0.06)" title="Joylashuvim">
+    <span class="material-symbols-outlined text-blue-500" style="font-size:19px;font-variation-settings:'FILL' 1">my_location</span>
+  </button>
+  <button onclick="goHome()" class="ov rounded-full shadow-lg flex items-center justify-center cursor-pointer" style="bottom:124px;right:10px;width:38px;height:38px;pointer-events:auto;background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);border:1px solid rgba(0,0,0,0.06)" title="Mening tumanim">
+    <span class="material-symbols-outlined text-indigo-500" style="font-size:19px;font-variation-settings:'FILL' 1">home</span>
+  </button>
+
   <!-- ═══ BOTTOM STATS — compact horizontal strip ═══ -->
   <div class="ov" style="bottom:64px;left:0;right:0;padding:0 8px;pointer-events:auto">
     <div class="gl rounded-2xl px-3 py-2.5 shadow-xl" id="statsPanel">
@@ -629,6 +637,16 @@ function updateUI(){
   else{bw.style.display='flex';bt.textContent=selVil.replace(' viloyati','').replace(' shahar','');gt.textContent='Maktabingizni toping';gs.textContent="Raqamni bosib ma'lumotni ko'ring";gi.textContent='pin_drop';}
 }
 function orqaga(){if(level==='tuman'&&selVil)showViloyat(selVil);else showCountry();}
+
+function gpsLocate(){map.locate({setView:true,maxZoom:12});}
+
+function goHome(){
+  navigator.geolocation.getCurrentPosition(
+    pos=>{map.flyTo([pos.coords.latitude,pos.coords.longitude],13,{duration:0.8});},
+    ()=>{tg.showAlert("GPS aniqlanmadi. Joylashuv ruxsatini bering.");},
+    {enableHighAccuracy:true,timeout:10000}
+  );
+}
 
 loadAll();
 
