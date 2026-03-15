@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Maktablar — GEOPORTAL</title>
+  <title>Obyektlar — GEOPORTAL</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet"/>
@@ -47,7 +47,7 @@
         <span class="material-symbols-outlined text-slate-600" style="font-size:18px">arrow_back</span>
       </button>
       <div class="flex-1 min-w-0">
-        <h1 class="font-black text-base text-slate-900 leading-tight">Maktablar</h1>
+        <h1 class="font-black text-base text-slate-900 leading-tight" id="headerTitle">Obyektlar</h1>
         <p class="text-xs text-slate-500" id="headerSubtitle">Yuklanmoqda...</p>
       </div>
       <button onclick="qidiruvToggle()" class="w-9 h-9 glass-sm rounded-full flex items-center justify-center flex-shrink-0 active:scale-90 transition-transform">
@@ -58,18 +58,37 @@
     <div id="qidiruvBox" class="hidden mt-2">
       <div class="glass rounded-full flex items-center px-4 gap-2 h-10">
         <span class="material-symbols-outlined text-slate-400" style="font-size:16px">search</span>
-        <input id="qidiruvInput" type="text" placeholder="Maktab nomi bo'yicha qidiring..."
+        <input id="qidiruvInput" type="text" placeholder="Nomi bo'yicha qidiring..."
           oninput="filterMaktablar()"
           class="flex-1 bg-transparent border-none text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-0"/>
       </div>
     </div>
   </div>
 
+  <!-- Obyekt tur tablari -->
+  <div class="scroll-x px-3 mt-1 flex gap-2">
+    <button onclick="setTur('hammasi')" id="t-hammasi" class="tab-filter active flex-shrink-0 px-3 py-2 rounded-full text-xs font-bold shadow-sm flex items-center gap-1.5">
+      <span class="material-symbols-outlined" style="font-size:14px">apps</span>Hammasi
+    </button>
+    <button onclick="setTur('maktab')" id="t-maktab" class="tab-filter flex-shrink-0 px-3 py-2 rounded-full text-xs font-bold shadow-sm flex items-center gap-1.5">
+      <span class="material-symbols-outlined" style="font-size:14px">school</span>Maktab
+    </button>
+    <button onclick="setTur('bogcha')" id="t-bogcha" class="tab-filter flex-shrink-0 px-3 py-2 rounded-full text-xs font-bold shadow-sm flex items-center gap-1.5">
+      <span class="material-symbols-outlined" style="font-size:14px">child_care</span>Bog'cha
+    </button>
+    <button onclick="setTur('shifoxona')" id="t-shifoxona" class="tab-filter flex-shrink-0 px-3 py-2 rounded-full text-xs font-bold shadow-sm flex items-center gap-1.5">
+      <span class="material-symbols-outlined" style="font-size:14px">local_hospital</span>Shifoxona
+    </button>
+    <button onclick="setTur('sport')" id="t-sport" class="tab-filter flex-shrink-0 px-3 py-2 rounded-full text-xs font-bold shadow-sm flex items-center gap-1.5">
+      <span class="material-symbols-outlined" style="font-size:14px">fitness_center</span>Sport
+    </button>
+  </div>
+
   <!-- Statistika mini kartalar -->
-  <div class="px-3 mt-1 grid grid-cols-3 gap-2">
+  <div class="px-3 mt-2 grid grid-cols-3 gap-2">
     <div class="glass rounded-2xl p-3 text-center">
       <p class="text-lg font-black text-slate-900" id="miniJami">—</p>
-      <p class="text-xs text-slate-500 mt-0.5">Jami maktab</p>
+      <p class="text-xs text-slate-500 mt-0.5" id="miniJamiLabel">Jami obyekt</p>
     </div>
     <div class="glass rounded-2xl p-3 text-center">
       <p class="text-lg font-black" style="color:#22c55e" id="miniTekshirilgan">—</p>
@@ -112,7 +131,26 @@
 
     let barcha = [];
     let aktiv = 'hammasi';
+    let aktivTur = 'hammasi';
     let qidiruvMatn = '';
+
+    const TUR_ICONS = {maktab:'school', bogcha:'child_care', shifoxona:'local_hospital', sport:'fitness_center'};
+    const TUR_NOMLARI = {maktab:'Maktab', bogcha:"Bog'cha", shifoxona:'Shifoxona', sport:'Sport'};
+    const TUR_RANGLARI = {maktab:'#3b82f6', bogcha:'#22c55e', shifoxona:'#ef4444', sport:'#f59e0b'};
+
+    function setTur(t) {
+      aktivTur = t;
+      ['hammasi','maktab','bogcha','shifoxona','sport'].forEach(x => {
+        document.getElementById('t-'+x).classList.remove('active');
+      });
+      document.getElementById('t-'+t).classList.add('active');
+
+      const titles = {hammasi:'Obyektlar', maktab:'Maktablar', bogcha:"Bog'chalar", shifoxona:'Shifoxonalar', sport:'Sport inshootlari'};
+      document.getElementById('headerTitle').textContent = titles[t] || 'Obyektlar';
+
+      updateStats();
+      render();
+    }
 
     function qidiruvToggle() {
       const box = document.getElementById('qidiruvBox');
@@ -134,8 +172,11 @@
       render();
     }
 
-    function render() {
+    function getFilteredList() {
       let list = [...barcha];
+      if (aktivTur !== 'hammasi') {
+        list = list.filter(m => m.tur === aktivTur);
+      }
       if (aktiv !== 'hammasi') {
         list = list.filter(m => {
           if (aktiv === 'yaxshi') return m.mamnuniyat_foizi !== null && m.mamnuniyat_foizi >= 70;
@@ -148,10 +189,15 @@
       if (qidiruvMatn) {
         list = list.filter(m => m.nom.toLowerCase().includes(qidiruvMatn) || m.tuman.toLowerCase().includes(qidiruvMatn));
       }
+      return list;
+    }
+
+    function render() {
+      let list = getFilteredList();
 
       const container = document.getElementById('maktablarList');
       if (!list.length) {
-        container.innerHTML = '<div class="glass rounded-2xl p-6 text-center text-slate-400 text-sm">Maktab topilmadi</div>';
+        container.innerHTML = '<div class="glass rounded-2xl p-6 text-center text-slate-400 text-sm">Obyekt topilmadi</div>';
         return;
       }
       container.innerHTML = list.map(m => {
@@ -173,10 +219,10 @@
         <div class="maktab-card glass rounded-2xl overflow-hidden shadow-sm cursor-pointer"
           onclick="window.location.href='/tma/maktablar/${m.id}/'">
           <div class="flex gap-3 p-4">
-            <div class="w-14 h-14 rounded-xl flex-shrink-0 overflow-hidden bg-slate-100 flex items-center justify-center">
+            <div class="w-14 h-14 rounded-xl flex-shrink-0 overflow-hidden flex items-center justify-center" style="background:${(TUR_RANGLARI[m.tur]||'#3b82f6')}12">
               ${m.rasm_url
-                ? `<img src="${m.rasm_url}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\\'material-symbols-outlined text-slate-400\\' style=\\'font-size:22px\\'>school</span>'">`
-                : `<span class="material-symbols-outlined text-slate-400" style="font-size:22px">school</span>`}
+                ? `<img src="${m.rasm_url}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\\'material-symbols-outlined\\' style=\\'font-size:22px;color:${TUR_RANGLARI[m.tur]||'#3b82f6'}\\'>${TUR_ICONS[m.tur]||'school'}</span>'">`
+                : `<span class="material-symbols-outlined" style="font-size:22px;color:${TUR_RANGLARI[m.tur]||'#3b82f6'}">${TUR_ICONS[m.tur]||'school'}</span>`}
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-start justify-between gap-2 mb-1">
@@ -215,17 +261,47 @@
     }
 
     const SINTETIK = [
-      { id:1, nom:"45-sonli umumta'lim maktabi", viloyat:"Toshkent shahri", tuman:"Yunusobod tumani", rasm_url:"", mamnuniyat_foizi:85, jami_tekshiruv:24, vaadalar_soni:4 },
-      { id:2, nom:"78-sonli umumta'lim maktabi", viloyat:"Toshkent shahri", tuman:"Chilonzor tumani", rasm_url:"", mamnuniyat_foizi:62, jami_tekshiruv:18, vaadalar_soni:3 },
-      { id:3, nom:"12-sonli umumta'lim maktabi", viloyat:"Samarqand viloyati", tuman:"Samarqand tumani", rasm_url:"", mamnuniyat_foizi:34, jami_tekshiruv:12, vaadalar_soni:4 },
-      { id:4, nom:"33-sonli umumta'lim maktabi", viloyat:"Farg'ona viloyati", tuman:"Farg'ona tumani", rasm_url:"", mamnuniyat_foizi:null, jami_tekshiruv:0, vaadalar_soni:2 },
-      { id:5, nom:"55-sonli umumta'lim maktabi", viloyat:"Toshkent shahri", tuman:"Mirobod tumani", rasm_url:"", mamnuniyat_foizi:78, jami_tekshiruv:31, vaadalar_soni:3 },
-      { id:6, nom:"91-sonli umumta'lim maktabi", viloyat:"Andijon viloyati", tuman:"Andijon tumani", rasm_url:"", mamnuniyat_foizi:45, jami_tekshiruv:9, vaadalar_soni:3 },
-      { id:7, nom:"17-sonli umumta'lim maktabi", viloyat:"Namangan viloyati", tuman:"Namangan tumani", rasm_url:"", mamnuniyat_foizi:22, jami_tekshiruv:7, vaadalar_soni:4 },
-      { id:8, nom:"62-sonli umumta'lim maktabi", viloyat:"Buxoro viloyati", tuman:"Buxoro tumani", rasm_url:"", mamnuniyat_foizi:null, jami_tekshiruv:0, vaadalar_soni:2 },
-      { id:9, nom:"28-sonli umumta'lim maktabi", viloyat:"Qashqadaryo viloyati", tuman:"Qarshi tumani", rasm_url:"", mamnuniyat_foizi:91, jami_tekshiruv:41, vaadalar_soni:4 },
-      { id:10, nom:"44-sonli umumta'lim maktabi", viloyat:"Toshkent shahri", tuman:"Shayxontohur tumani", rasm_url:"", mamnuniyat_foizi:55, jami_tekshiruv:15, vaadalar_soni:3 },
+      // Maktablar
+      { id:1, tur:'maktab', nom:"45-sonli umumta'lim maktabi", viloyat:"Toshkent shahri", tuman:"Yunusobod tumani", rasm_url:"", mamnuniyat_foizi:85, jami_tekshiruv:24, vaadalar_soni:4 },
+      { id:2, tur:'maktab', nom:"78-sonli umumta'lim maktabi", viloyat:"Toshkent shahri", tuman:"Chilonzor tumani", rasm_url:"", mamnuniyat_foizi:62, jami_tekshiruv:18, vaadalar_soni:3 },
+      { id:3, tur:'maktab', nom:"12-sonli umumta'lim maktabi", viloyat:"Samarqand viloyati", tuman:"Samarqand shahri", rasm_url:"", mamnuniyat_foizi:34, jami_tekshiruv:12, vaadalar_soni:4 },
+      { id:4, tur:'maktab', nom:"33-sonli umumta'lim maktabi", viloyat:"Farg'ona viloyati", tuman:"Farg'ona shahri", rasm_url:"", mamnuniyat_foizi:null, jami_tekshiruv:0, vaadalar_soni:2 },
+      { id:5, tur:'maktab', nom:"55-sonli umumta'lim maktabi", viloyat:"Toshkent shahri", tuman:"Mirobod tumani", rasm_url:"", mamnuniyat_foizi:78, jami_tekshiruv:31, vaadalar_soni:3 },
+      // Bog'chalar
+      { id:11, tur:'bogcha', nom:"122-sonli bog'cha", viloyat:"Toshkent shahri", tuman:"Sergeli tumani", rasm_url:"", mamnuniyat_foizi:72, jami_tekshiruv:16, vaadalar_soni:3 },
+      { id:12, tur:'bogcha', nom:"56-sonli bog'cha", viloyat:"Samarqand viloyati", tuman:"Samarqand shahri", rasm_url:"", mamnuniyat_foizi:28, jami_tekshiruv:9, vaadalar_soni:3 },
+      { id:13, tur:'bogcha', nom:"87-sonli bog'cha", viloyat:"Toshkent shahri", tuman:"Olmazor tumani", rasm_url:"", mamnuniyat_foizi:90, jami_tekshiruv:12, vaadalar_soni:2 },
+      { id:14, tur:'bogcha', nom:"34-sonli bog'cha", viloyat:"Farg'ona viloyati", tuman:"Farg'ona shahri", rasm_url:"", mamnuniyat_foizi:65, jami_tekshiruv:8, vaadalar_soni:3 },
+      { id:15, tur:'bogcha', nom:"15-sonli bog'cha", viloyat:"Andijon viloyati", tuman:"Asaka tumani", rasm_url:"", mamnuniyat_foizi:null, jami_tekshiruv:0, vaadalar_soni:2 },
+      // Shifoxonalar
+      { id:21, tur:'shifoxona', nom:"Yunusobod tuman oilaviy poliklinikasi", viloyat:"Toshkent shahri", tuman:"Yunusobod tumani", rasm_url:"", mamnuniyat_foizi:76, jami_tekshiruv:20, vaadalar_soni:4 },
+      { id:22, tur:'shifoxona', nom:"Qarshi shahar tibbiyot markazi", viloyat:"Qashqadaryo viloyati", tuman:"Qarshi shahri", rasm_url:"", mamnuniyat_foizi:48, jami_tekshiruv:14, vaadalar_soni:3 },
+      { id:23, tur:'shifoxona', nom:"Chilonzor tuman stomatologiyasi", viloyat:"Toshkent shahri", tuman:"Chilonzor tumani", rasm_url:"", mamnuniyat_foizi:92, jami_tekshiruv:11, vaadalar_soni:2 },
+      { id:24, tur:'shifoxona', nom:"Namangan viloyat ko'z kasalliklari", viloyat:"Namangan viloyati", tuman:"Namangan shahri", rasm_url:"", mamnuniyat_foizi:42, jami_tekshiruv:9, vaadalar_soni:3 },
+      { id:25, tur:'shifoxona', nom:"Buxoro tuman tibbiyot birlashmasi", viloyat:"Buxoro viloyati", tuman:"Buxoro shahri", rasm_url:"", mamnuniyat_foizi:88, jami_tekshiruv:7, vaadalar_soni:2 },
+      // Sport
+      { id:31, tur:'sport', nom:"Yunusobod sport kompleksi", viloyat:"Toshkent shahri", tuman:"Yunusobod tumani", rasm_url:"", mamnuniyat_foizi:95, jami_tekshiruv:18, vaadalar_soni:3 },
+      { id:32, tur:'sport', nom:"Samarqand shahri futbol stadioni", viloyat:"Samarqand viloyati", tuman:"Samarqand shahri", rasm_url:"", mamnuniyat_foizi:55, jami_tekshiruv:10, vaadalar_soni:3 },
+      { id:33, tur:'sport', nom:"Farg'ona viloyat tennis korti", viloyat:"Farg'ona viloyati", tuman:"Farg'ona shahri", rasm_url:"", mamnuniyat_foizi:60, jami_tekshiruv:6, vaadalar_soni:2 },
+      { id:34, tur:'sport', nom:"Andijon bolalar sport maktabi", viloyat:"Andijon viloyati", tuman:"Andijon shahri", rasm_url:"", mamnuniyat_foizi:70, jami_tekshiruv:13, vaadalar_soni:3 },
+      { id:35, tur:'sport', nom:"Xorazm suzish baseyni", viloyat:"Xorazm viloyati", tuman:"Urganch shahri", rasm_url:"", mamnuniyat_foizi:null, jami_tekshiruv:0, vaadalar_soni:2 },
     ];
+
+    function updateStats() {
+      let list = [...barcha];
+      if (aktivTur !== 'hammasi') {
+        list = list.filter(m => m.tur === aktivTur);
+      }
+      document.getElementById('miniJami').textContent = list.length;
+      const tekshirilgan = list.filter(m => m.jami_tekshiruv > 0).length;
+      document.getElementById('miniTekshirilgan').textContent = tekshirilgan;
+      const foizlar = list.filter(m => m.mamnuniyat_foizi !== null).map(m => m.mamnuniyat_foizi);
+      const ort = foizlar.length ? Math.round(foizlar.reduce((a,b) => a+b, 0) / foizlar.length) : 0;
+      document.getElementById('miniMamnuniyat').textContent = ort + '%';
+      const turNom = {hammasi:'obyekt', maktab:'maktab', bogcha:"bog'cha", shifoxona:'shifoxona', sport:'sport inshoot'};
+      document.getElementById('headerSubtitle').textContent = `${list.length} ta ${turNom[aktivTur] || 'obyekt'}`;
+      document.getElementById('miniJamiLabel').textContent = aktivTur === 'hammasi' ? 'Jami obyekt' : `Jami ${turNom[aktivTur]}`;
+    }
 
     async function yukla() {
       try {
@@ -236,14 +312,9 @@
       } catch {
         barcha = SINTETIK;
       }
-      // Statistika
-      document.getElementById('miniJami').textContent = barcha.length;
-      const tekshirilgan = barcha.filter(m => m.jami_tekshiruv > 0).length;
-      document.getElementById('miniTekshirilgan').textContent = tekshirilgan;
-      const foizlar = barcha.filter(m => m.mamnuniyat_foizi !== null).map(m => m.mamnuniyat_foizi);
-      const ort = foizlar.length ? Math.round(foizlar.reduce((a,b) => a+b, 0) / foizlar.length) : 0;
-      document.getElementById('miniMamnuniyat').textContent = ort + '%';
-      document.getElementById('headerSubtitle').textContent = `${barcha.length} ta maktab`;
+      // Sintetik ma'lumotlarda tur yo'q bo'lsa default qo'shish
+      barcha.forEach(m => { if (!m.tur) m.tur = 'maktab'; });
+      updateStats();
       render();
     }
 

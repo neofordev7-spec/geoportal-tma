@@ -40,6 +40,13 @@ MAKTAB_HOLAT = [
     ('nosoz', 'Nosoz'),
 ]
 
+OBYEKT_TURLARI = [
+    ('maktab', 'Maktab'),
+    ('bogcha', "Bog'cha"),
+    ('shifoxona', 'Shifoxona'),
+    ('sport', 'Sport inshoot'),
+]
+
 
 class Murojaat(models.Model):
     rasm = models.ImageField(upload_to='murojaatlar/', blank=True, null=True)
@@ -92,6 +99,7 @@ class Statistika(models.Model):
 
 class Maktab(models.Model):
     nom = models.CharField(max_length=200)
+    tur = models.CharField(max_length=30, choices=OBYEKT_TURLARI, default='maktab')
     viloyat = models.CharField(max_length=100, choices=VILOYATLAR)
     tuman = models.CharField(max_length=100)
     manzil = models.TextField()

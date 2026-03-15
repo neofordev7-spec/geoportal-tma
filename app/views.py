@@ -9,7 +9,7 @@ from django.utils import timezone
 from .models import (
     Murojaat, MurojaatRasm, Statistika, Maktab, Vaada, Tekshiruv,
     Like, Comment, MaktabIzoh,
-    VILOYATLAR, INFRATUZILMA_TURLARI,
+    VILOYATLAR, INFRATUZILMA_TURLARI, OBYEKT_TURLARI,
 )
 
 # Viloyat markazlari koordinatalari
@@ -159,14 +159,17 @@ def murojaatlar_royxati(request):
 
 @api_view(['GET'])
 def maktablar_royxati(request):
-    """Barcha maktablar ro'yxati + real-time statistika. ?viloyat=X&tuman=Y filter qilish mumkin"""
+    """Barcha obyektlar ro'yxati + real-time statistika. ?viloyat=X&tuman=Y&tur=Z filter qilish mumkin"""
     maktablar = Maktab.objects.prefetch_related('tekshiruvlar', 'vaadalar').all()
     viloyat_filter = request.query_params.get('viloyat')
     tuman_filter = request.query_params.get('tuman')
+    tur_filter = request.query_params.get('tur')
     if viloyat_filter:
         maktablar = maktablar.filter(viloyat=viloyat_filter)
     if tuman_filter:
         maktablar = maktablar.filter(tuman=tuman_filter)
+    if tur_filter:
+        maktablar = maktablar.filter(tur=tur_filter)
     data = []
     for m in maktablar:
         jami = Tekshiruv.objects.filter(maktab=m).count()
@@ -189,6 +192,8 @@ def maktablar_royxati(request):
         data.append({
             'id': m.id,
             'nom': m.nom,
+            'tur': m.tur,
+            'tur_nomi': m.get_tur_display(),
             'viloyat': m.get_viloyat_display(),
             'tuman': m.tuman,
             'manzil': m.manzil,
@@ -261,6 +266,8 @@ def maktab_detail_api(request, maktab_id):
     return Response({
         'id': maktab.id,
         'nom': maktab.nom,
+        'tur': maktab.tur,
+        'tur_nomi': maktab.get_tur_display(),
         'viloyat': maktab.get_viloyat_display(),
         'tuman': maktab.tuman,
         'manzil': maktab.manzil,

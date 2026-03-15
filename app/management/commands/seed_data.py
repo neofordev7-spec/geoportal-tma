@@ -198,6 +198,277 @@ MAKTABLAR = [
 ]
 
 
+# ─── Bog'chalar ─────────────────────────────────────────────────────────────
+BOGCHALAR = [
+    {
+        'nom': "122-sonli bog'cha",
+        'viloyat': 'toshkent_sh',
+        'tuman': 'Sergeli tumani',
+        'manzil': "Sergeli tumani, Qo'yliq ko'chasi 5",
+        'rasm_url': '',
+        'lat': 41.2245, 'lng': 69.2187,
+        'vaadalar': [
+            {'nom': "O'yin maydonini yangilash", 'tavsif': "Bolalar uchun xavfsiz o'yin jihozlari o'rnatish", 'icon': 'toys'},
+            {'nom': "Oshxona jihozlarini almashtirish", 'tavsif': "Yangi elektr plita va muzlatgich", 'icon': 'restaurant'},
+            {'nom': "Uxlash xonasini ta'mirlash", 'tavsif': "Yangi karavotlar va matraslar", 'icon': 'bed'},
+        ],
+        'tekshiruvlar': [
+            ('bajarildi', "O'yin maydoni yangilandi, bolalar xursand!", 30),
+            ('bajarildi', "Oshxona jihozlari keldi", 31),
+            ('muammo', "Karavotlar hali kelmadi", 32),
+            ('bajarildi', "Hammasi yaxshi", 30),
+        ]
+    },
+    {
+        'nom': "56-sonli bog'cha",
+        'viloyat': 'samarqand',
+        'tuman': 'Samarqand shahri',
+        'manzil': "Samarqand shahri, Mirzo Ulug'bek ko'chasi 18",
+        'rasm_url': '',
+        'lat': 39.6612, 'lng': 66.9407,
+        'vaadalar': [
+            {'nom': 'Isitish tizimini yangilash', 'tavsif': "Qish uchun gaz isitgichlarini o'rnatish", 'icon': 'local_fire_department'},
+            {'nom': 'Gigiena vositalari', 'tavsif': "Sovun, sanitizer va sochiqlar ta'minoti", 'icon': 'soap'},
+            {'nom': "Bolalar mebeli", 'tavsif': "Yangi stol va stulchalar", 'icon': 'chair'},
+        ],
+        'tekshiruvlar': [
+            ('muammo', "Isitish hali ta'mirlanmadi", 33),
+            ('muammo', "Sovun yo'q", 34),
+            ('muammo', "Stulchalar singan", 33),
+        ]
+    },
+    {
+        'nom': "87-sonli bog'cha",
+        'viloyat': 'toshkent_sh',
+        'tuman': 'Olmazor tumani',
+        'manzil': 'Olmazor tumani, Chorsu ko\'chasi 9',
+        'rasm_url': '',
+        'lat': 41.3312, 'lng': 69.2176,
+        'vaadalar': [
+            {'nom': "Hovlidagi daraxtlarni parvarish qilish", 'tavsif': "Ko'chatlar ekish va obodonlashtirish", 'icon': 'park'},
+            {'nom': 'Xavfsizlik kameralari', 'tavsif': "Bog'cha hududida 6 ta kamera o'rnatish", 'icon': 'videocam'},
+        ],
+        'tekshiruvlar': [
+            ('bajarildi', "Daraxtlar ekildi, juda chiroyli!", 35),
+            ('bajarildi', "Kameralar o'rnatildi", 36),
+            ('bajarildi', "Bolalar xavfsiz muhitda", 35),
+        ]
+    },
+    {
+        'nom': "34-sonli bog'cha",
+        'viloyat': 'fargona',
+        'tuman': "Farg'ona shahri",
+        'manzil': "Farg'ona shahri, Al-Farg'oniy ko'chasi 7",
+        'rasm_url': '',
+        'lat': 40.3802, 'lng': 71.7803,
+        'vaadalar': [
+            {'nom': "Ichimlik suvi filtri", 'tavsif': "Bolalar uchun toza ichimlik suvi", 'icon': 'water_drop'},
+            {'nom': "Yangi o'yinchoqlar", 'tavsif': "Rivojlantiruvchi o'yinchoqlar to'plami", 'icon': 'smart_toy'},
+            {'nom': "Tom ta'mirlash", 'tavsif': "Oqayotgan tomni ta'mirlash", 'icon': 'roofing'},
+        ],
+        'tekshiruvlar': [
+            ('bajarildi', "Suv filtri o'rnatildi", 37),
+            ('muammo', "O'yinchoqlar kelmadi", 38),
+            ('bajarildi', "Tom ta'mirlandi", 37),
+        ]
+    },
+    {
+        'nom': "15-sonli bog'cha",
+        'viloyat': 'andijon',
+        'tuman': 'Asaka tumani',
+        'manzil': 'Asaka tumani, Navoiy ko\'chasi 3',
+        'rasm_url': '',
+        'lat': 40.6321, 'lng': 72.2243,
+        'vaadalar': [
+            {'nom': "Elektr simlarini yangilash", 'tavsif': "Xavfsiz elektr tarmog'i", 'icon': 'electric_bolt'},
+            {'nom': "Asfalt yo'lka", 'tavsif': "Bog'cha ichidagi yo'lkalarni asfaltlash", 'icon': 'road'},
+        ],
+        'tekshiruvlar': []
+    },
+]
+
+# ─── Shifoxonalar ────────────────────────────────────────────────────────────
+SHIFOXONALAR = [
+    {
+        'nom': 'Yunusobod tuman oilaviy poliklinikasi',
+        'viloyat': 'toshkent_sh',
+        'tuman': 'Yunusobod tumani',
+        'manzil': "Yunusobod tumani, Bog'ishamol ko'chasi 21",
+        'rasm_url': '',
+        'lat': 41.3412, 'lng': 69.2976,
+        'vaadalar': [
+            {'nom': "Rentgen apparatini yangilash", 'tavsif': "Yangi raqamli rentgen apparati o'rnatish", 'icon': 'radiology'},
+            {'nom': "Kutish zali ta'mirlash", 'tavsif': "Bemorlar uchun qulay sharoit yaratish", 'icon': 'weekend'},
+            {'nom': "Laboratoriya jihozlari", 'tavsif': "Qon tahlili apparatlari va reagentlar", 'icon': 'biotech'},
+            {'nom': "Tibbiy kiyimlar", 'tavsif': "Shifokorlar uchun yangi forma", 'icon': 'checkroom'},
+        ],
+        'tekshiruvlar': [
+            ('bajarildi', "Rentgen yangilandi, juda sifatli!", 40),
+            ('bajarildi', "Kutish zali chiroyli ta'mirlandi", 41),
+            ('muammo', "Laboratoriya jihozlari to'liq emas", 42),
+            ('bajarildi', "Yangi formalar berildi", 40),
+        ]
+    },
+    {
+        'nom': 'Qarshi shahar tibbiyot markazi',
+        'viloyat': 'qashqadaryo',
+        'tuman': 'Qarshi shahri',
+        'manzil': "Qarshi shahri, Mustaqillik ko'chasi 45",
+        'rasm_url': '',
+        'lat': 38.8571, 'lng': 65.8011,
+        'vaadalar': [
+            {'nom': 'Tez yordam mashinasi', 'tavsif': "2 ta yangi tez yordam mashinasi sotib olish", 'icon': 'local_shipping'},
+            {'nom': 'Reanimatsiya bo\'limi', 'tavsif': "Yangi reanimatsiya jihozlari", 'icon': 'monitor_heart'},
+            {'nom': "Dorixona ta'minoti", 'tavsif': "Bepul dorilar ta'minoti", 'icon': 'medication'},
+        ],
+        'tekshiruvlar': [
+            ('bajarildi', "1 ta yangi mashina keldi", 43),
+            ('muammo', "Reanimatsiya jihozlari hali kelmadi", 44),
+            ('muammo', "Dorilar yetarli emas", 43),
+            ('bajarildi', "Mashina zo'r ishlayapti", 45),
+        ]
+    },
+    {
+        'nom': 'Chilonzor tuman stomatologiyasi',
+        'viloyat': 'toshkent_sh',
+        'tuman': 'Chilonzor tumani',
+        'manzil': "Chilonzor tumani, Qatortol ko'chasi 12",
+        'rasm_url': '',
+        'lat': 41.2715, 'lng': 69.1876,
+        'vaadalar': [
+            {'nom': 'Yangi stomatologik kreslo', 'tavsif': "3 ta yangi stomatologik kreslo o'rnatish", 'icon': 'dentistry'},
+            {'nom': 'Sterilizatsiya uskunalari', 'tavsif': "Yangi avtoklav va sterilizator", 'icon': 'local_laundry_service'},
+        ],
+        'tekshiruvlar': [
+            ('bajarildi', "Kreslolar o'rnatildi, zo'r!", 46),
+            ('bajarildi', "Sterilizator ishlayapti", 47),
+            ('bajarildi', "Tozalik ajoyib", 46),
+        ]
+    },
+    {
+        'nom': "Namangan viloyat ko'z kasalliklari shifoxonasi",
+        'viloyat': 'namangan',
+        'tuman': 'Namangan shahri',
+        'manzil': "Namangan shahri, Bobur ko'chasi 15",
+        'rasm_url': '',
+        'lat': 41.0023, 'lng': 71.6636,
+        'vaadalar': [
+            {'nom': "Ko'z operatsiyasi jihozlari", 'tavsif': "Lazer operatsiya uskunasi", 'icon': 'visibility'},
+            {'nom': "Bemor palatalarini yangilash", 'tavsif': "Karavotlar va konditsionerlar", 'icon': 'bed'},
+            {'nom': "Parkovka joyi", 'tavsif': "Bemorlar uchun avtoturargoh", 'icon': 'local_parking'},
+        ],
+        'tekshiruvlar': [
+            ('muammo', "Lazer jihozi hali kelmadi", 48),
+            ('bajarildi', "Palatalar yangilandi", 49),
+            ('muammo', "Parkovka juda tor", 48),
+        ]
+    },
+    {
+        'nom': 'Buxoro tuman tibbiyot birlashmasi',
+        'viloyat': 'buxoro',
+        'tuman': 'Buxoro shahri',
+        'manzil': "Buxoro shahri, Ibn Sino ko'chasi 8",
+        'rasm_url': '',
+        'lat': 39.7687, 'lng': 64.4216,
+        'vaadalar': [
+            {'nom': "Ultratovush apparati", 'tavsif': "Yangi UZI apparati sotib olish", 'icon': 'pregnant_woman'},
+            {'nom': "Shifoxona hovlisi", 'tavsif': "Ko'kalamzorlashtirish va orom zonasi", 'icon': 'park'},
+        ],
+        'tekshiruvlar': [
+            ('bajarildi', "UZI apparati keldi, ishlamoqda!", 50),
+            ('bajarildi', "Hovli juda chiroyli qilindi", 51),
+        ]
+    },
+]
+
+# ─── Sport inshootlari ──────────────────────────────────────────────────────
+SPORT_INSHOOTLARI = [
+    {
+        'nom': 'Yunusobod sport kompleksi',
+        'viloyat': 'toshkent_sh',
+        'tuman': 'Yunusobod tumani',
+        'manzil': "Yunusobod tumani, Sport ko'chasi 10",
+        'rasm_url': '',
+        'lat': 41.3452, 'lng': 69.2856,
+        'vaadalar': [
+            {'nom': "Suzish havzasini ta'mirlash", 'tavsif': "Suv filtrlash va isitish tizimini yangilash", 'icon': 'pool'},
+            {'nom': 'Trenajor zalini jihozlash', 'tavsif': "20 ta yangi trenajor o'rnatish", 'icon': 'fitness_center'},
+            {'nom': "Yoritish tizimi", 'tavsif': "LED chiroqlar bilan almashtirish", 'icon': 'lightbulb'},
+        ],
+        'tekshiruvlar': [
+            ('bajarildi', "Havza ta'mirlandi, suv toza!", 55),
+            ('bajarildi', "Trenajorlar o'rnatildi", 56),
+            ('bajarildi', "Chiroqlar yangilandi", 55),
+        ]
+    },
+    {
+        'nom': 'Samarqand shahri futbol stadioni',
+        'viloyat': 'samarqand',
+        'tuman': 'Samarqand shahri',
+        'manzil': "Samarqand shahri, Registon ko'chasi 20",
+        'rasm_url': '',
+        'lat': 39.6582, 'lng': 66.9657,
+        'vaadalar': [
+            {'nom': "Sun'iy o't qoplama", 'tavsif': "FIFA standartidagi sun'iy o't yotqizish", 'icon': 'grass'},
+            {'nom': 'Tomoshabinlar joylari', 'tavsif': "2000 ta yangi o'rindiq o'rnatish", 'icon': 'chair'},
+            {'nom': "Yoritish minorasi", 'tavsif': "4 ta 30m yoritish minorasini o'rnatish", 'icon': 'fluorescent'},
+        ],
+        'tekshiruvlar': [
+            ('bajarildi', "O't yotqizildi, zo'r sifat!", 57),
+            ('muammo', "O'rindiqlar hali o'rnatilmadi", 58),
+            ('muammo', "Yoritish minoralari kelmadi", 57),
+        ]
+    },
+    {
+        'nom': "Farg'ona viloyat tennis korti",
+        'viloyat': 'fargona',
+        'tuman': "Farg'ona shahri",
+        'manzil': "Farg'ona shahri, Navoiy ko'chasi 30",
+        'rasm_url': '',
+        'lat': 40.3862, 'lng': 71.7903,
+        'vaadalar': [
+            {'nom': "Kort qoplamasi", 'tavsif': "Tennis kort qoplamasini yangilash", 'icon': 'sports_tennis'},
+            {'nom': 'Kiyinish xonalari', 'tavsif': "Dush va kiyinish xonalarini ta'mirlash", 'icon': 'shower'},
+        ],
+        'tekshiruvlar': [
+            ('bajarildi', "Qoplama yangilandi", 59),
+            ('muammo', "Dush xonasi ishlamayapti", 60),
+        ]
+    },
+    {
+        'nom': "Andijon bolalar sport maktabi",
+        'viloyat': 'andijon',
+        'tuman': 'Andijon shahri',
+        'manzil': "Andijon shahri, Mustaqillik ko'chasi 15",
+        'rasm_url': '',
+        'lat': 40.7861, 'lng': 72.3502,
+        'vaadalar': [
+            {'nom': 'Gimnastika zali', 'tavsif': "Gimnastika jihozlarini yangilash", 'icon': 'sports_gymnastics'},
+            {'nom': 'Boks ringi', 'tavsif': "Yangi boks ringi va qo'lqoplar", 'icon': 'sports_mma'},
+            {'nom': "Bolalar uchun sport inventar", 'tavsif': "To'plar, skakalka va boshqa inventar", 'icon': 'sports_handball'},
+        ],
+        'tekshiruvlar': [
+            ('bajarildi', "Gimnastika jihozlari zo'r!", 61),
+            ('bajarildi', "Boks ringi o'rnatildi", 62),
+            ('muammo', "Inventar yetarli emas", 61),
+        ]
+    },
+    {
+        'nom': "Xorazm suzish baseyni",
+        'viloyat': 'xorazm',
+        'tuman': 'Urganch shahri',
+        'manzil': "Urganch shahri, Al-Xorazmiy ko'chasi 5",
+        'rasm_url': '',
+        'lat': 41.5531, 'lng': 60.6245,
+        'vaadalar': [
+            {'nom': "Basseyn filtrlash tizimi", 'tavsif': "Yangi filtrlash va xlor tizimi", 'icon': 'water'},
+            {'nom': "Tomoshabin joylari", 'tavsif': "Oila a'zolari uchun o'tirish joylari", 'icon': 'weekend'},
+        ],
+        'tekshiruvlar': []
+    },
+]
+
+
 class Command(BaseCommand):
     help = "Namunaviy maktablar, va'dalar va tekshiruvlar ma'lumotlarini yaratish"
 
@@ -209,62 +480,72 @@ class Command(BaseCommand):
             Statistika.objects.create()
             self.stdout.write(self.style.SUCCESS("✓ Statistika yaratildi"))
 
+        # Barcha obyekt turlarini birlashtirish
+        BARCHA_OBYEKTLAR = [
+            ('maktab', MAKTABLAR),
+            ('bogcha', BOGCHALAR),
+            ('shifoxona', SHIFOXONALAR),
+            ('sport', SPORT_INSHOOTLARI),
+        ]
+
         created = 0
-        for data in MAKTABLAR:
-            maktab, new = Maktab.objects.get_or_create(
-                nom=data['nom'],
-                defaults={
-                    'viloyat': data['viloyat'],
-                    'tuman': data['tuman'],
-                    'manzil': data['manzil'],
-                    'rasm_url': data['rasm_url'],
-                    'lat': data['lat'],
-                    'lng': data['lng'],
-                }
-            )
-            if not new:
-                continue
-
-            # Va'dalar yaratish
-            for i, v in enumerate(data['vaadalar']):
-                vaada = Vaada.objects.create(
-                    maktab=maktab,
-                    nom=v['nom'],
-                    tavsif=v['tavsif'],
-                    icon=v['icon'],
-                    tartib=i,
+        for tur, obyektlar in BARCHA_OBYEKTLAR:
+            for data in obyektlar:
+                maktab, new = Maktab.objects.get_or_create(
+                    nom=data['nom'],
+                    defaults={
+                        'tur': tur,
+                        'viloyat': data['viloyat'],
+                        'tuman': data['tuman'],
+                        'manzil': data['manzil'],
+                        'rasm_url': data.get('rasm_url', ''),
+                        'lat': data['lat'],
+                        'lng': data['lng'],
+                    }
                 )
+                if not new:
+                    continue
 
-                # Har bir va'da uchun tegishli demo tekshiruvlar
-                for natija, izoh, user_id in data['tekshiruvlar']:
-                    if random.random() > 0.4:
-                        Tekshiruv.objects.create(
-                            maktab=maktab,
-                            vaada=vaada,
-                            natija=natija,
-                            izoh=izoh,
-                            telegram_user_id=1000000 + user_id,
-                            telegram_username=f'fuqaro_{user_id}',
-                            telegram_full_name=random.choice([
-                                'Zarina Yusupova', 'Alisher Karimov', 'Malika Tosheva',
-                                'Bobur Rahimov', 'Nilufar Hasanova', 'Jasur Umarov',
-                                'Dilnoza Ergasheva', 'Sherzod Mirzayev'
-                            ]),
-                        )
+                # Va'dalar yaratish
+                for i, v in enumerate(data['vaadalar']):
+                    vaada = Vaada.objects.create(
+                        maktab=maktab,
+                        nom=v['nom'],
+                        tavsif=v['tavsif'],
+                        icon=v['icon'],
+                        tartib=i,
+                    )
 
-            # Maktab holatini yangilash
-            jami = Tekshiruv.objects.filter(maktab=maktab).count()
-            if jami > 0:
-                baj = Tekshiruv.objects.filter(maktab=maktab, natija='bajarildi').count()
-                foiz = round(baj / jami * 100)
-                maktab.holat = 'yaxshi' if foiz >= 70 else 'etiborga_muhtoj' if foiz >= 40 else 'nosoz'
-                maktab.save(update_fields=['holat'])
+                    # Har bir va'da uchun tegishli demo tekshiruvlar
+                    for natija, izoh, user_id in data['tekshiruvlar']:
+                        if random.random() > 0.4:
+                            Tekshiruv.objects.create(
+                                maktab=maktab,
+                                vaada=vaada,
+                                natija=natija,
+                                izoh=izoh,
+                                telegram_user_id=1000000 + user_id,
+                                telegram_username=f'fuqaro_{user_id}',
+                                telegram_full_name=random.choice([
+                                    'Zarina Yusupova', 'Alisher Karimov', 'Malika Tosheva',
+                                    'Bobur Rahimov', 'Nilufar Hasanova', 'Jasur Umarov',
+                                    'Dilnoza Ergasheva', 'Sherzod Mirzayev'
+                                ]),
+                            )
 
-            created += 1
-            self.stdout.write(f"  ✓ {maktab.nom}")
+                # Obyekt holatini yangilash
+                jami = Tekshiruv.objects.filter(maktab=maktab).count()
+                if jami > 0:
+                    baj = Tekshiruv.objects.filter(maktab=maktab, natija='bajarildi').count()
+                    foiz = round(baj / jami * 100)
+                    maktab.holat = 'yaxshi' if foiz >= 70 else 'etiborga_muhtoj' if foiz >= 40 else 'nosoz'
+                    maktab.save(update_fields=['holat'])
+
+                created += 1
+                self.stdout.write(f"  ✓ [{tur}] {maktab.nom}")
 
         if created:
-            self.stdout.write(self.style.SUCCESS(f"\n{created} ta maktab muvaffaqiyatli yaratildi!"))
+            self.stdout.write(self.style.SUCCESS(f"\n{created} ta obyekt muvaffaqiyatli yaratildi!"))
         else:
             self.stdout.write(self.style.WARNING("Ma'lumotlar allaqachon mavjud."))
 
