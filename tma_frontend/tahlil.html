@@ -91,11 +91,13 @@
     .signal-fab::before{content:'';position:absolute;inset:-3px;border-radius:50%;border:1.5px solid rgba(157,43,238,0.3);animation:sigPulse 2s ease-out infinite;}
 
     /* ── Tekshir FAB ── */
-    @keyframes tekshirGlow{0%,100%{box-shadow:0 4px 18px rgba(59,130,246,0.3)}50%{box-shadow:0 4px 28px rgba(59,130,246,0.55),0 0 8px rgba(99,102,241,0.3)}}
+    @keyframes tekshirPulse{0%,100%{box-shadow:0 0 12px rgba(59,130,246,0.3),0 0 0 0 rgba(99,102,241,0.4);transform:scale(1)}50%{box-shadow:0 0 24px rgba(59,130,246,0.6),0 0 40px rgba(99,102,241,0.2);transform:scale(1.08)}}
+    @keyframes tekshirRing{0%{transform:scale(1);opacity:0.6}100%{transform:scale(1.5);opacity:0}}
     @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
     @keyframes spin{to{transform:rotate(360deg)}}
     .spinner{animation:spin 0.7s linear infinite;border:2.5px solid rgba(0,0,0,0.08);border-top-color:#9333ea;border-radius:50%;width:24px;height:24px;}
-    .tekshir-fab{position:fixed;bottom:72px;right:12px;z-index:1199;width:48px;height:48px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;display:flex;align-items:center;justify-content:center;animation:tekshirGlow 2.5s ease-in-out infinite;transition:transform 0.15s;}
+    .tekshir-fab{position:fixed;bottom:74px;right:12px;z-index:1199;width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;display:flex;align-items:center;justify-content:center;animation:tekshirPulse 2s ease-in-out infinite;}
+    .tekshir-fab::before{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(59,130,246,0.3);animation:tekshirRing 2s ease-out infinite;}
     .tekshir-fab:active{transform:scale(0.92);}
     .tks-bg{position:fixed;inset:0;z-index:1300;background:rgba(0,0,0,0);pointer-events:none;transition:background 0.35s;}
     .tks-bg.open{background:rgba(0,0,0,0.5);pointer-events:auto;}

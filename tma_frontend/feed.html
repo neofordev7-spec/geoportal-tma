@@ -103,8 +103,10 @@
     .spinner{animation:spin 0.7s linear infinite;border:2.5px solid rgba(0,0,0,0.08);border-top-color:#9333ea;border-radius:50%;width:24px;height:24px;}
 
     /* ── Tekshir FAB ── */
-    @keyframes tekshirGlow{0%,100%{box-shadow:0 4px 18px rgba(59,130,246,0.3)}50%{box-shadow:0 4px 28px rgba(59,130,246,0.55),0 0 8px rgba(99,102,241,0.3)}}
-    .tekshir-fab{position:fixed;bottom:72px;right:12px;z-index:49;width:48px;height:48px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;display:flex;align-items:center;justify-content:center;animation:tekshirGlow 2.5s ease-in-out infinite;transition:transform 0.15s;}
+    @keyframes tekshirPulse{0%,100%{box-shadow:0 0 12px rgba(59,130,246,0.3),0 0 0 0 rgba(99,102,241,0.4);transform:scale(1)}50%{box-shadow:0 0 24px rgba(59,130,246,0.6),0 0 40px rgba(99,102,241,0.2);transform:scale(1.08)}}
+    @keyframes tekshirRing{0%{transform:scale(1);opacity:0.6}100%{transform:scale(1.5);opacity:0}}
+    .tekshir-fab{position:fixed;bottom:74px;right:12px;z-index:49;width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;display:flex;align-items:center;justify-content:center;animation:tekshirPulse 2s ease-in-out infinite;}
+    .tekshir-fab::before{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(59,130,246,0.3);animation:tekshirRing 2s ease-out infinite;}
     .tekshir-fab:active{transform:scale(0.92);}
 
     /* ── Tekshir sheet ── */
@@ -323,57 +325,9 @@ const fmt=n=>{if(!n)return'0';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1000)
 const statusCls={'kutilmoqda':'status-kutilmoqda','korib_chiqilmoqda':'status-korib_chiqilmoqda','hal_qilindi':'status-hal_qilindi'};
 const statusIcon={'kutilmoqda':'schedule','korib_chiqilmoqda':'visibility','hal_qilindi':'check_circle'};
 
-// ── Hardcoded feed data ──
-const POSTS=[
-  {
-    id:1,
-    user:'Aziz Karimov',
-    is_anonim:false,
-    izoh:'Qarshi–Yakkabo\'g\' yo\'lida ta\'mirlash ishlari boshlanganiga 3 oy bo\'ldi, lekin hali ham tugallanmagan. Har kuni bu yo\'ldan minglab mashina o\'tadi. Fuqarolar xavfsizligi xavf ostida!',
-    viloyat:'Qashqadaryo',
-    tuman:'Qarshi',
-    infratuzilma:'Yo\'l',
-    holat:'Kutilmoqda',
-    holat_kod:'kutilmoqda',
-    rasmlar:['/media/lenta/qarshi_yakkaboq.mp4'],
-    likes_soni:47,
-    comments_soni:4,
-    is_liked:false,
-    vaqt:'3 soat'
-  },
-  {
-    id:2,
-    user:'Sardor Rahimov',
-    is_anonim:false,
-    izoh:'Asfalt yotqizish ishlari nihoyat boshlandi! Rahmat tegishli tashkilotlarga. Umid qilamiz sifatli bo\'ladi va uzoq xizmat qiladi.',
-    viloyat:'Qashqadaryo',
-    tuman:'Qarshi sh.',
-    infratuzilma:'Yo\'l',
-    holat:'Hal qilindi',
-    holat_kod:'hal_qilindi',
-    rasmlar:['/media/lenta/asfalt.mp4'],
-    likes_soni:124,
-    comments_soni:5,
-    is_liked:false,
-    vaqt:'5 soat'
-  },
-  {
-    id:3,
-    user:'Anonim fuqaro',
-    is_anonim:true,
-    izoh:'Mahalliy ko\'cha 2 yildan beri buzilgan holatda. Bolalar maktabga xavfli sharoitda borishmoqda. Iltimos, e\'tibor qarating!',
-    viloyat:'Qashqadaryo',
-    tuman:'Shahrisabz',
-    infratuzilma:'Yo\'l',
-    holat:'Ko\'rib chiqilmoqda',
-    holat_kod:'korib_chiqilmoqda',
-    rasmlar:['/media/lenta/kocha.jpg'],
-    likes_soni:89,
-    comments_soni:6,
-    is_liked:false,
-    vaqt:'8 soat'
-  }
-];
+// ── Feed data from API ──
+let POSTS=[];
+let feedOffset=0, feedLoading=false, feedHasMore=true;
 
 let activePost=null;
 
@@ -386,19 +340,21 @@ function card(p,idx){
   const loc=(p.viloyat||p.tuman)?`<div class="loc"><span class="material-symbols-outlined" style="font-size:12px;font-variation-settings:'FILL' 1">location_on</span>${[p.viloyat,p.tuman].filter(Boolean).join(', ')}</div>`:'';
   const sBadge=p.holat_kod?`<span class="status-badge ${statusCls[p.holat_kod]||''}"><span class="material-symbols-outlined" style="font-size:11px;font-variation-settings:'FILL' 1">${statusIcon[p.holat_kod]||'info'}</span>${p.holat}</span>`:'';
 
-  const isVideo=/\.(mp4|mov|webm)/i.test(p.rasmlar[0]||'');
   let media='';
-  const u=p.rasmlar[0];
-  if(isVideo){
-    media=`<div class="vid-wrap" data-vid="1">
-      <video src="${u}" playsinline preload="auto" loop muted></video>
-      <div class="play-icon show" id="pi-${p.id}"><div><span class="material-symbols-outlined text-white" style="font-size:32px;font-variation-settings:'FILL' 1">play_arrow</span></div></div>
-      <div class="vid-progress" id="vp-${p.id}" style="width:0%"></div>
-      <div class="mute-btn" onclick="event.stopPropagation();toggleMute(this)" data-muted="1"><span class="material-symbols-outlined text-white/60" style="font-size:16px;font-variation-settings:'FILL' 1">volume_off</span></div>
-      <div class="dbl-heart"><span class="material-symbols-outlined">favorite</span></div>
-    </div>`;
-  }else{
-    media=`<div class="relative"><img src="${u}" style="width:100%;max-height:80vh;object-fit:cover;background:#f1f5f9;display:block;" onerror="this.parentElement.style.display='none'"/><div class="dbl-heart"><span class="material-symbols-outlined">favorite</span></div></div>`;
+  const u=p.rasmlar&&p.rasmlar[0];
+  if(u){
+    const isVideo=/\.(mp4|mov|webm)/i.test(u);
+    if(isVideo){
+      media=`<div class="vid-wrap" data-vid="1">
+        <video src="${u}" playsinline preload="auto" loop muted></video>
+        <div class="play-icon show" id="pi-${p.id}"><div><span class="material-symbols-outlined text-white" style="font-size:32px;font-variation-settings:'FILL' 1">play_arrow</span></div></div>
+        <div class="vid-progress" id="vp-${p.id}" style="width:0%"></div>
+        <div class="mute-btn" onclick="event.stopPropagation();toggleMute(this)" data-muted="1"><span class="material-symbols-outlined text-white/60" style="font-size:16px;font-variation-settings:'FILL' 1">volume_off</span></div>
+        <div class="dbl-heart"><span class="material-symbols-outlined">favorite</span></div>
+      </div>`;
+    }else{
+      media=`<div class="relative"><img src="${u}" style="width:100%;max-height:80vh;object-fit:cover;background:#f1f5f9;display:block;" onerror="this.parentElement.style.display='none'"/><div class="dbl-heart"><span class="material-symbols-outlined">favorite</span></div></div>`;
+    }
   }
 
   const t=p.izoh||'';
@@ -427,7 +383,7 @@ function card(p,idx){
     ${media}
     <div class="actions">
       <div class="abtn" onclick="doLike(${p.id})">
-        <span class="material-symbols-outlined mi text-slate-500" style="font-variation-settings:'FILL' 0" id="lk-${p.id}">favorite</span>
+        <span class="material-symbols-outlined mi ${p.is_liked?'text-red-500':'text-slate-500'}" style="font-variation-settings:'FILL' ${p.is_liked?1:0}" id="lk-${p.id}">favorite</span>
         <span class="num" id="ln-${p.id}">${fmt(p.likes_soni)}</span>
       </div>
       <div class="abtn" onclick="openC(${p.id})">
@@ -447,19 +403,45 @@ function card(p,idx){
   </div>`;
 }
 
-// ── Render feed ──
-function renderFeed(){
+// ── Load feed from API ──
+async function loadFeed(){
+  if(feedLoading||!feedHasMore)return;
+  feedLoading=true;
   const el=document.getElementById('feed');
-  POSTS.forEach((p,i)=>el.insertAdjacentHTML('beforeend',card(p,i)));
-  // Stagger show animation
-  requestAnimationFrame(()=>{
-    document.querySelectorAll('.post').forEach((p,i)=>{
-      setTimeout(()=>p.classList.add('show'),i*120);
+  // Show loader on first load
+  if(feedOffset===0) el.innerHTML='<div class="flex justify-center py-12"><div class="spinner"></div></div>';
+  try{
+    const url=`/api/feed/?limit=10&offset=${feedOffset}${UID?'&user_id='+UID:''}`;
+    const res=await fetch(url);
+    const d=await res.json();
+    if(feedOffset===0) el.innerHTML='';
+    if(!d.results||!d.results.length){
+      if(feedOffset===0) el.innerHTML='<div class="text-center py-12 text-slate-400 text-sm">Hozircha postlar yo\'q</div>';
+      feedHasMore=false;
+      feedLoading=false;
+      return;
+    }
+    const startIdx=POSTS.length;
+    d.results.forEach(p=>POSTS.push(p));
+    d.results.forEach((p,i)=>el.insertAdjacentHTML('beforeend',card(p,startIdx+i)));
+    // Stagger show animation
+    requestAnimationFrame(()=>{
+      const posts=el.querySelectorAll('.post:not(.show)');
+      posts.forEach((p,i)=>setTimeout(()=>p.classList.add('show'),i*80));
     });
-  });
-  // Setup video observers
-  setupVideos();
+    setupVideos();
+    feedOffset+=d.results.length;
+    feedHasMore=d.has_more;
+  }catch(e){
+    if(feedOffset===0) el.innerHTML='<div class="text-center py-12 text-slate-400 text-sm">Xatolik yuz berdi</div>';
+  }
+  feedLoading=false;
 }
+
+// ── Infinite scroll ──
+window.addEventListener('scroll',()=>{
+  if(window.innerHeight+window.scrollY>=document.body.offsetHeight-600) loadFeed();
+});
 
 // ── Video autoplay on scroll ──
 function setupVideos(){
@@ -847,7 +829,7 @@ async function tksSubmit(){
 }
 
 // ── Init ──
-renderFeed();
+loadFeed();
 </script>
 </body>
 </html>
