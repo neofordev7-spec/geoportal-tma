@@ -11,19 +11,19 @@
   <script>tailwind.config={theme:{extend:{fontFamily:{sans:["Inter","sans-serif"]}}}}</script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'Inter',sans-serif;background:#000;color:#fff;-webkit-tap-highlight-color:transparent;overflow-x:hidden;}
+    body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#dcfce7 0%,#e0f2fe 50%,#f3e8ff 100%);color:#0f172a;-webkit-tap-highlight-color:transparent;overflow-x:hidden;min-height:100vh;}
     ::-webkit-scrollbar{display:none;}
 
     /* ── Post ── */
-    .post{background:#000;border-bottom:0.5px solid rgba(255,255,255,0.06);padding-bottom:2px;margin-bottom:2px;opacity:0;transform:translateY(16px);}
+    .post{background:rgba(255,255,255,0.6);backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,0,0,0.06);padding-bottom:2px;margin-bottom:8px;border-radius:16px;margin-left:8px;margin-right:8px;opacity:0;transform:translateY(16px);overflow:hidden;}
     .post.show{opacity:1;transform:translateY(0);transition:opacity 0.4s ease-out,transform 0.4s ease-out;}
 
     /* ── Video ── */
-    .vid-wrap{position:relative;background:#000;width:100%;overflow:hidden;cursor:pointer;}
-    .vid-wrap video{width:100%;display:block;max-height:80vh;object-fit:contain;background:#000;}
+    .vid-wrap{position:relative;background:#f1f5f9;width:100%;overflow:hidden;cursor:pointer;}
+    .vid-wrap video{width:100%;display:block;max-height:80vh;object-fit:contain;background:#f1f5f9;}
     .play-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;pointer-events:none;}
     .play-icon.show{opacity:1;}
-    .play-icon div{width:64px;height:64px;border-radius:50%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(16px);border:2px solid rgba(255,255,255,0.08);}
+    .play-icon div{width:64px;height:64px;border-radius:50%;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(16px);border:2px solid rgba(255,255,255,0.2);}
     .vid-progress{position:absolute;bottom:0;left:0;height:3px;background:linear-gradient(90deg,#9333ea,#ec4899);border-radius:0 2px 0 0;transition:width 0.2s linear;z-index:5;}
     .mute-btn{position:absolute;bottom:14px;right:14px;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,0.5);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:6;border:1px solid rgba(255,255,255,0.08);cursor:pointer;transition:transform 0.15s;}
     .mute-btn:active{transform:scale(0.85);}
@@ -39,7 +39,7 @@
     .abtn{display:flex;align-items:center;gap:6px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform 0.1s;}
     .abtn:active{transform:scale(0.9);}
     .abtn .mi{font-size:26px;transition:transform 0.15s;}
-    .abtn .num{font-size:13px;font-weight:700;color:rgba(255,255,255,0.4);}
+    .abtn .num{font-size:13px;font-weight:700;color:rgba(15,23,42,0.4);}
     @keyframes heartBeat{0%{transform:scale(1)}15%{transform:scale(1.35)}30%{transform:scale(0.95)}50%{transform:scale(1.1)}70%{transform:scale(1)}}
     .heart-beat{animation:heartBeat 0.5s ease-out;}
 
@@ -50,45 +50,45 @@
     .status-hal_qilindi{background:rgba(34,197,94,0.1);color:#22c55e;}
 
     /* ── Text ── */
-    .desc{padding:2px 16px 12px;font-size:14px;line-height:1.5;color:rgba(255,255,255,0.8);}
-    .desc .name{font-weight:800;color:#fff;margin-right:5px;}
-    .desc .more{color:rgba(255,255,255,0.3);font-weight:600;cursor:pointer;}
+    .desc{padding:2px 16px 12px;font-size:14px;line-height:1.5;color:rgba(15,23,42,0.7);}
+    .desc .name{font-weight:800;color:#0f172a;margin-right:5px;}
+    .desc .more{color:rgba(15,23,42,0.35);font-weight:600;cursor:pointer;}
 
     /* ── Location ── */
-    .loc{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:rgba(255,255,255,0.25);font-weight:500;}
+    .loc{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:rgba(15,23,42,0.35);font-weight:500;}
 
     /* ── Comment sheet (modern) ── */
     .sheet-bg{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,0);pointer-events:none;transition:background 0.35s;}
     .sheet-bg.open{background:rgba(0,0,0,0.6);pointer-events:auto;}
-    .sheet{position:fixed;bottom:0;left:0;right:0;z-index:61;background:#1c1c1e;border-radius:16px 16px 0 0;max-height:80vh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.32,0.72,0,1);}
+    .sheet{position:fixed;bottom:0;left:0;right:0;z-index:61;background:#fff;border-radius:16px 16px 0 0;max-height:80vh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.32,0.72,0,1);box-shadow:0 -4px 30px rgba(0,0,0,0.1);}
     .sheet.open{transform:translateY(0);}
 
     .c-header{display:flex;align-items:center;justify-content:center;position:relative;padding:14px 16px 12px;}
-    .c-handle{width:36px;height:4px;border-radius:99px;background:rgba(255,255,255,0.12);position:absolute;top:8px;left:50%;transform:translateX(-50%);}
+    .c-handle{width:36px;height:4px;border-radius:99px;background:rgba(0,0,0,0.1);position:absolute;top:8px;left:50%;transform:translateX(-50%);}
     .c-title{font-size:14px;font-weight:700;letter-spacing:-0.01em;}
-    .c-close{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.15s;}
+    .c-close{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.15s;}
     .c-close:active{transform:translateY(-50%) scale(0.85);}
 
     .c-list{flex:1;overflow-y:auto;padding:0 16px 8px;overscroll-behavior:contain;}
-    .c-item{display:flex;gap:12px;padding:14px 0;border-bottom:0.5px solid rgba(255,255,255,0.04);}
+    .c-item{display:flex;gap:12px;padding:14px 0;border-bottom:0.5px solid rgba(0,0,0,0.06);}
     .c-item:last-child{border-bottom:none;}
     .c-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:800;color:#fff;}
     .c-av-gradient{background:linear-gradient(135deg,#667eea,#764ba2);}
-    .c-av-anon{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.3);}
+    .c-av-anon{background:rgba(0,0,0,0.06);color:rgba(0,0,0,0.3);}
     .c-meta{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
-    .c-name{font-size:13px;font-weight:700;color:#fff;}
-    .c-time{font-size:11px;color:rgba(255,255,255,0.18);font-weight:500;}
-    .c-text{font-size:14px;color:rgba(255,255,255,0.7);line-height:1.45;word-break:break-word;}
+    .c-name{font-size:13px;font-weight:700;color:#0f172a;}
+    .c-time{font-size:11px;color:rgba(15,23,42,0.3);font-weight:500;}
+    .c-text{font-size:14px;color:rgba(15,23,42,0.65);line-height:1.45;word-break:break-word;}
     .c-like-btn{display:flex;flex-direction:column;align-items:center;gap:2px;margin-left:auto;flex-shrink:0;padding-top:4px;cursor:pointer;}
-    .c-like-btn span{font-size:16px;color:rgba(255,255,255,0.15);transition:all 0.15s;}
+    .c-like-btn span{font-size:16px;color:rgba(15,23,42,0.15);transition:all 0.15s;}
 
     .c-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;}
-    .c-empty-icon{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;margin-bottom:12px;border:1px solid rgba(255,255,255,0.04);}
+    .c-empty-icon{width:56px;height:56px;border-radius:50%;background:rgba(0,0,0,0.03);display:flex;align-items:center;justify-content:center;margin-bottom:12px;border:1px solid rgba(0,0,0,0.06);}
 
-    .c-input-wrap{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:0.5px solid rgba(255,255,255,0.06);background:#1c1c1e;}
+    .c-input-wrap{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:0.5px solid rgba(0,0,0,0.06);background:#fff;}
     .c-input-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#9333ea,#ec4899);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:800;color:#fff;}
-    .c-input{flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.04);border-radius:20px;padding:10px 16px;font-size:14px;color:#fff;outline:none;font-family:inherit;resize:none;max-height:80px;line-height:1.4;transition:border-color 0.2s;}
-    .c-input::placeholder{color:rgba(255,255,255,0.18);}
+    .c-input{flex:1;background:rgba(0,0,0,0.04);border:1px solid rgba(0,0,0,0.08);border-radius:20px;padding:10px 16px;font-size:14px;color:#0f172a;outline:none;font-family:inherit;resize:none;max-height:80px;line-height:1.4;transition:border-color 0.2s;}
+    .c-input::placeholder{color:rgba(15,23,42,0.3);}
     .c-input:focus{border-color:rgba(147,51,234,0.4);}
     .c-send{width:36px;height:36px;border-radius:50%;background:rgba(147,51,234,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all 0.2s;border:none;opacity:0.4;pointer-events:none;}
     .c-send.active{background:#9333ea;opacity:1;pointer-events:auto;}
@@ -100,20 +100,20 @@
     .fab::before{content:'';position:absolute;inset:-3px;border-radius:50%;border:1.5px solid rgba(147,51,234,0.3);animation:sigPulse 2s ease-out infinite;}
 
     @keyframes spin{to{transform:rotate(360deg)}}
-    .spinner{animation:spin 0.7s linear infinite;border:2.5px solid rgba(255,255,255,0.06);border-top-color:#9333ea;border-radius:50%;width:24px;height:24px;}
+    .spinner{animation:spin 0.7s linear infinite;border:2.5px solid rgba(0,0,0,0.08);border-top-color:#9333ea;border-radius:50%;width:24px;height:24px;}
   </style>
 </head>
 <body class="pb-[64px]">
 
 <!-- Header -->
-<div class="sticky top-0 z-40" style="background:rgba(0,0,0,0.92);backdrop-filter:blur(24px) saturate(180%);">
+<div class="sticky top-0 z-40" style="background:rgba(255,255,255,0.92);backdrop-filter:blur(24px) saturate(180%);border-bottom:1px solid rgba(0,0,0,0.06);">
   <div class="flex items-center justify-between px-4 h-12">
     <div class="flex items-center gap-2">
-      <span class="text-[17px] font-black tracking-tight">Real Holat</span>
-      <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-purple-500/15 text-purple-400" style="letter-spacing:0.04em;">BETA</span>
+      <span class="text-[17px] font-black tracking-tight text-slate-900">Real Holat</span>
+      <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-purple-500/15 text-purple-600" style="letter-spacing:0.04em;">BETA</span>
     </div>
-    <a href="/tma/profil/" class="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center active:scale-90 transition-transform">
-      <span class="material-symbols-outlined text-white/50" style="font-size:18px;font-variation-settings:'FILL' 1">person</span>
+    <a href="/tma/profil/" class="w-8 h-8 rounded-full bg-black/[0.06] flex items-center justify-center active:scale-90 transition-transform">
+      <span class="material-symbols-outlined text-slate-500" style="font-size:18px;font-variation-settings:'FILL' 1">person</span>
     </a>
   </div>
 </div>
@@ -128,17 +128,17 @@
     <div class="c-handle"></div>
     <span class="c-title">Izohlar</span>
     <div class="c-close" onclick="closeC()">
-      <span class="material-symbols-outlined text-white/40" style="font-size:16px">close</span>
+      <span class="material-symbols-outlined text-slate-400" style="font-size:16px">close</span>
     </div>
   </div>
   <div id="cList" class="c-list" style="min-height:80px;max-height:calc(80vh - 130px)"></div>
   <div id="cEmpty" class="hidden">
     <div class="c-empty">
       <div class="c-empty-icon">
-        <span class="material-symbols-outlined text-white/10" style="font-size:24px">chat_bubble_outline</span>
+        <span class="material-symbols-outlined text-slate-300" style="font-size:24px">chat_bubble_outline</span>
       </div>
-      <p class="text-[13px] font-semibold text-white/20 mb-1">Hali izohlar yo'q</p>
-      <p class="text-[11px] text-white/10">Birinchi bo'lib fikringizni bildiring</p>
+      <p class="text-[13px] font-semibold text-slate-400 mb-1">Hali izohlar yo'q</p>
+      <p class="text-[11px] text-slate-300">Birinchi bo'lib fikringizni bildiring</p>
     </div>
   </div>
   <div class="c-input-wrap">
@@ -151,19 +151,19 @@
 </div>
 
 <!-- Bottom Nav -->
-<div class="fixed bottom-0 left-0 right-0 z-50" style="background:rgba(0,0,0,0.96);backdrop-filter:blur(24px);border-top:0.5px solid rgba(255,255,255,0.05);">
+<div class="fixed bottom-0 left-0 right-0 z-50" style="background:rgba(255,255,255,0.92);backdrop-filter:blur(24px);border-top:1px solid rgba(0,0,0,0.06);">
   <div class="flex items-end justify-around py-1.5 px-6">
     <a href="/tma/feed/" class="flex flex-col items-center gap-0.5 py-1">
-      <span class="material-symbols-outlined text-white" style="font-size:24px;font-variation-settings:'FILL' 1">dynamic_feed</span>
-      <span class="text-[9px] font-bold">Lenta</span>
+      <span class="material-symbols-outlined text-slate-900" style="font-size:24px;font-variation-settings:'FILL' 1">dynamic_feed</span>
+      <span class="text-[9px] font-bold text-slate-900">Lenta</span>
     </a>
     <a href="/tma/murojaat/" class="flex flex-col items-center">
       <div class="fab"><span class="material-symbols-outlined text-white" style="font-size:26px;font-variation-settings:'FILL' 1">campaign</span></div>
-      <span class="text-[9px] font-bold mt-1" style="color:#a855f7">Signal</span>
+      <span class="text-[9px] font-bold mt-1" style="color:#9d2bee">Signal</span>
     </a>
     <a href="/tma/tahlil/" class="flex flex-col items-center gap-0.5 py-1">
-      <span class="material-symbols-outlined text-white/30" style="font-size:24px;font-variation-settings:'FILL' 1">bar_chart</span>
-      <span class="text-[9px] font-semibold text-white/30">Tahlil</span>
+      <span class="material-symbols-outlined text-slate-400" style="font-size:24px;font-variation-settings:'FILL' 1">bar_chart</span>
+      <span class="text-[9px] font-semibold text-slate-400">Tahlil</span>
     </a>
   </div>
 </div>
@@ -236,7 +236,7 @@ let activePost=null;
 // ── Build card ──
 function card(p,idx){
   const av=p.is_anonim
-    ?`<div class="w-10 h-10 rounded-full bg-white/[0.06] flex items-center justify-center" style="border:1px solid rgba(255,255,255,0.04);"><span class="material-symbols-outlined text-white/20" style="font-size:18px">person_off</span></div>`
+    ?`<div class="w-10 h-10 rounded-full bg-black/[0.05] flex items-center justify-center" style="border:1px solid rgba(0,0,0,0.06);"><span class="material-symbols-outlined text-slate-400" style="font-size:18px">person_off</span></div>`
     :`<div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:linear-gradient(135deg,${idx===0?'#7c3aed,#ec4899':'#667eea,#764ba2'});"><span class="text-[13px] font-black text-white">${(p.user[0]||'').toUpperCase()}</span></div>`;
 
   const loc=(p.viloyat||p.tuman)?`<div class="loc"><span class="material-symbols-outlined" style="font-size:12px;font-variation-settings:'FILL' 1">location_on</span>${[p.viloyat,p.tuman].filter(Boolean).join(', ')}</div>`:'';
@@ -254,7 +254,7 @@ function card(p,idx){
       <div class="dbl-heart"><span class="material-symbols-outlined">favorite</span></div>
     </div>`;
   }else{
-    media=`<div class="relative"><img src="${u}" style="width:100%;max-height:80vh;object-fit:cover;background:#111;display:block;" onerror="this.parentElement.style.display='none'"/><div class="dbl-heart"><span class="material-symbols-outlined">favorite</span></div></div>`;
+    media=`<div class="relative"><img src="${u}" style="width:100%;max-height:80vh;object-fit:cover;background:#f1f5f9;display:block;" onerror="this.parentElement.style.display='none'"/><div class="dbl-heart"><span class="material-symbols-outlined">favorite</span></div></div>`;
   }
 
   const t=p.izoh||'';
@@ -273,33 +273,33 @@ function card(p,idx){
           ${sBadge}
         </div>
         <div class="flex items-center gap-2 mt-0.5">
-          ${p.infratuzilma?`<span class="text-[11px] text-white/25 font-medium">${p.infratuzilma}</span>`:''}
-          ${p.infratuzilma&&(p.viloyat||p.tuman)?'<span class="text-[11px] text-white/10">·</span>':''}
+          ${p.infratuzilma?`<span class="text-[11px] text-slate-400 font-medium">${p.infratuzilma}</span>`:''}
+          ${p.infratuzilma&&(p.viloyat||p.tuman)?'<span class="text-[11px] text-slate-300">·</span>':''}
           ${loc}
         </div>
       </div>
-      <span class="text-[11px] text-white/15 font-medium self-start mt-1">${p.vaqt}</span>
+      <span class="text-[11px] text-slate-400 font-medium self-start mt-1">${p.vaqt}</span>
     </div>
     ${media}
     <div class="actions">
       <div class="abtn" onclick="doLike(${p.id})">
-        <span class="material-symbols-outlined mi text-white/70" style="font-variation-settings:'FILL' 0" id="lk-${p.id}">favorite</span>
+        <span class="material-symbols-outlined mi text-slate-500" style="font-variation-settings:'FILL' 0" id="lk-${p.id}">favorite</span>
         <span class="num" id="ln-${p.id}">${fmt(p.likes_soni)}</span>
       </div>
       <div class="abtn" onclick="openC(${p.id})">
-        <span class="material-symbols-outlined mi text-white/70" style="font-variation-settings:'FILL' 0">chat_bubble</span>
+        <span class="material-symbols-outlined mi text-slate-500" style="font-variation-settings:'FILL' 0">chat_bubble</span>
         <span class="num" id="cn-${p.id}">${fmt(p.comments_soni)}</span>
       </div>
       <div class="abtn" onclick="doShare(${p.id})">
-        <span class="material-symbols-outlined mi text-white/70" style="font-size:22px;font-variation-settings:'FILL' 1">send</span>
+        <span class="material-symbols-outlined mi text-slate-500" style="font-size:22px;font-variation-settings:'FILL' 1">send</span>
       </div>
       <div class="flex-1"></div>
       <div class="abtn" onclick="doBookmark(this)">
-        <span class="material-symbols-outlined mi text-white/20" style="font-size:24px;font-variation-settings:'FILL' 0">bookmark</span>
+        <span class="material-symbols-outlined mi text-slate-300" style="font-size:24px;font-variation-settings:'FILL' 0">bookmark</span>
       </div>
     </div>
     ${desc}
-    ${p.comments_soni>0?`<div class="px-4 pb-3"><span class="text-[12px] text-white/20 font-medium cursor-pointer active:text-white/30" onclick="openC(${p.id})">${p.comments_soni} ta izohni ko'rish</span></div>`:''}
+    ${p.comments_soni>0?`<div class="px-4 pb-3"><span class="text-[12px] text-slate-400 font-medium cursor-pointer active:text-slate-500" onclick="openC(${p.id})">${p.comments_soni} ta izohni ko'rish</span></div>`:''}
   </div>`;
 }
 
@@ -396,7 +396,7 @@ function doLike(id){
   const liked=ic.classList.contains('text-red-500');
   const cur=parseInt(cn.textContent)||0;
   if(liked){
-    ic.className='material-symbols-outlined mi text-white/70';
+    ic.className='material-symbols-outlined mi text-slate-500';
     ic.style.fontVariationSettings='"FILL" 0';
     cn.textContent=fmt(Math.max(0,cur-1));
   }else{
@@ -413,8 +413,8 @@ function doBookmark(btn){
   const ic=btn.querySelector('.material-symbols-outlined');
   const filled=ic.style.fontVariationSettings.includes('1');
   ic.style.fontVariationSettings=filled?'"FILL" 0':'"FILL" 1';
-  ic.classList.toggle('text-white/20',filled);
-  ic.classList.toggle('text-white',!filled);
+  ic.classList.toggle('text-slate-300',filled);
+  ic.classList.toggle('text-slate-900',!filled);
 }
 
 function doShare(id){if(navigator.share)navigator.share({title:'Real Holat',url:location.origin+'/tma/feed/#post-'+id}).catch(()=>{});}
@@ -462,7 +462,7 @@ async function loadC(id){
     const d=await(await fetch(`/api/feed/${id}/comments/`)).json();
     if(!d.comments?.length){list.innerHTML='';emp.classList.remove('hidden');}
     else{emp.classList.add('hidden');list.innerHTML=d.comments.map((c,i)=>commentHTML(c,i)).join('');}
-  }catch{list.innerHTML='<p class="text-center text-xs text-white/20 py-8">Xatolik yuz berdi</p>';}
+  }catch{list.innerHTML='<p class="text-center text-xs text-slate-400 py-8">Xatolik yuz berdi</p>';}
 }
 
 function autoGrow(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,80)+'px';}
