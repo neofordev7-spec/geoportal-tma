@@ -21,7 +21,7 @@ import { generateSyntheticSchools, enrichTumanStats } from '../syntheticSchools'
 import ViloyatlarLayer from './ViloyatlarLayer';
 import TumanlarLayer from './TumanlarLayer';
 import MaktablarLayer from './MaktablarLayer';
-import { Breadcrumb, LayerSwitcher, GpsButton, StatsBox } from './MapControls';
+import { Breadcrumb, LayerSwitcher, GpsButton, StatsBox, HomeButton } from './MapControls';
 
 const UZ_CENTER: [number, number] = [41.3, 64.5];
 const UZ_ZOOM = 6;
@@ -212,6 +212,21 @@ export default function UzbekistanMap() {
     }
   }, [level, viloyatlarGeo, selectedViloyat]);
 
+  // Handle "Home" button — fly to user's GPS location at ~10km zoom
+  const handleHome = useCallback(() => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        // Zoom level 13 ≈ ~10km visible radius
+        setMapTarget({ center: [latitude, longitude], zoom: 13 });
+      },
+      () => {
+        alert("GPS aniqlanmadi. Iltimos, joylashuv ruxsatini bering.");
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, []);
+
   // Stats count for bottom box
   const statsCount =
     level === 'country'
@@ -310,6 +325,8 @@ export default function UzbekistanMap() {
       />
 
       <LayerSwitcher activeLayer={tileLayer} onChange={setTileLayer} />
+
+      <HomeButton onHomeClick={handleHome} />
 
       <StatsBox
         level={level}

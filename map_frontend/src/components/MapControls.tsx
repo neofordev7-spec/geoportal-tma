@@ -111,23 +111,53 @@ export function StatsBox({ level, viloyatName, tumanName, count, tekshirilgan, b
         ? viloyatName || ''
         : tumanName || '';
 
+  const pct = count > 0 ? Math.round((bajarilgan / count) * 100) : 0;
+
   return (
-    <div className="absolute bottom-6 left-3 z-[1000] bg-white/95 backdrop-blur rounded-xl shadow-lg p-4 min-w-[220px]">
-      <h3 className="text-sm font-bold text-gray-900 mb-2">{title}</h3>
-      <div className="flex items-end gap-2 mb-2">
-        <span className="text-2xl font-bold text-blue-600">{count}</span>
-        <span className="text-xs text-gray-500 pb-1">ob'yekt</span>
+    <div className="absolute bottom-4 left-3 right-3 z-[1000] bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg px-4 py-2.5 flex items-center gap-3">
+      <div className="flex-shrink-0">
+        <p className="text-[10px] font-semibold text-gray-400 leading-tight">{title}</p>
+        <p className="text-lg font-black text-gray-900 leading-tight">{count} <span className="text-[10px] font-semibold text-gray-400">ob'yekt</span></p>
       </div>
-      <div className="grid grid-cols-2 gap-2 text-xs">
-        <div className="bg-emerald-50 rounded-lg px-2 py-1.5 text-center">
-          <div className="font-bold text-emerald-600">{tekshirilgan}</div>
-          <div className="text-emerald-500/80 text-[10px]">tekshirilgan</div>
+      <div className="h-8 w-px bg-gray-200 flex-shrink-0" />
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+          <span className="text-xs font-bold text-gray-700">{tekshirilgan}</span>
+          <span className="text-[9px] text-gray-400 hidden sm:inline">tekshirilgan</span>
         </div>
-        <div className="bg-blue-50 rounded-lg px-2 py-1.5 text-center">
-          <div className="font-bold text-blue-600">{bajarilgan}</div>
-          <div className="text-blue-500/80 text-[10px]">bajarilgan</div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
+          <span className="text-xs font-bold text-gray-700">{bajarilgan}</span>
+          <span className="text-[9px] text-gray-400 hidden sm:inline">bajarilgan</span>
         </div>
+      </div>
+      <div className="flex-shrink-0 w-10 h-10 rounded-full border-[3px] border-blue-100 flex items-center justify-center relative">
+        <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
+          <circle cx="18" cy="18" r="15" fill="none" stroke="#dbeafe" strokeWidth="3" />
+          <circle cx="18" cy="18" r="15" fill="none" stroke="#3b82f6" strokeWidth="3"
+            strokeDasharray={`${pct * 0.942} 100`} strokeLinecap="round" />
+        </svg>
+        <span className="text-[9px] font-black text-blue-600">{pct}%</span>
       </div>
     </div>
+  );
+}
+
+interface HomeButtonProps {
+  onHomeClick: () => void;
+}
+
+export function HomeButton({ onHomeClick }: HomeButtonProps) {
+  return (
+    <button
+      onClick={onHomeClick}
+      className="absolute bottom-36 right-3 z-[1000] w-10 h-10 bg-white rounded-lg shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors cursor-pointer"
+      title="Mening tumanim"
+    >
+      <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z" />
+      </svg>
+    </button>
   );
 }

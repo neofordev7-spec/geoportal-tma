@@ -81,6 +81,17 @@
 <!-- ═══ MUAMMO FORMASI ═══ -->
 <div id="viewReport" class="px-4 mt-3 fade-up pb-24">
 
+  <!-- Hero banner -->
+  <div class="gl rounded-2xl p-4 mb-4 flex items-center gap-3" style="border-left:3px solid #9d2bee;">
+    <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,rgba(157,43,238,0.12),rgba(124,58,237,0.08))">
+      <span class="material-symbols-outlined" style="font-size:24px;color:#9d2bee;font-variation-settings:'FILL' 1">campaign</span>
+    </div>
+    <div class="flex-1 min-w-0">
+      <p class="text-[12px] font-bold text-slate-800 leading-snug">Muammoni xabar bering!</p>
+      <p class="text-[10px] text-slate-500 leading-snug mt-0.5">Rasm va batafsil izoh qo'shsangiz, tegishli tashkilot <b class="text-slate-700">tekshiruvda birinchi</b> ko'rib chiqadi</p>
+    </div>
+  </div>
+
   <!-- Ta'sir darajasi -->
   <div class="flex items-center justify-between mb-4">
     <div class="flex items-center gap-2">
@@ -149,14 +160,15 @@
     </button>
   </div>
 
-  <!-- Submit -->
-  <div class="fixed left-0 right-0 px-4 pb-2 z-50" style="bottom:56px;background:linear-gradient(to top,rgba(220,252,231,0.95) 60%,transparent);">
+  <!-- Submit — fixed just above bottom tabs -->
+  <div class="mt-6 mb-4">
     <button id="submitBtn" onclick="submit()"
-      class="w-full py-3.5 rounded-full font-black text-sm flex items-center justify-center gap-2 active:scale-95 transition-all text-white"
-      style="background:linear-gradient(135deg,#9d2bee,#7c3aed);box-shadow:0 0 20px rgba(157,43,238,0.35);">
+      class="w-full py-3.5 rounded-2xl font-black text-sm flex items-center justify-center gap-2 active:scale-95 transition-all text-white"
+      style="background:linear-gradient(135deg,#9d2bee,#7c3aed);box-shadow:0 4px 20px rgba(157,43,238,0.35);">
       <span class="material-symbols-outlined" style="font-size:18px;font-variation-settings:'FILL' 1">send</span>
       Signal yuborish
     </button>
+    <p class="text-[10px] text-center text-slate-400 mt-2">Batafsil ma'lumot — tezroq hal bo'ladi</p>
   </div>
 </div>
 
@@ -169,7 +181,20 @@
     </div>
     <h2 class="text-lg font-black text-slate-900 mb-1">Qabul qilindi!</h2>
     <p class="text-xs text-slate-400 mb-1">Signalingiz lentaga joylandi</p>
-    <p id="motivationText" class="text-[11px] font-semibold mb-4" style="color:#9d2bee;line-height:1.4;"></p>
+    <p id="motivationText" class="text-[11px] font-semibold mb-3" style="color:#9d2bee;line-height:1.4;"></p>
+
+    <!-- Tekshiruvga tavsiya -->
+    <div onclick="resetForm();openTekshir();" class="flex items-center gap-2.5 p-3 rounded-2xl mb-3 cursor-pointer active:scale-[0.98] transition-transform" style="background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(99,102,241,0.06));border:1.5px solid rgba(59,130,246,0.15);">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">
+        <span class="material-symbols-outlined text-white" style="font-size:18px;font-variation-settings:'FILL' 1">radar</span>
+      </div>
+      <div class="flex-1 text-left">
+        <p class="text-[11px] font-bold text-slate-800">Atrofingizdagi va'dalarni tekshiring</p>
+        <p class="text-[9px] text-slate-500">Yaqindagi ob'yektlar qanday ahvolda?</p>
+      </div>
+      <span class="material-symbols-outlined text-blue-400" style="font-size:16px">chevron_right</span>
+    </div>
+
     <div class="flex gap-2">
       <a href="/tma/feed/" class="flex-1 py-2.5 rounded-full text-xs font-bold text-white text-center active:scale-95 transition-transform" style="background:#9d2bee">Lentada ko'rish</a>
       <button onclick="resetForm()" class="flex-1 py-2.5 rounded-full text-xs font-semibold text-slate-500 text-center active:scale-95 transition-transform" style="background:rgba(0,0,0,0.05)">Yopish</button>
@@ -177,10 +202,13 @@
   </div>
 </div>
 
-<!-- Tekshir FAB -->
-<button onclick="openTekshir()" id="tekshirFab" class="tekshir-fab">
-  <span class="material-symbols-outlined" style="font-size:24px;font-variation-settings:'FILL' 1">radar</span>
-</button>
+<!-- Tekshir FAB with label -->
+<div id="tekshirFabWrap" style="position:fixed;bottom:68px;right:12px;z-index:49;display:flex;flex-direction:column;align-items:center;gap:4px;">
+  <button onclick="openTekshir()" id="tekshirFab" class="tekshir-fab" style="position:relative;bottom:auto;right:auto;">
+    <span class="material-symbols-outlined" style="font-size:24px;font-variation-settings:'FILL' 1">radar</span>
+  </button>
+  <span style="background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;font-size:9px;font-weight:800;padding:3px 8px;border-radius:99px;white-space:nowrap;box-shadow:0 2px 8px rgba(59,130,246,0.3);letter-spacing:0.3px;">Tekshir!</span>
+</div>
 
 <!-- Tekshir Sheet -->
 <div id="tksBg" class="tks-bg" onclick="closeTekshir()"></div>
@@ -458,7 +486,7 @@ const TUR_ICONS={maktab:{icon:'school',color:'#3b82f6',bg:'rgba(59,130,246,0.12)
 function openTekshir(){
   document.getElementById('tksBg').classList.add('open');
   document.getElementById('tksSheet').classList.add('open');
-  document.getElementById('tekshirFab').style.display='none';
+  document.getElementById('tekshirFabWrap').style.display='none';
   document.getElementById('tksStep1').classList.remove('hidden');
   document.getElementById('tksStep2').classList.add('hidden');
   document.getElementById('tksSuccess').classList.add('hidden');
@@ -468,7 +496,7 @@ function closeTekshir(){
   document.getElementById('tksSheet').classList.remove('open');
   setTimeout(()=>{
     document.getElementById('tksBg').classList.remove('open');
-    document.getElementById('tekshirFab').style.display='';
+    document.getElementById('tekshirFabWrap').style.display='';
     document.body.style.overflow='';
     tksSelectedObj=null; tksSelectedNatija=''; tksFile=null;
     document.getElementById('tksStep1').classList.remove('hidden');
